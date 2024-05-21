@@ -1,0 +1,28 @@
+.custom-modal {
+    width: 600px !important;
+}
+
+.ant-modal-content {
+    background-color: #106af1 !important;
+}
+
+.ant-modal-header {
+    background-color: #1890ff !important;
+    color: white !important;
+}
+
+.ant-modal-title {
+    font-weight: bold !important;
+}
+
+.ant-modal-footer {
+    border-top: none !important;
+}
+
+.ant-form-item {
+    margin-bottom: 16px !important;
+}
+
+.ant-input {
+    min-height: 150px !important;
+}

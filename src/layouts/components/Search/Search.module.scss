@@ -1,0 +1,96 @@
+.search,
+.search-result {
+    width: 361px;
+}
+
+.search {
+    position: relative;
+    display: flex;
+    height: var(--search-height);
+    background-color: var(--bg-color-second);
+    border-radius: var(--search-border-radius);
+    padding-left: 16px;
+    border: 1.5px solid transparent;
+
+    input {
+        flex: 1;
+        height: 100%;
+        color: var(--text-color);
+        font-size: 1.6rem;
+        caret-color: var(--white);
+        border: none;
+        outline: none;
+        background-color: transparent;
+        margin-right: 40px;
+    }
+
+    input:not(:placeholder-shown) ~ .search-btn {
+        color: var(--white);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: var(--search-top-spacer);
+        right: var(--search-button-width);
+        width: 1px;
+        height: calc(var(--search-height) - var(--search-top-spacer) * 2);
+        background-color: var(--text-color);
+        opacity: 0.6;
+    }
+
+    &:focus-within {
+        border-color: #131111;
+    }
+}
+
+.search-title {
+    padding: 5px 12px;
+    font-size: 1.4rem;
+}
+
+.search-clear {
+    cursor: pointer;
+}
+
+.search-clear,
+.search-loading {
+    position: absolute;
+    right: calc(var(--search-button-width) + 16px);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--white);
+    background-color: var(--bg-color-second);
+}
+
+.search-loading {
+    animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+    from {
+        transform: translateY(-50%) rotate(0);
+    }
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+.search-btn {
+    width: var(--search-button-width);
+    height: 100%;
+    font-size: 1.8rem;
+    color: var(--text-color);
+    background-color: var(--bg-color-second);
+    border-top-right-radius: var(--search-border-radius);
+    border-bottom-right-radius: var(--search-border-radius);
+
+    &:hover {
+        cursor: pointer;
+        background-color: var(--bg-color-hover);
+    }
+
+    &:active {
+        background-color: var(--bg-color-second);
+    }
+}

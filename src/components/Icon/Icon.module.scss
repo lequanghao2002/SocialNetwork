@@ -1,0 +1,21 @@
+.wrapper {
+    width: 100%;
+    padding: 8px 24px;
+    cursor: pointer;
+    border-radius: 8px;
+    text-align: center;
+    &:hover {
+        background-color: var(--bg-color-hover);
+    }
+}
+
+.icon {
+    font-size: 2rem;
+    margin: 0 8px;
+}
+
+.left-text,
+.left-right {
+    font-weight: 500;
+    color: var(--text-sub-color);
+}

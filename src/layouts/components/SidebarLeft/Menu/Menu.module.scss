@@ -1,0 +1,20 @@
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 8px;
+    font-size: 1.6rem;
+    font-weight: 500;
+    border-radius: var(--default-border-radius);
+
+    &.active {
+        color: var(--primary);
+    }
+
+    &:hover {
+        background-color: var(--bg-color-hover);
+    }
+}
+
+.title {
+    margin-left: 10px;
+}

@@ -1,0 +1,26 @@
+.account-item {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 0 8px;
+    border-radius: var(--default-border-radius);
+}
+
+.item-info {
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.nickname {
+    font-size: 1.4rem;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.time {
+    font-size: 1.4rem;
+    color: var(--text-sub-color);
+}
