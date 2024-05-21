@@ -1,28 +1,52 @@
-.custom-modal {
-    width: 600px !important;
+.title {
+    text-align: center;
+    color: var(--text-color);
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Custom  modal antd*/
 .ant-modal-content {
-    background-color: #106af1 !important;
+    background-color: var(--bg-color-primary) !important;
+    box-shadow: 0 0 8px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
-.ant-modal-header {
-    background-color: #1890ff !important;
-    color: white !important;
+.ant-modal-close {
+    background-color: var(--bg-color-second) !important;
+    color: var(--text-color) !important;
+    border-radius: 50% !important;
 }
 
-.ant-modal-title {
-    font-weight: bold !important;
+.ant-modal-close:hover {
+    background-color: var(--bg-color-hover) !important;
 }
 
-.ant-modal-footer {
-    border-top: none !important;
+.customFooterButton {
+    font-weight: 500;
+    width: 100%;
+    background-color: var(--bg-color-second);
 }
 
-.ant-form-item {
-    margin-bottom: 16px !important;
+.customFooterButton:hover {
+    background-color: var(--primary) !important;
 }
 
-.ant-input {
-    min-height: 150px !important;
+.customTextArea {
+    background-color: var(--bg-color-second) !important;
+    color: var(--text-color) !important;
+    caret-color: var(--white);
+    border: none !important;
+    outline: none !important;
+    background-color: transparent !important;
+    list-style: none !important;
+    padding: 8px !important;
+    font-size: 1.6rem !important;
+    min-height: 200px !important;
+    resize: none !important;
+}
+
+.customTextArea:focus {
+    outline: none !important; /* Xóa outline khi focus */
+    box-shadow: none !important; /* Xóa shadow khi focus */
 }

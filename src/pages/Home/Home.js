@@ -15,7 +15,7 @@ import Image from '~/components/Image';
 import Icon from '~/components/Icon';
 import Post from '~/components/Post';
 import { useContext } from 'react';
-import { AppContext } from '~/Context/AppProvider';
+import { AppContext } from '~/context/AppProvider';
 import PostModel from '~/components/Modals/PostModal';
 
 const cx = classNames.bind(styles);

@@ -17,7 +17,7 @@ function Sidebar() {
                 <MenuItem title="Bookmarks" to={config.routes.bookmark} icon={faBookmark}></MenuItem>
             </Menu>
 
-            <SuggestedAccounts label="Suggested Accounts" />
+            {/* <SuggestedAccounts label="Suggested Accounts" /> */}
         </aside>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { Form, Input, Modal } from 'antd';
-import { AppContext } from '~/Context/AppProvider';
+import { Form, Input, Modal, Button } from 'antd';
+import { AppContext } from '~/context/AppProvider';
 import './PostModal.css';
 
 function PostModel() {
@@ -19,15 +19,21 @@ function PostModel() {
     return (
         <div>
             <Modal
-                title="Add post"
                 open={isPostModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
-                className="customModal"
+                okText="Post"
+                footer={[
+                    <Button key="submit" type="primary" onClick={handleOk} className="customFooterButton">
+                        Post
+                    </Button>,
+                ]}
+                cancelButtonProps={{ style: { display: 'none' } }}
             >
+                <h2 className="title">Create post</h2>
                 <Form form={form}>
                     <Form.Item name="content">
-                        <Input.TextArea placeholder="Content" />
+                        <Input.TextArea className="customTextArea" placeholder="Content..." />
                     </Form.Item>
                 </Form>
             </Modal>
