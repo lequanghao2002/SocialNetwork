@@ -12,7 +12,6 @@ root.render(
         <GlobalStyles>
             <AppProvider>
                 <App />
-                <PostModel />
             </AppProvider>
         </GlobalStyles>
     </React.StrictMode>,

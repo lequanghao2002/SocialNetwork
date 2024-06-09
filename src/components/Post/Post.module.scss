@@ -6,12 +6,20 @@
 }
 
 .header {
-    // display: flex;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    // .info {
-    //     display: flex;
-    //     flex-direction: column;
-    // }
+.icon-ellipsis {
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 50%;
+
+    &:hover {
+        background-color: var(--bg-color-hover);
+    }
 }
 
 .body {
@@ -20,9 +28,21 @@
 }
 
 .text {
+    margin-bottom: 50px;
+}
+
+.image {
+    display: inline-block;
+    padding-right: 9px;
+    padding-bottom: 9px;
+
+    img {
+        border-radius: 8px;
+    }
 }
 
 .footer {
+    margin-top: 15px;
 }
 
 .tag {
@@ -35,7 +55,12 @@
         text-decoration: underline;
         cursor: pointer;
     }
+
+    + .tag {
+        margin-left: 12px;
+    }
 }
 
 .interact {
+    margin-top: 20px;
 }

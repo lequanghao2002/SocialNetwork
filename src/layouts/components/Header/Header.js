@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 import styles from './Header.module.scss';
 import Button from '~/components/Button';
 import Menu from '~/components/Popper/Menu';
-import Image from '~/components/Image/index';
+import Image from '~/components/Image';
 import Search from '../Search';
 import config from '~/config';
 

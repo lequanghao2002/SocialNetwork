@@ -1,4 +1,4 @@
-.title {
+.title-post {
     text-align: center;
     color: var(--text-color);
     padding-bottom: 15px;
@@ -6,7 +6,37 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Custom  modal antd*/
+.loading-overlay {
+    font-size: 3rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--text-color);
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.search-loading {
+    animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+    from {
+        transform: translateY(-50%) rotate(0);
+    }
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+/* --------------------- Custom  modal antd ---------------------*/
 .ant-modal-content {
     background-color: var(--bg-color-primary) !important;
     box-shadow: 0 0 8px 0 rgba(255, 255, 255, 0.05) !important;
@@ -25,11 +55,20 @@
 .customFooterButton {
     font-weight: 500;
     width: 100%;
-    background-color: var(--bg-color-second);
+    opacity: 0.8;
+    background-color: var(--primary) !important;
+    border: none;
 }
 
 .customFooterButton:hover {
-    background-color: var(--primary) !important;
+    opacity: 1;
+}
+
+.customFooterButtonDisable {
+    font-weight: 500;
+    width: 100%;
+    background-color: var(--bg-color-second) !important;
+    border: none;
 }
 
 .customTextArea {
@@ -40,8 +79,8 @@
     outline: none !important;
     background-color: transparent !important;
     list-style: none !important;
-    padding: 8px !important;
-    font-size: 1.6rem !important;
+    padding: 8px 0 0 0 !important;
+    font-size: 1.8rem !important;
     min-height: 200px !important;
     resize: none !important;
 }
@@ -49,4 +88,99 @@
 .customTextArea:focus {
     outline: none !important; /* Xóa outline khi focus */
     box-shadow: none !important; /* Xóa shadow khi focus */
+}
+
+.customTextArea::placeholder {
+    color: white;
+}
+
+/* --------------------- Custom Dropdown antd ---------------------*/
+.body-post {
+    display: flex;
+    align-items: center;
+}
+
+.info-post {
+    display: flex;
+    flex-direction: column;
+    margin-left: 12px;
+}
+
+.name {
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+.customButton {
+    border: none;
+    padding: 0px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-color);
+    background-color: var(--bg-color-second);
+    outline: none;
+}
+
+.customButton:hover {
+    background-color: var(--bg-color-second) !important;
+    color: var(--text-color) !important;
+}
+
+.ant-dropdown ul {
+    background-color: var(--bg-color-second) !important;
+}
+
+.ant-dropdown li:hover {
+    background-color: var(--bg-color-hover) !important;
+}
+
+.ant-dropdown li {
+    color: var(--text-color) !important;
+    background-color: var(--bg-color-second) !important;
+}
+
+/* --------------------- Custom Select Tag antd ---------------------*/
+.ant-select {
+    color: var(--text-color);
+}
+
+.ant-select-selector {
+    background-color: var(--bg-color-primary) !important;
+    border-color: var(--bg-color-second) !important;
+    cursor: pointer !important;
+}
+
+.customSelectTag .ant-select-selector .ant-select-selection-placeholder {
+    color: var(--text-color);
+    opacity: 0.7;
+}
+.ant-select-dropdown {
+    background-color: var(--bg-color-second);
+}
+
+.ant-select-item-option-selected {
+    background-color: var(--bg-color-hover) !important;
+}
+
+.ant-select-item-option-content,
+.ant-select-item-option-state {
+    color: var(--text-color) !important;
+}
+
+.ant-select-selection-item {
+    background-color: var(--bg-color-hover) !important;
+}
+
+.ant-select-arrow,
+.ant-select-selection-item-remove {
+    color: var(--text-color) !important;
+}
+
+/* --------------------- Custom upload image antd ---------------------*/
+.icon-file-image {
+    font-size: 5rem;
+}
+
+.ant-upload:hover {
+    background-color: var(--bg-color-hover);
 }

@@ -1,40 +1,127 @@
+import { useContext, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Post.module.scss';
 import Button from '../Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMessage, faShare, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
+import {
+    faBookmark,
+    faEllipsisVertical,
+    faMessage,
+    faPenToSquare,
+    faShare,
+    faThumbsUp,
+    faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 import AccountPopper from '~/components/AccountPopper';
+import { Image } from 'antd';
+import Menu from '~/components/Popper/Menu';
+import { AppContext } from '~/context/AppProvider';
+import PostModal from '~/components/Modals/PostModal';
+import * as postService from '~/services/postService';
 
 const cx = classNames.bind(styles);
 
-function Post() {
+function Post({ data, handlePostSubmit, handleDeletePost }) {
+    const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
+        useContext(AppContext);
+
+    let imageArray = [];
+    if (data.images) {
+        imageArray = JSON.parse(data.images);
+    }
+
+    const MENU_ITEMS = [
+        {
+            icon: <FontAwesomeIcon icon={faPenToSquare}></FontAwesomeIcon>,
+            title: 'Update post',
+        },
+        {
+            icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
+            title: 'Save post',
+        },
+        {
+            icon: <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>,
+            title: 'Delete post',
+        },
+    ];
+
+    // Handle logic
+    const handleMenuChange = (menuItem) => {
+        console.log(menuItem);
+
+        switch (menuItem.title) {
+            case 'Update post': {
+                setPostCurrent(data);
+                setModePost('Update');
+                setIsPostModalVisible(true);
+                break;
+            }
+            case 'Delete post': {
+                //onDeletePost(data.id);
+                handleDelete();
+                break;
+            }
+            default:
+        }
+    };
+
+    // const onDeletePost = async (id) => {
+    //     try {
+    //         const result = await postService.deletePost(id);
+    //         if (result) {
+    //         } else {
+    //             console.error('Invalid data format:', result);
+    //         }
+    //     } catch (error) {
+    //         console.error('Failed to fetch posts:', error);
+    //     }
+    // };
+
+    const handleDelete = () => {
+        handleDeletePost(data.id);
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('header')}>
-                <AccountPopper />
-                {/* <Image
-                    src="https://scontent.fdad3-5.fna.fbcdn.net/v/t39.30808-1/442505173_1987519968317490_8947428851547572351_n.jpg?stp=cp0_dst-jpg_p40x40&_nc_cat=107&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeFZmrHNdMiqZcMt0SibqskPzIGptUJx7pTMgam1QnHulPU4bpplWwNcWG9e8wZ48RmfDfPFaa2-g3tmnNKLryps&_nc_ohc=tFe22mxkVYEQ7kNvgGvFxtu&_nc_ht=scontent.fdad3-5.fna&oh=00_AYCVaW3Fw1jd_YdVMdlExkXo6DzD1LmRp3iD2PaGxaGTrA&oe=664F5C98"
-                    alt=""
-                />
-                <div className={cx('info')}>
-                    <span className={cx('name')}>Lê Quang Hào</span>
-                    <span className={cx('time')}>2 hours ago</span>
-                </div> */}
+                <AccountPopper data={data} />
+
+                {/* <PostModal data={data} /> */}
+                <PostModal onSubmit={handlePostSubmit} />
+                <Menu items={MENU_ITEMS} onChange={handleMenuChange}>
+                    <span>
+                        <FontAwesomeIcon className={cx('icon-ellipsis')} icon={faEllipsisVertical} />
+                    </span>
+                </Menu>
             </div>
 
             <div className={cx('body')}>
-                <span className={cx('text')}>
-                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-                    industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type
-                    and scrambled it to make a type specimen book. It has survived not only five centuries, but also the
-                    leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s
-                    with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop
-                    publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-                </span>
+                <p className={cx('text')}>{data.content}</p>
+                <Image.PreviewGroup
+                    preview={{
+                        onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
+                    }}
+                >
+                    {imageArray.map((imageUrl, index) => (
+                        <div className={cx('image')}>
+                            <Image
+                                key={index}
+                                width={100}
+                                height={100}
+                                src={`${process.env.REACT_APP_BASE_URL2}${imageUrl}`}
+                            />
+                        </div>
+                    ))}
+                </Image.PreviewGroup>
             </div>
 
             <div className={cx('footer')}>
-                <div className={cx('tag')}>#typescript</div>
+                {data.listTag &&
+                    data.listTag.map((item) => (
+                        <span key={item.id} className={cx('tag')}>
+                            #{item.name}
+                        </span>
+                    ))}
                 <div className={cx('interact')}>
                     <Button leftIcon={<FontAwesomeIcon icon={faThumbsUp} />}>204</Button>
                     <Button leftIcon={<FontAwesomeIcon icon={faMessage} />}>10</Button>
