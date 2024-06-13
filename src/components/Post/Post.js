@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Post.module.scss';
 import Button from '../Button';
@@ -21,14 +21,21 @@ import * as postService from '~/services/postService';
 
 const cx = classNames.bind(styles);
 
-function Post({ data, handlePostSubmit, handleDeletePost }) {
+function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange }) {
     const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
         useContext(AppContext);
+    const [checkLike, setCheckLike] = useState();
 
     let imageArray = [];
     if (data.images) {
         imageArray = JSON.parse(data.images);
     }
+
+    const userIDFake = 'db382289-75ce-4cad-8094-16ea658fa0c9';
+    useEffect(() => {
+        const isLiked = data.likes.some((item) => item.userId === userIDFake);
+        setCheckLike(isLiked);
+    }, [data.likes]);
 
     const MENU_ITEMS = [
         {
@@ -81,6 +88,30 @@ function Post({ data, handlePostSubmit, handleDeletePost }) {
         handleDeletePost(data.id);
     };
 
+    // const handleLikeChange = async () => {
+    //     console.log('start');
+    //     try {
+    //         const result = await postService.changeLike({ userId: userIDFake, postId: data.id });
+    //         if (result) {
+    //             console.log(result);
+    //         } else {
+    //             console.error('Invalid data format:', result);
+    //         }
+    //     } catch (error) {
+    //         console.error('Failed to fetch posts:', error);
+    //     }
+    // };
+
+    const onLikeClick = async () => {
+        const result = await postService.changeLike({ userId: userIDFake, postId: data.id });
+        if (result) {
+            handleLikeChange(data.id, userIDFake);
+            setCheckLike(!checkLike);
+        } else {
+            console.error('Failed to like post');
+        }
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('header')}>
@@ -123,7 +154,12 @@ function Post({ data, handlePostSubmit, handleDeletePost }) {
                         </span>
                     ))}
                 <div className={cx('interact')}>
-                    <Button leftIcon={<FontAwesomeIcon icon={faThumbsUp} />}>204</Button>
+                    <Button
+                        className={checkLike ? cx('buttonLiked') : ''}
+                        leftIcon={<FontAwesomeIcon icon={faThumbsUp} onClick={onLikeClick} />}
+                    >
+                        {data.likes.length || 0}
+                    </Button>
                     <Button leftIcon={<FontAwesomeIcon icon={faMessage} />}>10</Button>
                     <Button leftIcon={<FontAwesomeIcon icon={faShare} />}>5</Button>
                 </div>

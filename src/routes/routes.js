@@ -8,6 +8,8 @@ import Upload from '~/pages/Upload';
 import Search from '~/pages/Search';
 import Message from '~/pages/Message';
 import Bookmark from '~/pages/Bookmark';
+import Login from '~/pages/Login';
+import Profile from '~/pages/Profile';
 
 const publicRoutes = [
     { path: config.routes.home, component: Home },
@@ -17,6 +19,8 @@ const publicRoutes = [
     { path: config.routes.search, component: Search, layout: null },
     { path: config.routes.message, component: Message },
     { path: config.routes.bookmark, component: Bookmark },
+    { path: config.routes.login, component: Login, layout: null },
+    { path: config.routes.profile, component: Profile, layout: HeaderOnly },
 ];
 
 const privateRoutes = [];

@@ -79,3 +79,14 @@ export const deletePost = async (Id) => {
         return null;
     }
 };
+
+export const changeLike = async (data) => {
+    try {
+        const res = await httpRequest.post('Posts/change-like', data, {});
+
+        return res;
+    } catch (error) {
+        console.error('There was an error!', error);
+        return null;
+    }
+};

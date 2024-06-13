@@ -68,19 +68,22 @@
 }
 
 .text {
-    background-color: var(--bg-color-primary);
+    //background-color: var(--bg-color-primary);
+    background-color: transparent;
 
     &:hover {
         text-decoration: underline;
-        background-color: var(--bg-color-primary);
+        background-color: transparent;
+
+        //background-color: var(--bg-color-primary);
     }
 }
 
 // Button size
 .small {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     min-width: 88px;
-    padding: 4px 8px;
+    padding: 6px 8px;
 }
 
 .large {

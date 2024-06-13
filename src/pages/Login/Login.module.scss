@@ -1,0 +1,93 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    background-color: var(--bg-color-primary);
+}
+
+.title {
+    margin-bottom: 24px;
+    font-size: 2.4rem;
+    font-weight: bold;
+}
+
+.social-login {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 24px;
+    color: white;
+
+    .facebook-btn {
+        background-color: #1877f2;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        text-align: center;
+        margin-left: 0;
+
+        &:hover {
+            background-color: #165dcb;
+        }
+
+        svg {
+            margin-right: 8px;
+        }
+    }
+
+    .google-btn {
+        margin-top: 10px;
+        background-color: #db4437;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        text-align: center;
+        margin-left: 0;
+
+        &:hover {
+            background-color: #c62828;
+        }
+
+        svg {
+            margin-right: 8px;
+        }
+    }
+}
+
+.custom-input {
+    background-color: var(--bg-color-primary) !important;
+    color: var(--text-color) !important;
+    outline: none !important;
+
+    &::placeholder {
+        color: var(--text-color) !important;
+    }
+
+    input::placeholder {
+        color: var(--text-color) !important;
+    }
+
+    input[type='password']::placeholder {
+        color: var(--text-color) !important;
+    }
+}

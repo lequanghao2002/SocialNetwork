@@ -16,7 +16,7 @@ import Icon from '~/components/Icon';
 import Post from '~/components/Post';
 import { useContext, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { AppContext } from '~/context/AppProvider';
+import { AppContext, AuthContext } from '~/context';
 import * as postService from '~/services/postService';
 import PostModal from '~/components/Modals/PostModal';
 import { Empty, message } from 'antd';
@@ -24,8 +24,9 @@ import * as modePostConstant from '~/constant';
 
 const cx = classNames.bind(styles);
 
-function Home() {
+function Home({ profile }) {
     const { isPostModalVisible, setIsPostModalVisible, modePost, setModePost } = useContext(AppContext);
+    const { user } = useContext(AuthContext);
     const [posts, setPosts] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -105,6 +106,55 @@ function Home() {
         }
     };
 
+    // const handleLikeChange = (postId, userId) => {
+    //     setPosts((prevPosts) =>
+    //         prevPosts.map((post) => {
+    //             if (post.id === postId) {
+    //                 const isLiked = post.likes.some((like) => like.userId === userId);
+    //                 if (isLiked) {
+    //                     post.likes = post.likes.filter((like) => like.userId !== userId);
+    //                 } else {
+    //                     post.likes.push({ userId });
+    //                 }
+    //             }
+    //             return post;
+    //         }),
+    //     );
+    // };
+
+    // const handleLikeChange = (postId, userId) => {
+    //     // Tạo một bản sao của danh sách bài viết
+    //     const updatedPosts = [...posts];
+    //     // Tìm kiếm bài viết cần cập nhật
+    //     const postToUpdate = updatedPosts.find((post) => post.id === postId);
+    //     if (postToUpdate) {
+    //         // Cập nhật số lượng like trong bài viết
+    //         postToUpdate.likes.push({ userId });
+    //         // Cập nhật state của số lượng like
+    //         setPosts(updatedPosts);
+    //     }
+    // };
+
+    const handleLikeChange = (postId, userId) => {
+        // Tạo một bản sao của danh sách bài viết
+        const updatedPosts = [...posts];
+        // Tìm kiếm bài viết cần cập nhật
+        const postToUpdate = updatedPosts.find((post) => post.id === postId);
+        if (postToUpdate) {
+            // Kiểm tra nếu người dùng đã unlike
+            const existingLikeIndex = postToUpdate.likes.findIndex((like) => like.userId === userId);
+            if (existingLikeIndex !== -1) {
+                // Nếu đã like, xóa like khỏi danh sách
+                postToUpdate.likes.splice(existingLikeIndex, 1);
+            } else {
+                // Nếu chưa like, thêm like mới vào danh sách
+                postToUpdate.likes.push({ userId });
+            }
+            // Cập nhật state của số lượng like
+            setPosts(updatedPosts);
+        }
+    };
+
     return (
         <>
             {contextHolder}
@@ -130,17 +180,19 @@ function Home() {
                     </div>
                 </div>
 
-                <div className={cx('post-nav')}>
-                    <Button small leftIcon={<FontAwesomeIcon icon={faClock} />} className={cx('')}>
-                        Recent
-                    </Button>
-                    <Button small leftIcon={<FontAwesomeIcon icon={faUsers} />} className={cx('')}>
-                        Friends
-                    </Button>
-                    <Button small leftIcon={<FontAwesomeIcon icon={faFire} />} className={cx('')}>
-                        Popular
-                    </Button>
-                </div>
+                {profile || (
+                    <div className={cx('post-nav')}>
+                        <Button small leftIcon={<FontAwesomeIcon icon={faClock} />} className={cx('')}>
+                            Recent
+                        </Button>
+                        <Button small leftIcon={<FontAwesomeIcon icon={faUsers} />} className={cx('')}>
+                            Friends
+                        </Button>
+                        <Button small leftIcon={<FontAwesomeIcon icon={faFire} />} className={cx('')}>
+                            Popular
+                        </Button>
+                    </div>
+                )}
 
                 <InfiniteScroll
                     dataLength={posts.length}
@@ -161,6 +213,7 @@ function Home() {
                                     data={item}
                                     handlePostSubmit={handlePostSubmit}
                                     handleDeletePost={handleDeletePost}
+                                    handleLikeChange={handleLikeChange}
                                 />
                             </div>
                         ))}

@@ -22,6 +22,10 @@ import Menu from '~/components/Popper/Menu';
 import Image from '~/components/Image';
 import Search from '../Search';
 import config from '~/config';
+import { AuthContext } from '~/context';
+import { useContext, useEffect } from 'react';
+import { auth } from '~/firebase/config';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
@@ -57,12 +61,18 @@ const MENU_ITEMS = [
 ];
 
 function Header() {
-    const currentUser = true;
+    const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
     // Handle logic
     const handleMenuChange = (menuItem) => {
-        switch (menuItem) {
-            case 'language': {
+        switch (menuItem.title) {
+            case 'View profile': {
+                navigate(config.routes.profile);
+                break;
+            }
+            case 'Log out': {
+                auth.signOut();
                 break;
             }
             default:
@@ -73,7 +83,7 @@ function Header() {
         {
             icon: <FontAwesomeIcon icon={faUser}></FontAwesomeIcon>,
             title: 'View profile',
-            to: '/@hoaa',
+            //to: '/@hoaa',
         },
         {
             icon: <FontAwesomeIcon icon={faCoins}></FontAwesomeIcon>,
@@ -89,7 +99,7 @@ function Header() {
         {
             icon: <FontAwesomeIcon icon={faSignOut}></FontAwesomeIcon>,
             title: 'Log out',
-            to: '/logout',
+            //to: '/logout',
             separate: true,
         },
     ];
@@ -105,7 +115,7 @@ function Header() {
                 <Search />
 
                 <div className={cx('actions')}>
-                    {currentUser ? (
+                    {user ? (
                         <>
                             <Tippy delay={[0, 100]} content="notification" placement="bottom">
                                 <button className={cx('action-btn')}>
@@ -119,17 +129,15 @@ function Header() {
                                 </button>
                             </Tippy>
 
-                            <Menu items={currentUser ? userMenu : MENU_ITEMS} onChange={handleMenuChange}>
-                                <Image
-                                    src="https://thienanblog.com/wp-content/uploads/2017/10/react-logo.png"
-                                    className={cx('user-avatar')}
-                                    alt="Le Quang Hao"
-                                ></Image>
+                            <Menu items={user ? userMenu : MENU_ITEMS} onChange={handleMenuChange}>
+                                <Image src={user.photoURL} className={cx('user-avatar')} alt={user.displayName}></Image>
                             </Menu>
                         </>
                     ) : (
                         <>
-                            <Button text>Log In</Button>
+                            <Button text to={config.routes.login}>
+                                Log In
+                            </Button>
                             <Button primary>Sign Up</Button>
                         </>
                     )}
