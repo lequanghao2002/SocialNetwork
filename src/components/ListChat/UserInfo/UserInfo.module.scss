@@ -1,0 +1,23 @@
+.wrapper {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.icons {
+    display: flex;
+    gap: 20px;
+
+    & svg {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+}

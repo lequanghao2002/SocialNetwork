@@ -1,0 +1,22 @@
+.wrapper {
+    height: calc(100vh - 80px - 46px);
+    overflow-y: scroll;
+
+    .item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
+        cursor: pointer;
+
+        .info {
+          span {
+          }
+
+          p {
+            font-size: 1.4rem;
+
+          }
+        }
+    }
+}
