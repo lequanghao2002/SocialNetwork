@@ -1,0 +1,48 @@
+.wrapper {
+    margin: 0 16px;
+
+    .search {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .search-bar {
+            flex: 1;
+            background-color: var(--bg-color-second);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 14px;
+
+            border-radius: 8px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            -ms-border-radius: 8px;
+            -o-border-radius: 8px;
+
+            input {
+                font-size: 1.6rem;
+                background-color: transparent;
+                border: none;
+                outline: none;
+                color: var(--text-color);
+                flex: 1;
+            }
+        }
+
+        .icon-plus {
+            cursor: pointer;
+            background-color: var(--bg-color-second);
+            padding: 14px;
+            border-radius: 8px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            -ms-border-radius: 8px;
+            -o-border-radius: 8px;
+
+            &:hover {
+                background-color: var(--bg-color-hover);
+            }
+        }
+    }
+}
