@@ -69,3 +69,12 @@
 .no-data {
     color: var(--text-color);
 }
+
+.loading {
+    margin-top: 60px;
+    font-size: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

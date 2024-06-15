@@ -3,19 +3,74 @@ import classNames from 'classnames/bind';
 import styles from './Login.module.scss';
 import { Col, Row, Form, Input } from 'antd';
 import Button from '~/components/Button';
-import { auth, facebookProvider } from '~/firebase/config';
+import { auth, facebookProvider, googleProvider, githubProvider } from '~/firebase/config';
 import { signInWithPopup } from 'firebase/auth';
 import * as accountService from '~/services/accountService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {} from '@fortawesome/free-solid-svg-icons';
 import { faFacebookSquare, faGoogle } from '@fortawesome/free-brands-svg-icons';
 
 const cx = classNames.bind(styles);
 
 function Login() {
-    const handleFbLogin = async () => {
+    const handleFacebookLogin = async () => {
         const response = await signInWithPopup(auth, facebookProvider);
         const user = response.user;
+
+        const userData = {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            firstName: user.displayName.split(' ')[0],
+            lastName: user.displayName.split(' ').slice(1).join(' '),
+        };
+
+        console.log(userData);
+
+        try {
+            const result = await accountService.externalLogin(userData);
+            if (result) {
+                console.log(result);
+            } else {
+                console.error('Invalid data format:', result);
+            }
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        const response = await signInWithPopup(auth, googleProvider);
+        const user = response.user;
+        console.log(user);
+
+        const userData = {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            firstName: user.displayName.split(' ')[0],
+            lastName: user.displayName.split(' ').slice(1).join(' '),
+        };
+
+        console.log(userData);
+
+        try {
+            const result = await accountService.externalLogin(userData);
+            if (result) {
+                console.log(result);
+            } else {
+                console.error('Invalid data format:', result);
+            }
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+        }
+    };
+
+    const handleGithubLogin = async () => {
+        const response = await signInWithPopup(auth, githubProvider);
+        const user = response.user;
+        console.log(user);
 
         const userData = {
             uid: user.uid,
@@ -80,11 +135,11 @@ function Login() {
                         </Form>
 
                         <div className={cx('social-login')}>
-                            <Button primary className={cx('facebook-btn')} onClick={handleFbLogin}>
+                            <Button primary className={cx('facebook-btn')} onClick={handleFacebookLogin}>
                                 <FontAwesomeIcon icon={faFacebookSquare} />
                                 Log in with Facebook
                             </Button>
-                            <Button className={cx('google-btn')}>
+                            <Button className={cx('google-btn')} onClick={handleGoogleLogin}>
                                 <FontAwesomeIcon icon={faGoogle} />
                                 Log in with Google
                             </Button>
