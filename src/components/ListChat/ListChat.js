@@ -4,6 +4,7 @@ import styles from './ListChat.module.scss';
 import UserInfo from './UserInfo';
 import Search from './Search';
 import ListFriends from './ListFriends';
+import AddUser from './AddUser';
 
 const cx = classNames.bind(styles);
 
