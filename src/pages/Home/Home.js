@@ -8,6 +8,7 @@ import {
     faFileImage,
     faFileLines,
     faFire,
+    faSpinner,
     faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -198,7 +199,12 @@ function Home({ profile }) {
                     dataLength={posts.length}
                     next={fetchPosts}
                     hasMore={hasMore}
-                    loader={<h4>Loading...</h4>}
+                    loader={
+                        <div className={cx('loading')}>
+                            <FontAwesomeIcon icon={faSpinner} className="search-loading" />
+                            <span>Loading</span>
+                        </div>
+                    }
                     endMessage={
                         <Empty
                             image={Empty.PRESENTED_IMAGE_SIMPLE}
