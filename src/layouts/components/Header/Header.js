@@ -62,7 +62,7 @@ const MENU_ITEMS = [
 
 function Header() {
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext);
+    const { user, setUser } = useContext(AuthContext);
 
     // Handle logic
     const handleMenuChange = (menuItem) => {
@@ -72,7 +72,14 @@ function Header() {
                 break;
             }
             case 'Log out': {
+                localStorage.removeItem('userToken');
                 auth.signOut();
+
+                // Update user state
+                // setUser(null);
+
+                // navigate(config.routes.login);
+
                 break;
             }
             default:
@@ -130,7 +137,11 @@ function Header() {
                             </Tippy>
 
                             <Menu items={user ? userMenu : MENU_ITEMS} onChange={handleMenuChange}>
-                                <Image src={user.photoURL} className={cx('user-avatar')} alt={user.displayName}></Image>
+                                <Image
+                                    src={user.AvatarUrl}
+                                    className={cx('user-avatar')}
+                                    alt={user.displayName}
+                                ></Image>
                             </Menu>
                         </>
                     ) : (

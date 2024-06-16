@@ -85,6 +85,9 @@ function Home({ profile }) {
             const updatedPosts = posts.map((post) => (post.id === newPost.id ? newPost : post));
             setPosts(updatedPosts);
             success('Update post success');
+        } else if (modePost === modePostConstant.modeShare) {
+            setPosts([newPost, ...posts]);
+            success('Share post success');
         } else {
             console.log('No mode post');
         }
@@ -106,35 +109,6 @@ function Home({ profile }) {
             console.error('Failed to delete post:', error);
         }
     };
-
-    // const handleLikeChange = (postId, userId) => {
-    //     setPosts((prevPosts) =>
-    //         prevPosts.map((post) => {
-    //             if (post.id === postId) {
-    //                 const isLiked = post.likes.some((like) => like.userId === userId);
-    //                 if (isLiked) {
-    //                     post.likes = post.likes.filter((like) => like.userId !== userId);
-    //                 } else {
-    //                     post.likes.push({ userId });
-    //                 }
-    //             }
-    //             return post;
-    //         }),
-    //     );
-    // };
-
-    // const handleLikeChange = (postId, userId) => {
-    //     // Tạo một bản sao của danh sách bài viết
-    //     const updatedPosts = [...posts];
-    //     // Tìm kiếm bài viết cần cập nhật
-    //     const postToUpdate = updatedPosts.find((post) => post.id === postId);
-    //     if (postToUpdate) {
-    //         // Cập nhật số lượng like trong bài viết
-    //         postToUpdate.likes.push({ userId });
-    //         // Cập nhật state của số lượng like
-    //         setPosts(updatedPosts);
-    //     }
-    // };
 
     const handleLikeChange = (postId, userId) => {
         // Tạo một bản sao của danh sách bài viết
@@ -162,10 +136,7 @@ function Home({ profile }) {
             <div className={cx('wrapper')}>
                 <div className={cx('post-new')}>
                     <div className={cx('header')}>
-                        <Avatar
-                            src="https://scontent.fdad3-5.fna.fbcdn.net/v/t39.30808-1/442505173_1987519968317490_8947428851547572351_n.jpg?stp=dst-jpg_p200x200&_nc_cat=107&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeFZmrHNdMiqZcMt0SibqskPzIGptUJx7pTMgam1QnHulPU4bpplWwNcWG9e8wZ48RmfDfPFaa2-g3tmnNKLryps&_nc_ohc=tFe22mxkVYEQ7kNvgGvFxtu&_nc_ht=scontent.fdad3-5.fna&oh=00_AYA2TVm31yGxfRfyW9nTG88i-8dvLwloYMPc0GprmMLYiA&oe=664F5C98"
-                            alt=""
-                        />
+                        <Avatar src={user.AvatarUrl} alt={user.Email} />
                         {/* <PostModal onSubmit={handlePostSubmit} /> */}
                         <div className={cx('input')} onClick={handleShowPostModel}>
                             <span className={cx('text')}>Share your programming knowledge here...</span>

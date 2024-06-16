@@ -7,6 +7,8 @@ import Image from '../Image';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEarthAfrica, faLock, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 
 const cx = classNames.bind(styles);
 dayjs.extend(relativeTime);
@@ -37,6 +39,13 @@ function AccountPopper({ data }) {
                             <span>{user.firstName + ' ' + user.lastName}</span>
                         </p>
                         <p className={cx('time')}>
+                            {data.status === 1 ? (
+                                <FontAwesomeIcon icon={faEarthAfrica} />
+                            ) : data.status === 2 ? (
+                                <FontAwesomeIcon icon={faUserGroup} />
+                            ) : data.status === 3 ? (
+                                <FontAwesomeIcon icon={faLock} />
+                            ) : null}
                             <span>{timeAgo}</span>
                         </p>
                     </div>

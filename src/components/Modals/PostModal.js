@@ -16,6 +16,7 @@ import * as tagService from '~/services/tagService';
 import { AppContext } from '~/context/AppProvider';
 import './PostModal.css';
 import * as modePostConstant from '~/constant';
+import { AuthContext } from '~/context';
 
 const items = [
     {
@@ -49,6 +50,7 @@ function PostModal({ onSubmit }) {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const inputRef = useRef();
+    const { user } = useContext(AuthContext);
 
     useEffect(() => {
         if (isPostModalVisible) {
@@ -56,11 +58,9 @@ function PostModal({ onSubmit }) {
                 inputRef.current && inputRef.current.focus();
             }, 0);
 
-            if (postCurrent) {
+            if (postCurrent.length !== 0 && modePost === modePostConstant.modeUpdate) {
                 form.setFieldsValue({ Content: postCurrent.content });
-                console.log(postCurrent);
                 const statusPostUpdate = items.find((item) => item.key == postCurrent.status);
-                console.log(statusPostUpdate);
                 if (statusPostUpdate) {
                     setStatusPost({
                         label: statusPostUpdate.label,
@@ -78,17 +78,16 @@ function PostModal({ onSubmit }) {
                         url: `${process.env.REACT_APP_BASE_URL2}${img}`,
                     }));
 
-                    console.log(fileList);
                     setFileList(fileList);
                 } else {
                     setFileList([]);
                 }
 
                 if (postCurrent.listTag) {
-                    const newSelectedTag = postCurrent.listTag.map((element) => ({
-                        value: element.name,
-                        label: element.name,
-                    }));
+                    let newSelectedTag = [];
+                    postCurrent.listTag.forEach((item) => {
+                        newSelectedTag.push(item.name);
+                    });
                     setSelectedTag(newSelectedTag);
                 } else {
                     setSelectedTag([]);
@@ -132,15 +131,9 @@ function PostModal({ onSubmit }) {
         const formData = new FormData();
 
         // Thêm các trường dữ liệu vào formData
+        formData.append('UserId', user.Id);
         formData.append('Content', data.Content);
         formData.append('Status', data.Status);
-
-        //Thêm các tệp vào formData
-        // if (data.FileList && data.FileList.length > 0) {
-        //     data.FileList.forEach((fileObj, index) => {
-        //         formData.append('FileList', fileObj.originFileObj); // Sử dụng originFileObj để lấy tệp thực tế
-        //     });
-        // }
 
         if (data.FileList && data.FileList.length > 0) {
             data.FileList.forEach((fileObj, index) => {
@@ -158,29 +151,13 @@ function PostModal({ onSubmit }) {
             });
         }
 
-        // if (data.FileList && data.FileList.length > 0) {
-        //     data.FileList.forEach((fileObj, index) => {
-        //         if (fileObj.originFileObj instanceof File) {
-        //             // Nếu fileObj.originFileObj là một đối tượng File, thêm nó vào formData
-        //             formData.append('FileList', fileObj.originFileObj);
-        //         } else {
-        //             // Nếu không phải, chuyển đổi fileObj thành một đối tượng File và thêm vào formData
-        //             const file = new File([fileObj.url], fileObj.name || `file_${index}`);
-        //             formData.append('FileList', file);
-        //         }
-        //     });
-        // }
-
-        console.log(fileList);
-
+        console.log(data.TagList);
         // Thêm các tag (nếu có) vào formData
         if (data.TagList && data.TagList.length > 0) {
             data.TagList.forEach((tag, index) => {
                 formData.append(`TagList`, tag);
             });
         }
-
-        console.log(data);
 
         const fetchApi = async () => {
             try {
@@ -190,14 +167,15 @@ function PostModal({ onSubmit }) {
                     result = await postService.addPost(formData);
                 } else if (modePost === modePostConstant.modeUpdate) {
                     formData.append('Id', postCurrent.id);
-                    console.log(formData);
                     result = await postService.updatePost(formData);
+                } else if (modePost === modePostConstant.modeShare) {
+                    formData.append('SharedPostId', postCurrent.id);
+                    result = await postService.addPost(formData);
                 } else {
                     console.log('result is null');
                 }
 
                 if (result != null) {
-                    console.log(result);
                     setIsPostModalVisible(false);
                     onSubmit(result);
                 }
@@ -236,6 +214,7 @@ function PostModal({ onSubmit }) {
 
     // ---------------------------------- Tag post ----------------------------------
     const handleChangeTags = (value) => {
+        console.log({ value });
         setSelectedTag(value);
     };
 
@@ -314,9 +293,9 @@ function PostModal({ onSubmit }) {
                 {/* Loading overlay */}
                 <h2 className="title-post">{modePost} post</h2>
                 <div className="body-post">
-                    <Avatar src="https://scontent.fdad3-1.fna.fbcdn.net/v/t39.30808-1/444153590_1990476318021855_5038580475676609884_n.jpg?stp=dst-jpg_p200x200&_nc_cat=103&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeFD4LSsf4oaed2X7wme9M_LEKooY9h7LowQqihj2HsujFoSKNMInw6IgnF57NubvJ4L_WACDBRV4-r3nYPi2wmE&_nc_ohc=3EcukDdHMJgQ7kNvgHmQJaK&_nc_ht=scontent.fdad3-1.fna&oh=00_AYDXT4W-TeMGhYVoAXyZfe9vzuBY_VypvFY2FzLvMwrFzQ&oe=66551247" />
+                    <Avatar src={user.AvatarUrl} />
                     <div className="info-post">
-                        <span className="name">Lê Quang Hào</span>
+                        <span className="name">{user.FirstName + ' ' + user.LastName}</span>
                         <Dropdown menu={menuProps}>
                             <Button className="customButton">
                                 <Space>

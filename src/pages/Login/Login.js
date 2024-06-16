@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Login.module.scss';
 import { Col, Row, Form, Input } from 'antd';
@@ -8,15 +8,20 @@ import { signInWithPopup } from 'firebase/auth';
 import * as accountService from '~/services/accountService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebookSquare, faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { jwtDecode } from 'jwt-decode';
+import { AuthContext } from '~/context';
+import config from '~/config';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function Login() {
-    const handleFacebookLogin = async () => {
-        const response = await signInWithPopup(auth, facebookProvider);
-        const user = response.user;
+    const { setUser } = useContext(AuthContext);
+    const navigate = useNavigate();
 
+    const fetchLoginExternal = async (user, provider) => {
         const userData = {
+            provider: provider,
             uid: user.uid,
             displayName: user.displayName,
             email: user.email,
@@ -25,74 +30,34 @@ function Login() {
             lastName: user.displayName.split(' ').slice(1).join(' '),
         };
 
-        console.log(userData);
-
         try {
             const result = await accountService.externalLogin(userData);
-            if (result) {
-                console.log(result);
+            if (result !== '') {
+                localStorage.setItem('userToken', result);
+                const decodedToken = jwtDecode(result);
+                setUser(decodedToken); // Update the user context with decoded token
+                navigate(config.routes.home); // Redirect to home page
             } else {
-                console.error('Invalid data format:', result);
+                console.error('Get token user error');
             }
         } catch (error) {
             console.error('Failed to fetch posts:', error);
         }
+    };
+
+    const handleFacebookLogin = async () => {
+        const response = await signInWithPopup(auth, facebookProvider);
+        fetchLoginExternal(response.user, 'Facebook');
     };
 
     const handleGoogleLogin = async () => {
         const response = await signInWithPopup(auth, googleProvider);
-        const user = response.user;
-        console.log(user);
-
-        const userData = {
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-            firstName: user.displayName.split(' ')[0],
-            lastName: user.displayName.split(' ').slice(1).join(' '),
-        };
-
-        console.log(userData);
-
-        try {
-            const result = await accountService.externalLogin(userData);
-            if (result) {
-                console.log(result);
-            } else {
-                console.error('Invalid data format:', result);
-            }
-        } catch (error) {
-            console.error('Failed to fetch posts:', error);
-        }
+        fetchLoginExternal(response.user, 'Google');
     };
 
     const handleGithubLogin = async () => {
         const response = await signInWithPopup(auth, githubProvider);
-        const user = response.user;
-        console.log(user);
-
-        const userData = {
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-            firstName: user.displayName.split(' ')[0],
-            lastName: user.displayName.split(' ').slice(1).join(' '),
-        };
-
-        console.log(userData);
-
-        try {
-            const result = await accountService.externalLogin(userData);
-            if (result) {
-                console.log(result);
-            } else {
-                console.error('Invalid data format:', result);
-            }
-        } catch (error) {
-            console.error('Failed to fetch posts:', error);
-        }
+        fetchLoginExternal(response.user, 'Github');
     };
 
     const onFinish = (values) => {
