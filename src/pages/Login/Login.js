@@ -7,7 +7,7 @@ import { auth, facebookProvider, googleProvider, githubProvider } from '~/fireba
 import { signInWithPopup } from 'firebase/auth';
 import * as accountService from '~/services/accountService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFacebookSquare, faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { faFacebookSquare, faGithub, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { jwtDecode } from 'jwt-decode';
 import { AuthContext } from '~/context';
 import config from '~/config';
@@ -107,6 +107,10 @@ function Login() {
                             <Button className={cx('google-btn')} onClick={handleGoogleLogin}>
                                 <FontAwesomeIcon icon={faGoogle} />
                                 Log in with Google
+                            </Button>
+                            <Button className={cx('github-btn')} onClick={handleGithubLogin}>
+                                <FontAwesomeIcon icon={faGithub} />
+                                Log in with GitHub
                             </Button>
                         </div>
                     </div>
