@@ -18,17 +18,31 @@ import Menu from '~/components/Popper/Menu';
 import { AppContext } from '~/context/AppProvider';
 import PostModal from '~/components/Modals/PostModal';
 import * as postService from '~/services/postService';
-import { AuthContext } from '~/context';
+import { AuthContext, NotificationContext } from '~/context';
 import * as modePostConstant from '~/constant';
+import { useNavigate } from 'react-router-dom';
+import PostDetailModal from '../Modals/PostDetailModal';
 
 const cx = classNames.bind(styles);
 
-function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange }) {
-    const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
-        useContext(AppContext);
+function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange, disableActionButton = false }) {
+    const {
+        isPostModalVisible,
+        setIsPostModalVisible,
+        postCurrent,
+        setPostCurrent,
+        modePost,
+        setModePost,
+        setPosts,
+        posts,
+    } = useContext(AppContext);
     const [checkLike, setCheckLike] = useState();
     const { user } = useContext(AuthContext);
-
+    const [sharedPost, setSharedPost] = useState(null);
+    const [sharedCount, setSharedCount] = useState(0);
+    const [showPostDetailModal, setShowPostDetailModal] = useState(null);
+    const { success, error } = useContext(NotificationContext);
+    const navigate = useNavigate();
     let imageArray = [];
     if (data.images) {
         imageArray = JSON.parse(data.images);
@@ -41,18 +55,42 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange }) {
 
     const ACTION_POST =
         data.userId === user.Id
+            ? data?.usersFavourite?.find((item) => item.userId === user.Id)
+                ? [
+                      {
+                          icon: <FontAwesomeIcon icon={faPenToSquare}></FontAwesomeIcon>,
+                          title: 'Update post',
+                      },
+                      {
+                          icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
+                          title: 'UnSave post',
+                      },
+
+                      {
+                          icon: <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>,
+                          title: 'Delete post',
+                      },
+                  ]
+                : [
+                      {
+                          icon: <FontAwesomeIcon icon={faPenToSquare}></FontAwesomeIcon>,
+                          title: 'Update post',
+                      },
+                      {
+                          icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
+                          title: 'Save post',
+                      },
+
+                      {
+                          icon: <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>,
+                          title: 'Delete post',
+                      },
+                  ]
+            : data?.usersFavourite?.find((item) => item.userId === user.Id)
             ? [
                   {
-                      icon: <FontAwesomeIcon icon={faPenToSquare}></FontAwesomeIcon>,
-                      title: 'Update post',
-                  },
-                  {
                       icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
-                      title: 'Save post',
-                  },
-                  {
-                      icon: <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>,
-                      title: 'Delete post',
+                      title: 'UnSave post',
                   },
               ]
             : [
@@ -72,43 +110,43 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange }) {
                 break;
             }
             case 'Delete post': {
-                //onDeletePost(data.id);
                 handleDelete();
+                break;
+            }
+            case 'Save post': {
+                handleSave('Save post');
+                break;
+            }
+            case 'UnSave post': {
+                handleSave('UnSave post');
                 break;
             }
             default:
         }
     };
 
-    // const onDeletePost = async (id) => {
-    //     try {
-    //         const result = await postService.deletePost(id);
-    //         if (result) {
-    //         } else {
-    //             console.error('Invalid data format:', result);
-    //         }
-    //     } catch (error) {
-    //         console.error('Failed to fetch posts:', error);
-    //     }
-    // };
+    const handleSave = async (action) => {
+        const dataSave = {
+            userId: user.Id,
+            postId: data.id,
+        };
+        const result = await postService.savePost(dataSave);
+        if (result) {
+            console.log(posts);
+            const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
+            console.log(updatedPosts);
+
+            setPosts(updatedPosts);
+            success(`${action} success`);
+        } else {
+            error(`${action} error`);
+            console.error('comment error');
+        }
+    };
 
     const handleDelete = () => {
         handleDeletePost(data.id);
     };
-
-    // const handleLikeChange = async () => {
-    //     console.log('start');
-    //     try {
-    //         const result = await postService.changeLike({ userId: userIDFake, postId: data.id });
-    //         if (result) {
-    //             console.log(result);
-    //         } else {
-    //             console.error('Invalid data format:', result);
-    //         }
-    //     } catch (error) {
-    //         console.error('Failed to fetch posts:', error);
-    //     }
-    // };
 
     const convertNewlinesToBreaks = (text) => {
         return text.replace(/\n/g, '<br/>');
@@ -130,8 +168,89 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange }) {
         setIsPostModalVisible(true);
     };
 
+    useEffect(() => {
+        if (data.sharedPostId) {
+            fetchSharedPost(data.sharedPostId);
+        }
+    }, [data.sharedPostId]);
+
+    const fetchSharedPost = async (sharedPostId) => {
+        const result = await postService.getPostById(sharedPostId);
+        if (result) {
+            setSharedPost(result);
+        } else {
+            console.error('Failed to fetch shared post');
+        }
+    };
+
+    const SharedPost = ({ sharedPost }) => {
+        if (!sharedPost) return null;
+
+        let sharedImageArray = [];
+        if (sharedPost.images) {
+            sharedImageArray = JSON.parse(sharedPost.images);
+        }
+
+        return (
+            <div className={cx('share-post')}>
+                <div className={cx('header')}>
+                    <AccountPopper data={sharedPost} />
+                </div>
+
+                <div className={cx('body')}>
+                    <p
+                        className={cx('text')}
+                        dangerouslySetInnerHTML={{ __html: convertNewlinesToBreaks(sharedPost.content) }}
+                    ></p>
+                    <Image.PreviewGroup
+                        preview={{
+                            onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
+                        }}
+                    >
+                        {sharedImageArray.map((imageUrl, index) => (
+                            <div className={cx('image')} key={index}>
+                                <Image width={100} height={100} src={`${process.env.REACT_APP_BASE_URL2}${imageUrl}`} />
+                            </div>
+                        ))}
+                    </Image.PreviewGroup>
+                </div>
+
+                <div className={cx('footer')}>
+                    {sharedPost.listTag &&
+                        sharedPost.listTag.map((item) => (
+                            <span key={item.id} className={cx('tag')}>
+                                #{item.name}
+                            </span>
+                        ))}
+                </div>
+            </div>
+        );
+    };
+
+    useEffect(() => {
+        fetchCountPostShared(data.id);
+    }, [data.id]);
+
+    const fetchCountPostShared = async (id) => {
+        const result = await postService.countSharedPost(id);
+        if (result) {
+            setSharedCount(result);
+        } else {
+            console.error('Failed to fetch shared post count');
+        }
+    };
     return (
         <>
+            <PostDetailModal
+                visible={showPostDetailModal}
+                setVisible={setShowPostDetailModal}
+                onClose={() => setShowPostDetailModal(false)}
+                post={data}
+                handlePostSubmit={handlePostSubmit}
+                handleDeletePost={handleDeletePost}
+                handleLikeChange={handleLikeChange}
+            ></PostDetailModal>
+
             <div className={cx('wrapper')}>
                 <div className={cx('header')}>
                     <AccountPopper data={data} />
@@ -176,15 +295,38 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange }) {
                                 #{item.name}
                             </span>
                         ))}
+
+                    {data.sharedPostId !== '' && <SharedPost sharedPost={sharedPost} />}
+
                     <div className={cx('interact')}>
                         <Button
                             className={checkLike ? cx('buttonLiked') : ''}
-                            leftIcon={<FontAwesomeIcon icon={faThumbsUp} onClick={onLikeClick} />}
+                            leftIcon={<FontAwesomeIcon icon={faThumbsUp} />}
+                            onClick={() => {
+                                if (disableActionButton) return;
+                                onLikeClick();
+                            }}
                         >
                             {data.likes.length || 0}
                         </Button>
-                        <Button leftIcon={<FontAwesomeIcon icon={faMessage} />}>10</Button>
-                        <Button leftIcon={<FontAwesomeIcon icon={faShare} onClick={handleSharedPost} />}>5</Button>
+                        <Button
+                            leftIcon={<FontAwesomeIcon icon={faMessage} />}
+                            onClick={() => {
+                                if (disableActionButton) return;
+                                setShowPostDetailModal(true);
+                            }}
+                        >
+                            {data.comments.length || 0}
+                        </Button>
+                        <Button
+                            leftIcon={<FontAwesomeIcon icon={faShare} />}
+                            onClick={() => {
+                                if (disableActionButton) return;
+                                handleSharedPost();
+                            }}
+                        >
+                            {sharedCount}
+                        </Button>
                     </div>
                 </div>
             </div>

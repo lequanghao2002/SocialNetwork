@@ -96,6 +96,23 @@ body .tippy-box {
     line-height: 2.2rem;
 }
 
+.loading-overlay {
+    font-size: 3rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--text-color);
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
 .search-loading {
     animation: spinner 1s linear infinite;
 }

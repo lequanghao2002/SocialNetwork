@@ -30,7 +30,7 @@ function AuthProvider({ children }) {
             if (currentUser) {
                 const userToken = localStorage.getItem('userToken');
                 try {
-                    if (userToken) {
+                    if (userToken || userToken != null) {
                         const decodedUser = jwtDecode(userToken);
                         setUser(decodedUser);
                         setIsLoading(false);
@@ -51,7 +51,7 @@ function AuthProvider({ children }) {
         });
 
         return () => unsubscribe();
-    }, [navigate]);
+    }, []);
 
     return <AuthContext.Provider value={{ user, setUser }}>{isLoading ? <Spin /> : children}</AuthContext.Provider>;
 }

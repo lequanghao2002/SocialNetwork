@@ -1,0 +1,35 @@
+.wrapper {
+    margin-top: 40px;
+    background-color: var(--bg-color-primary);
+
+    input {
+        width: 100%;
+        font-size: 1.6rem;
+        color: var(--text-color);
+        background-color: var(--bg-color-second);
+        border-radius: 8px;
+        -webkit-border-radius: 8px;
+        -moz-border-radius: 8px;
+        -ms-border-radius: 8px;
+        -o-border-radius: 8px;
+        border: none;
+        outline: none;
+    }
+
+    input:hover {
+        background-color: var(--bg-color-second);
+    }
+
+    input:focus {
+        background-color: var(--bg-color-second);
+    }
+
+    label {
+        color: var(--text-color) !important;
+        min-width: 90px;
+    }
+
+    .btn-edit {
+        width: 100%;
+    }
+}

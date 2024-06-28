@@ -64,11 +64,13 @@ function Header() {
     const navigate = useNavigate();
     const { user, setUser } = useContext(AuthContext);
 
+    console.log({ user });
+
     // Handle logic
     const handleMenuChange = (menuItem) => {
         switch (menuItem.title) {
             case 'View profile': {
-                navigate(config.routes.profile);
+                navigate(`${config.routes.profile.replace(':id', user.Id)}`);
                 break;
             }
             case 'Log out': {

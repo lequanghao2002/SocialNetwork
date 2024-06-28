@@ -132,9 +132,15 @@
     justify-content: center;
     font-size: 1.8rem;
     width: 100%;
-    text-align: center;
 }
 
 .live-at,
 .study-at {
+}
+
+.info-detail {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+    margin-left: 10px;
 }

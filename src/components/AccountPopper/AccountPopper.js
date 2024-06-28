@@ -9,12 +9,16 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEarthAfrica, faLock, faUserGroup } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import config from '~/config';
 
 const cx = classNames.bind(styles);
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
 function AccountPopper({ data }) {
+    const navigate = useNavigate();
+
     var user = data.user;
 
     const timeAgo = dayjs.utc(data.createdDate).local().fromNow();
@@ -34,7 +38,12 @@ function AccountPopper({ data }) {
             <Tippy interactive offset={[-150, -30]} delay={[300, 100]} placement="bottom-start" render={renderPreview}>
                 <div className={cx('account-item')}>
                     <Image src={user.avatarUrl} alt={user.email} />
-                    <div className={cx('item-info')}>
+                    <div
+                        className={cx('item-info')}
+                        onClick={() => {
+                            navigate(`${config.routes.profile.replace(':id', data.userId)}`);
+                        }}
+                    >
                         <p className={cx('nickname')}>
                             <span>{user.firstName + ' ' + user.lastName}</span>
                         </p>

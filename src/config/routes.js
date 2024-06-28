@@ -6,7 +6,7 @@ const routes = {
     friend: '/search',
     bookmark: '/bookmark',
     login: '/login',
-    profile: '/profile',
+    profile: '/profile/:id',
 };
 
 export default routes;

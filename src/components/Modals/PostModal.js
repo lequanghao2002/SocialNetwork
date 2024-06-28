@@ -289,7 +289,7 @@ function PostModal({ onSubmit }) {
                         <FontAwesomeIcon icon={faSpinner} className="search-loading" />
                         <span>Posting</span>
                     </div>
-                )}{' '}
+                )}
                 {/* Loading overlay */}
                 <h2 className="title-post">{modePost} post</h2>
                 <div className="body-post">

@@ -1,0 +1,107 @@
+.wrapper {
+    margin-top: 0px !important;
+
+    span,
+    p {
+        color: var(--text-color);
+    }
+
+    .list-comment {
+        overflow-y: scroll;
+        max-height: 500px;
+        border-top: 1px solid var(--bg-color-hover);
+        padding-top: 20px;
+        padding-right: 14px;
+        flex-direction: column;
+
+        .item-comment {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+
+            .user-info {
+                display: flex;
+                flex-direction: column;
+                background-color: var(--bg-color-hover);
+                border-radius: 10px;
+                padding: 4px 8px;
+
+                .full-name {
+                    font-weight: 700;
+                }
+
+                .comment {
+                    word-break: break-word;
+                }
+            }
+
+            .rely {
+                display: flex;
+                gap: 50px;
+
+                .btn-reply,
+                .btn-update,
+                .btn-remove {
+                    cursor: pointer;
+                    color: var(--text-sub-color) !important;
+                }
+            }
+        }
+
+        .child-comment {
+            // margin-left: 20px;
+            // border-left: 2px solid #ccc;
+            // padding-left: 10px;
+            color: red;
+        }
+    }
+
+    .bottom {
+        display: flex;
+        align-self: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--bg-color-primary);
+        gap: 14px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid var(--bg-color-hover);
+
+        .icons {
+            display: flex;
+            gap: 8px;
+        }
+
+        svg {
+            color: var(--text-color);
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            &:hover {
+                background-color: var(--bg-color-hover);
+            }
+        }
+
+        .input-send {
+            flex: 1;
+            border: none;
+            outline: none;
+            color: var(--text-color);
+            background-color: var(--bg-color-second);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 1.6rem;
+        }
+
+        .emoji {
+            position: relative;
+
+            .picker {
+                position: absolute;
+                bottom: 50px;
+                left: 0;
+            }
+        }
+    }
+}

@@ -22,16 +22,18 @@ import * as postService from '~/services/postService';
 import PostModal from '~/components/Modals/PostModal';
 import { Empty, message } from 'antd';
 import * as modePostConstant from '~/constant';
+import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
-function Home({ profile }) {
-    const { isPostModalVisible, setIsPostModalVisible, modePost, setModePost } = useContext(AppContext);
+function Home({ profile, profileId }) {
+    const { isPostModalVisible, setIsPostModalVisible, modePost, setModePost, posts, setPosts } =
+        useContext(AppContext);
     const { user } = useContext(AuthContext);
-    const [posts, setPosts] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [messageApi, contextHolder] = message.useMessage();
+    const navigate = useNavigate();
 
     const success = (message) => {
         messageApi.open({
@@ -51,7 +53,13 @@ function Home({ profile }) {
 
     const fetchPosts = async () => {
         try {
-            const result = await postService.getAllPost(page, 10);
+            let result;
+            if (profile) {
+                result = await postService.getAllPostByUserId(profileId, page, 10);
+            } else {
+                result = await postService.getAllPost(page, 10);
+            }
+
             if (result) {
                 console.log({ result, posts });
                 setPosts([...posts, ...result]);
@@ -134,23 +142,47 @@ function Home({ profile }) {
         <>
             {contextHolder}
             <div className={cx('wrapper')}>
-                <div className={cx('post-new')}>
-                    <div className={cx('header')}>
-                        <Avatar src={user.AvatarUrl} alt={user.Email} />
-                        {/* <PostModal onSubmit={handlePostSubmit} /> */}
-                        <div className={cx('input')} onClick={handleShowPostModel}>
-                            <span className={cx('text')}>Share your programming knowledge here...</span>
-                            <span className={cx('icon')}>
-                                <FontAwesomeIcon icon={faFaceSmile} />
-                            </span>
+                {profile ? (
+                    profileId === user.Id ? (
+                        <div className={cx('post-new')}>
+                            <div className={cx('header')}>
+                                <Avatar src={user.AvatarUrl} alt={user.Email} />
+                                {/* <PostModal onSubmit={handlePostSubmit} /> */}
+                                <div className={cx('input')} onClick={handleShowPostModel}>
+                                    <span className={cx('text')}>Share your programming knowledge here...</span>
+                                    <span className={cx('icon')}>
+                                        <FontAwesomeIcon icon={faFaceSmile} />
+                                    </span>
+                                </div>
+                            </div>
+                            <div className={cx('option')}>
+                                <Icon icon={faFileCode} rightText={'Code'} />
+                                <Icon icon={faFileImage} rightText={'Image'} />
+                                <Icon icon={faFileLines} rightText={'File'} />
+                            </div>
+                        </div>
+                    ) : (
+                        <></>
+                    )
+                ) : (
+                    <div className={cx('post-new')}>
+                        <div className={cx('header')}>
+                            <Avatar src={user.AvatarUrl} alt={user.Email} />
+                            {/* <PostModal onSubmit={handlePostSubmit} /> */}
+                            <div className={cx('input')} onClick={handleShowPostModel}>
+                                <span className={cx('text')}>Share your programming knowledge here...</span>
+                                <span className={cx('icon')}>
+                                    <FontAwesomeIcon icon={faFaceSmile} />
+                                </span>
+                            </div>
+                        </div>
+                        <div className={cx('option')}>
+                            <Icon icon={faFileCode} rightText={'Code'} />
+                            <Icon icon={faFileImage} rightText={'Image'} />
+                            <Icon icon={faFileLines} rightText={'File'} />
                         </div>
                     </div>
-                    <div className={cx('option')}>
-                        <Icon icon={faFileCode} rightText={'Code'} />
-                        <Icon icon={faFileImage} rightText={'Image'} />
-                        <Icon icon={faFileLines} rightText={'File'} />
-                    </div>
-                </div>
+                )}
 
                 {profile || (
                     <div className={cx('post-nav')}>
