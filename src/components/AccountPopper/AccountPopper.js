@@ -11,6 +11,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEarthAfrica, faLock, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import config from '~/config';
+import * as userService from '~/services/userService';
+import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);
 dayjs.extend(relativeTime);
@@ -18,6 +20,20 @@ dayjs.extend(utc);
 
 function AccountPopper({ data }) {
     const navigate = useNavigate();
+    const [userById, setUserById] = useState({});
+
+    useEffect(() => {
+        fetchUserById(data.userId);
+    }, []);
+
+    const fetchUserById = async (Id) => {
+        try {
+            const result = await userService.getUserById(Id);
+            setUserById(result);
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+        }
+    };
 
     var user = data.user;
 
@@ -27,7 +43,7 @@ function AccountPopper({ data }) {
         return (
             <div tabIndex="-1" {...props}>
                 <PopperWrapper>
-                    <AccountPreview user={data.user} />
+                    <AccountPreview user={userById} />
                 </PopperWrapper>
             </div>
         );

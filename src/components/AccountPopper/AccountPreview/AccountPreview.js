@@ -3,7 +3,7 @@ import styles from './AccountPreview.module.scss';
 import Button from '~/components/Button';
 import Image from '~/components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCommentDots, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcase, faCommentDots, faHouse, faSchool, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 
 const cx = classNames.bind(styles);
 
@@ -16,21 +16,46 @@ function AccountPreview({ user }) {
                     <Button text className={cx('nickname')}>
                         <strong>{user.firstName + ' ' + user.lastName}</strong>
                     </Button>
-                    <Button text className={cx('study-at')}>
-                        Trường Đại học Yersin Đà Lạt
-                    </Button>
-                    <Button text className={cx('live-at')}>
-                        Ninh Thuận
-                    </Button>
+                    <div className={cx('info-detail')}>
+                        {user?.userProfile?.liveAt && (
+                            <span>
+                                <FontAwesomeIcon icon={faHouse} className={cx('icon-intro')} />
+                                Live at:
+                                <Button text className={cx('live-at')}>
+                                    {user?.userProfile?.liveAt}
+                                </Button>
+                            </span>
+                        )}
+
+                        {user?.userProfile?.studyAt && (
+                            <span>
+                                <FontAwesomeIcon icon={faSchool} className={cx('icon-intro')} />
+                                Study at:
+                                <Button text className={cx('study-at')}>
+                                    {user?.userProfile?.studyAt}
+                                </Button>
+                            </span>
+                        )}
+
+                        {user?.userProfile?.workingAt && (
+                            <span>
+                                <FontAwesomeIcon icon={faBriefcase} className={cx('icon-intro')} />
+                                Work at:
+                                <Button text className={cx('work-at')}>
+                                    {user?.userProfile?.workingAt}
+                                </Button>
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            <div className={cx('body')}>
+            {/* <div className={cx('body')}>
                 <Button leftIcon={<FontAwesomeIcon icon={faCommentDots} />}>Message</Button>
                 <Button primary leftIcon={<FontAwesomeIcon icon={faUserPlus} />}>
                     Add friend
                 </Button>
-            </div>
+            </div> */}
         </div>
     );
 }

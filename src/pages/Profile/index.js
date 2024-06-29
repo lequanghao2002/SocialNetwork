@@ -111,6 +111,12 @@ function Profile() {
                             <span className={cx('num-friends')}>{`${listFriendShip?.length} friends`}</span>
                         </div>
 
+                        {/* {userInfo?.id === user.Id && ( */}
+                        <Button classNames={cx('edit-info')} onClick={() => setShowProfileModal(true)}>
+                            Edit info
+                        </Button>
+                        {/* )} */}
+
                         {userInfo?.id !== user.Id && (
                             <div className={cx('action-btn')}>
                                 {friendShip.status === 0 && (
