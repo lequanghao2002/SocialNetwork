@@ -217,8 +217,8 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange, disa
 
                 <div className={cx('footer')}>
                     {sharedPost.listTag &&
-                        sharedPost.listTag.map((item) => (
-                            <span key={item.id} className={cx('tag')}>
+                        sharedPost.listTag.map((item, index) => (
+                            <span key={index} className={cx('tag')}>
                                 #{item.name}
                             </span>
                         ))}
@@ -276,13 +276,8 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange, disa
                         }}
                     >
                         {imageArray.map((imageUrl, index) => (
-                            <div className={cx('image')}>
-                                <Image
-                                    key={index}
-                                    width={100}
-                                    height={100}
-                                    src={`${process.env.REACT_APP_BASE_URL2}${imageUrl}`}
-                                />
+                            <div key={index} className={cx('image')}>
+                                <Image width={100} height={100} src={`${process.env.REACT_APP_BASE_URL2}${imageUrl}`} />
                             </div>
                         ))}
                     </Image.PreviewGroup>
@@ -290,8 +285,8 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange, disa
 
                 <div className={cx('footer')}>
                     {data.listTag &&
-                        data.listTag.map((item) => (
-                            <span key={item.id} className={cx('tag')}>
+                        data.listTag.map((item, index) => (
+                            <span key={index} className={cx('tag')}>
                                 #{item.name}
                             </span>
                         ))}

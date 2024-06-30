@@ -61,7 +61,6 @@ function Home({ profile, profileId }) {
             }
 
             if (result) {
-                console.log({ result, posts });
                 setPosts([...posts, ...result]);
                 setPage(page + 1);
                 if (result.length === 0) {
@@ -77,6 +76,9 @@ function Home({ profile, profileId }) {
     };
 
     useEffect(() => {
+        if (profileId) {
+            setPosts([]);
+        }
         fetchPosts();
     }, []);
 

@@ -3,6 +3,7 @@ import styles from './SuggestedAccounts.module.scss';
 import Tippy from '@tippyjs/react/headless';
 import { Wrapper as PopperWrapper } from '~/components/Popper';
 import AccountPreview from '../AccountPopper/AccountPreview';
+import Image from '../Image';
 
 const cx = classNames.bind(styles);
 
@@ -21,7 +22,7 @@ function AccountItem({ data }) {
         <div>
             <Tippy interactive delay={[300, 100]} offset={[-150, -30]} placement="bottom-start" render={renderPreview}>
                 <div className={cx('account-item')}>
-                    <img className={cx('avatar')} src={data.avatarUrl} alt="" />
+                    <Image className={cx('avatar')} src={data.avatarUrl} alt="" />
                     <div className={cx('item-info')}>
                         <p className={cx('nickname')}>
                             <strong>{`${data.firstName} ${data.lastName}`}</strong>

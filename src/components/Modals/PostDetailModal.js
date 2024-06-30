@@ -58,8 +58,8 @@ function PostDetailModal({ visible, setVisible, onClose, post, handlePostSubmit,
         return comments
             .filter((comment) => comment.parentId === parentId)
             .map((comment) => (
-                <div>
-                    <div key={comment.id} className="item-comment">
+                <div key={comment.id}>
+                    <div className="item-comment">
                         <Comment item={comment} postId={post.id} />
                     </div>
                     <div style={{ marginLeft: '30px' }}>{renderComments(comments, comment.id)}</div>

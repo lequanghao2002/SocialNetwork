@@ -17,10 +17,11 @@ import { faLinkedin, faSquareFacebook, faSquareGithub, faUpwork } from '@fortawe
 import Home from '../Home';
 import FriendStatusButton from '~/components/FriendStatusButton';
 import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '~/context';
+import { AppContext, AuthContext } from '~/context';
 import * as userServices from '~/services/userService';
 import { useParams } from 'react-router-dom';
 import ProfileModal from '~/components/Modals/ProfileModal';
+import InfoModal from '~/components/Modals/InfoModal';
 
 const cx = classNames.bind(styles);
 
@@ -31,6 +32,7 @@ function Profile() {
     const [friendShip, setFriendShip] = useState({});
     const [listFriendShip, setListFriendShip] = useState({});
     const [showProfileModal, setShowProfileModal] = useState(null);
+    const [showInfoModal, setShowInfoModal] = useState(null);
 
     useEffect(() => {
         fetchUserProfileById(id);
@@ -39,12 +41,13 @@ function Profile() {
         if (id !== user.Id) {
             fetchFriendship(user.Id, id);
         }
-    }, [id]);
+    }, []);
 
     const fetchUserProfileById = async (id) => {
         try {
             const result = await userServices.getUserById(id);
             if (result) {
+                console.log({ result });
                 setUserInfo(result);
             } else {
                 console.error('Invalid data format:', result);
@@ -97,25 +100,41 @@ function Profile() {
                     onUpdate={onUpdate}
                 />
 
+                <InfoModal
+                    visible={showInfoModal}
+                    setVisible={setShowInfoModal}
+                    onClose={() => setShowInfoModal(false)}
+                    userInfo={userInfo}
+                    onUpdate={onUpdate}
+                />
+
                 <div className={cx('cover-image')}>
                     {userInfo?.userProfile?.coverPhotoUrl && (
-                        <img className={cx('image')} src={userInfo?.userProfile?.coverPhotoUrl} alt="" />
+                        <img
+                            className={cx('image')}
+                            src={`${process.env.REACT_APP_BASE_URL2}${userInfo?.userProfile?.coverPhotoUrl}`}
+                            alt=""
+                        />
                     )}
                 </div>
 
                 <div className={cx('profile')}>
                     <div className={cx('header')}>
-                        <Image className={cx('avatar')} src={userInfo?.avatarUrl} />
+                        <img
+                            className={cx('avatar')}
+                            src={`${process.env.REACT_APP_BASE_URL2}${userInfo?.avatarUrl}`}
+                            alt={userInfo?.firstName}
+                        />
                         <div className={cx('info')}>
                             <span className={cx('full-name')}>{`${userInfo?.firstName} ${userInfo?.lastName}`}</span>
                             <span className={cx('num-friends')}>{`${listFriendShip?.length} friends`}</span>
                         </div>
 
-                        {/* {userInfo?.id === user.Id && ( */}
-                        <Button classNames={cx('edit-info')} onClick={() => setShowProfileModal(true)}>
-                            Edit info
-                        </Button>
-                        {/* )} */}
+                        {userInfo?.id === user.Id && (
+                            <Button className={cx('edit-info')} onClick={() => setShowInfoModal(true)}>
+                                Edit info
+                            </Button>
+                        )}
 
                         {userInfo?.id !== user.Id && (
                             <div className={cx('action-btn')}>
@@ -265,12 +284,11 @@ function Profile() {
 
                                         <div className={cx('list-friends')}>
                                             {listFriendShip?.length >= 0 &&
-                                                listFriendShip.map((item) => (
-                                                    <div className={cx('item-friends')}>
+                                                listFriendShip.map((item, index) => (
+                                                    <div key={index} className={cx('item-friends')}>
                                                         <img
-                                                            key={item.id}
                                                             className={cx('img-friend')}
-                                                            src={item.avatarUrl}
+                                                            src={`${process.env.REACT_APP_BASE_URL2}${item.avatarUrl}`}
                                                             alt={item.email}
                                                         />
                                                         <span>{`${item.firstName} ${item.lastName}`}</span>

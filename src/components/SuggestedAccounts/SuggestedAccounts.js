@@ -28,8 +28,8 @@ function SuggestedAccounts({ label }) {
         <div className={cx('wrapper')}>
             <p className={cx('label')}>{label}</p>
 
-            {listFriendShip.map((item) => (
-                <AccountItem data={item}></AccountItem>
+            {listFriendShip?.map((item, index) => (
+                <AccountItem key={index} data={item}></AccountItem>
             ))}
         </div>
     );

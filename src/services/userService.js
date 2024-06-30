@@ -24,6 +24,20 @@ export const updateUserProfile = async (data) => {
     }
 };
 
+export const updateUser = async (data) => {
+    try {
+        const res = await httpRequest.post('Users/update-user', data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return res;
+    } catch (error) {
+        console.error('There was an error!', error);
+        return null;
+    }
+};
+
 export const getStatusFriend = async (userId, friendId) => {
     try {
         const res = await httpRequest.get('Users/get-status-friend', {
