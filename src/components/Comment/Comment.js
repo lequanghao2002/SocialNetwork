@@ -14,13 +14,12 @@ import { message } from 'antd';
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
-function Comment({ item, postId }) {
+function Comment({ item, postId, posts, setPosts }) {
     const { user } = useContext(AuthContext);
     const [relyMode, setRelyMode] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
-    const { posts, setPosts } = useContext(AppContext);
     const { success, error } = useContext(NotificationContext);
     const [loading, setLoading] = useState(false);
 

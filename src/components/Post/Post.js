@@ -25,17 +25,17 @@ import PostDetailModal from '../Modals/PostDetailModal';
 
 const cx = classNames.bind(styles);
 
-function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange, disableActionButton = false }) {
-    const {
-        isPostModalVisible,
-        setIsPostModalVisible,
-        postCurrent,
-        setPostCurrent,
-        modePost,
-        setModePost,
-        setPosts,
-        posts,
-    } = useContext(AppContext);
+function Post({
+    data,
+    handlePostSubmit,
+    handleDeletePost,
+    handleLikeChange,
+    disableActionButton = false,
+    posts,
+    setPosts,
+}) {
+    const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
+        useContext(AppContext);
     const [checkLike, setCheckLike] = useState();
     const { user } = useContext(AuthContext);
     const [sharedPost, setSharedPost] = useState(null);
@@ -249,6 +249,8 @@ function Post({ data, handlePostSubmit, handleDeletePost, handleLikeChange, disa
                 handlePostSubmit={handlePostSubmit}
                 handleDeletePost={handleDeletePost}
                 handleLikeChange={handleLikeChange}
+                posts={posts}
+                setPosts={setPosts}
             ></PostDetailModal>
 
             <div className={cx('wrapper')}>

@@ -16,7 +16,7 @@ const publicRoutes = [
     //W{ path: '/friend', component: Friend },
     { path: config.routes.friend, component: Friend },
     //{ path: config.routes.upload, component: Upload, layout: HeaderOnly },
-    { path: config.routes.search, component: Search, layout: null },
+    { path: config.routes.search, component: Search },
     //{ path: config.routes.message, component: Message },
     { path: config.routes.message, component: Message, layout: HeaderOnly },
     { path: config.routes.bookmark, component: Bookmark },

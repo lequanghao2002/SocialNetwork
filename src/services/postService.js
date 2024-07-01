@@ -16,10 +16,12 @@
 
 import * as httpRequest from '~/utils/httpRequest';
 
-export const getAllPost = async (page, pageSize) => {
+export const getAllPost = async (filter, userId, page, pageSize) => {
     try {
         const res = await httpRequest.get('Posts/get-all', {
             params: {
+                filter,
+                userId,
                 page,
                 pageSize,
             },

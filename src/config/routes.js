@@ -3,7 +3,7 @@ const routes = {
     //friend: '/:nickname',
     search: '/search',
     message: '/message',
-    friend: '/search',
+    friend: '/friend',
     bookmark: '/bookmark',
     login: '/login',
     profile: '/profile/:id',

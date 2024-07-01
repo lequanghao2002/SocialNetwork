@@ -27,13 +27,14 @@ import { useNavigate } from 'react-router-dom';
 const cx = classNames.bind(styles);
 
 function Home({ profile, profileId }) {
-    const { isPostModalVisible, setIsPostModalVisible, modePost, setModePost, posts, setPosts } =
-        useContext(AppContext);
+    const [posts, setPosts] = useState([]);
+    const { isPostModalVisible, setIsPostModalVisible, modePost, setModePost } = useContext(AppContext);
     const { user } = useContext(AuthContext);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [messageApi, contextHolder] = message.useMessage();
     const navigate = useNavigate();
+    const [filter, setFilter] = useState('Recent');
 
     const success = (message) => {
         messageApi.open({
@@ -51,25 +52,46 @@ function Home({ profile, profileId }) {
         });
     };
 
-    const fetchPosts = async () => {
+    const fetchPosts = async (newFilter = null, reset = false) => {
+        console.log({ filter }, { newFilter }, { reset });
+        const filterParam = newFilter ? newFilter : filter;
         try {
             let result;
+            let currentPage = reset ? 1 : page;
+
             if (profile) {
-                result = await postService.getAllPostByUserId(profileId, page, 10);
+                result = await postService.getAllPostByUserId(profileId, currentPage, 10);
             } else {
-                result = await postService.getAllPost(page, 10);
+                if (filterParam === 'Friends') {
+                    result = await postService.getAllPost('Friends', user.Id, currentPage, 10);
+                } else if (filterParam === 'Popular') {
+                    result = await postService.getAllPost('Popular', null, currentPage, 10);
+                } else {
+                    result = await postService.getAllPost('Recent', null, currentPage, 10);
+                }
             }
 
-            if (result) {
-                setPosts([...posts, ...result]);
-                setPage(page + 1);
-                if (result.length === 0) {
-                    setHasMore(false);
-                }
-                console.log({ result, posts });
+            if (reset) {
+                console.log('---reset');
+                setPosts(result);
             } else {
-                console.error('Invalid data format:', result);
+                console.log('---no-reset');
+                setPosts([...posts, ...result]);
             }
+            setPage(currentPage + 1);
+            if (result.length === 0) {
+                setHasMore(false);
+            }
+
+            // if (result) {
+            //     setPosts([...posts, ...result]);
+            //     setPage(currentPage + 1);
+            //     if (result.length === 0) {
+            //         setHasMore(false);
+            //     }
+            // } else {
+            //     console.error('Invalid data format:', result);
+            // }
         } catch (error) {
             console.error('Failed to fetch posts:', error);
         }
@@ -140,6 +162,14 @@ function Home({ profile, profileId }) {
         }
     };
 
+    const handleFilterChange = (newFilter) => {
+        setFilter(newFilter);
+        setPage(1);
+        setHasMore(true);
+        setPosts([]);
+        fetchPosts(newFilter, true);
+    };
+
     return (
         <>
             {contextHolder}
@@ -188,13 +218,34 @@ function Home({ profile, profileId }) {
 
                 {profile || (
                     <div className={cx('post-nav')}>
-                        <Button small leftIcon={<FontAwesomeIcon icon={faClock} />} className={cx('')}>
+                        <Button
+                            small
+                            leftIcon={<FontAwesomeIcon icon={faClock} />}
+                            className={cx('', {
+                                active: filter === 'Recent',
+                            })}
+                            onClick={() => handleFilterChange('Recent')}
+                        >
                             Recent
                         </Button>
-                        <Button small leftIcon={<FontAwesomeIcon icon={faUsers} />} className={cx('')}>
+                        <Button
+                            small
+                            leftIcon={<FontAwesomeIcon icon={faUsers} />}
+                            className={cx('', {
+                                active: filter === 'Friends',
+                            })}
+                            onClick={() => handleFilterChange('Friends')}
+                        >
                             Friends
                         </Button>
-                        <Button small leftIcon={<FontAwesomeIcon icon={faFire} />} className={cx('')}>
+                        <Button
+                            small
+                            leftIcon={<FontAwesomeIcon icon={faFire} />}
+                            className={cx('', {
+                                active: filter === 'Popular',
+                            })}
+                            onClick={() => handleFilterChange('Popular')}
+                        >
                             Popular
                         </Button>
                     </div>
@@ -225,6 +276,8 @@ function Home({ profile, profileId }) {
                                     handlePostSubmit={handlePostSubmit}
                                     handleDeletePost={handleDeletePost}
                                     handleLikeChange={handleLikeChange}
+                                    posts={posts}
+                                    setPosts={setPosts}
                                 />
                             </div>
                         ))}

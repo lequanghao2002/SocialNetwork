@@ -17,9 +17,18 @@ import Comment from '../Comment/Comment';
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
-function PostDetailModal({ visible, setVisible, onClose, post, handlePostSubmit, handleDeletePost, handleLikeChange }) {
+function PostDetailModal({
+    visible,
+    setVisible,
+    onClose,
+    post,
+    handlePostSubmit,
+    handleDeletePost,
+    handleLikeChange,
+    posts,
+    setPosts,
+}) {
     const [form] = Form.useForm();
-    const { posts, setPosts } = useContext(AppContext);
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
     const { user } = useContext(AuthContext);
@@ -60,7 +69,7 @@ function PostDetailModal({ visible, setVisible, onClose, post, handlePostSubmit,
             .map((comment) => (
                 <div key={comment.id}>
                     <div className="item-comment">
-                        <Comment item={comment} postId={post.id} />
+                        <Comment item={comment} postId={post.id} posts={posts} setPosts={setPosts} />
                     </div>
                     <div style={{ marginLeft: '30px' }}>{renderComments(comments, comment.id)}</div>
                 </div>
