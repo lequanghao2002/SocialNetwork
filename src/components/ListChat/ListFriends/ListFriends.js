@@ -1,50 +1,82 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './ListFriends.module.scss';
 import Image from '~/components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, faPenToSquare, faPlus, faPlusSquare, faSearch, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { AuthContext } from '~/context';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { db } from '~/firebase/config';
+import { ChatContext } from '~/context/ChatProvider';
 
 const cx = classNames.bind(styles);
 
 function ListFriends() {
+    const { user } = useContext(AuthContext);
+    const { chatId, changeChat } = useContext(ChatContext);
+    const [chats, setChats] = useState([]);
+
+    useEffect(() => {
+        if (!user?.Uid) return;
+
+        const unSub = onSnapshot(doc(db, 'userchats', user.Uid), async (res) => {
+            const items = res.data().chats || [];
+
+            const promises = items.map(async (item) => {
+                const userDocRef = doc(db, 'users', item.receiverId);
+                const userDocSnap = await getDoc(userDocRef);
+
+                const user = userDocSnap.data();
+
+                return { ...item, user };
+            });
+
+            const chatData = await Promise.all(promises);
+            setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+        });
+
+        return () => {
+            unSub();
+        };
+    }, [user.Uid]);
+
+    const handleSelect = async (chat) => {
+        const userChats = chats.map((item) => {
+            const { user, ...rest } = item;
+
+            return rest;
+        });
+
+        const chatIndex = userChats.findIndex((item) => item.chatId === chat.chatId);
+        userChats[chatIndex].isSeen = true;
+
+        const userChatsRef = doc(db, 'userchats', user.Uid);
+        try {
+            await updateDoc(userChatsRef, {
+                chats: userChats,
+            });
+            changeChat(chat.chatId, chat.user);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
         <div className={cx('wrapper')}>
-            <div className={cx('item')}>
-                <Image src="" alt="" className={cx('img')} />
-                <div className={cx('info')}>
-                    <span>Quang Hào</span>
-                    <p>Hello</p>
+            {chats?.map((chat) => (
+                <div
+                    style={{ backgroundColor: chat.isSeen ? 'transparent' : '#f18404' }}
+                    key={chat.chatId}
+                    className={cx('item')}
+                    onClick={() => handleSelect(chat)}
+                >
+                    <Image src={chat.user.avatar} alt="" className={cx('img')} />
+                    <div className={cx('info')}>
+                        <span>{chat.user.username}</span>
+                        <p>{chat.lastMessage}</p>
+                    </div>
                 </div>
-            </div>
-            <div className={cx('item')}>
-                <Image src="" alt="" className={cx('img')} />
-                <div className={cx('info')}>
-                    <span>Quang Hào</span>
-                    <p>Hello</p>
-                </div>
-            </div>
-            <div className={cx('item')}>
-                <Image src="" alt="" className={cx('img')} />
-                <div className={cx('info')}>
-                    <span>Quang Hào</span>
-                    <p>Hello</p>
-                </div>
-            </div>
-            <div className={cx('item')}>
-                <Image src="" alt="" className={cx('img')} />
-                <div className={cx('info')}>
-                    <span>Quang Hào</span>
-                    <p>Hello</p>
-                </div>
-            </div>
-            <div className={cx('item')}>
-                <Image src="" alt="" className={cx('img')} />
-                <div className={cx('info')}>
-                    <span>Quang Hào</span>
-                    <p>Hello</p>
-                </div>
-            </div>
+            ))}
         </div>
     );
 }

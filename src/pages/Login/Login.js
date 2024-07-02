@@ -3,7 +3,6 @@ import classNames from 'classnames/bind';
 import styles from './Login.module.scss';
 import { Col, Row, Form, Input } from 'antd';
 import Button from '~/components/Button';
-import { auth, facebookProvider, googleProvider, githubProvider } from '~/firebase/config';
 import { signInWithPopup } from 'firebase/auth';
 import * as accountService from '~/services/accountService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,6 +11,10 @@ import { jwtDecode } from 'jwt-decode';
 import { AuthContext } from '~/context';
 import config from '~/config';
 import { useNavigate } from 'react-router-dom';
+import { auth, facebookProvider, googleProvider, githubProvider, db } from '~/firebase/config';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import upload from '~/firebase/upload';
 
 const cx = classNames.bind(styles);
 
@@ -30,13 +33,27 @@ function Login() {
             lastName: user.displayName.split(' ').slice(1).join(' '),
         };
 
+        //const imgUrl = await upload();
+
+        await setDoc(doc(db, 'users', userData.uid), {
+            username: userData.displayName,
+            email: userData.email,
+            avatar: userData.photoURL,
+            id: userData.uid,
+            blocked: [],
+        });
+
+        await setDoc(doc(db, 'userchats', userData.uid), {
+            chat: [],
+        });
+
         try {
             const result = await accountService.externalLogin(userData);
             if (result !== '') {
                 localStorage.setItem('userToken', result);
                 const decodedToken = jwtDecode(result);
-                setUser(decodedToken); // Update the user context with decoded token
-                navigate(config.routes.home); // Redirect to home page
+                setUser(decodedToken);
+                navigate(config.routes.home);
             } else {
                 console.error('Get token user error');
             }

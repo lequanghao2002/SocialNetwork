@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import classNames from 'classnames/bind';
 import styles from './UserInfo.module.scss';
 import Image from '~/components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, faPenToSquare, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { AuthContext } from '~/context';
 
 const cx = classNames.bind(styles);
 
 function UserInfo() {
+    const { user } = useContext(AuthContext);
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('user-info')}>
-                <Image src="123" alt="quanghao" />
-                <h2>Quang Hào</h2>
+                <Image src={user.AvatarUrl} alt={user.email} />
+                <h2>{`${user.FirstName} ${user.LastName}`}</h2>
             </div>
 
             <div className={cx('icons')}>

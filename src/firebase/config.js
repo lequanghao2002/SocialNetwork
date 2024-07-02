@@ -1,6 +1,7 @@
 // firebaseConfig.js
 import { initializeApp } from 'firebase/app';
 import { getAuth, FacebookAuthProvider, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -18,9 +19,11 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
-//const db = firebase.firestore();
+const db = getFirestore();
+const storage = getStorage();
+
 const facebookProvider = new FacebookAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
-export { auth, facebookProvider, googleProvider, githubProvider };
+export { auth, facebookProvider, googleProvider, githubProvider, db, storage };
