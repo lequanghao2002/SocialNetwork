@@ -1,20 +1,43 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DetailChat.module.scss';
 import Image from '../Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp, faDownload } from '@fortawesome/free-solid-svg-icons';
 import Button from '../Button';
+import { ChatContext } from '~/context/ChatProvider';
+import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { db } from '~/firebase/config';
+import { AuthContext } from '~/context';
 
 const cx = classNames.bind(styles);
 
 function DetailChat() {
+    const { user, isReceiverBlocked, changeBlock, isCurrentUserBlocked } = useContext(ChatContext);
+    const { user: currentUser } = useContext(AuthContext);
+
+    const handleBlock = async () => {
+        if (!user) return;
+
+        const userDocRef = doc(db, 'users', currentUser.Uid);
+
+        try {
+            await updateDoc(userDocRef, {
+                blocked: isReceiverBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
+            });
+
+            changeBlock();
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     return (
         <div className={cx('wrapper')}>
             <div className={cx('user')}>
-                <Image src="" alt="" className={cx('img')} />
-                <h2>Quang Hào</h2>
-                <p>Logakfjksdjfksdjfksdjfksdjfksjdfksjdkfjsdkfjdsk</p>
+                <Image src={user?.avatar} alt="" className={cx('img')} />
+                <h2>{user?.username}</h2>
+                {/* <p>Logakfjksdjfksdjfksdjfksdjfksjdfksjdkfjsdkfjdsk</p> */}
             </div>
 
             <div className={cx('info')}>
@@ -47,7 +70,7 @@ function DetailChat() {
                             </div>
                             <FontAwesomeIcon icon={faDownload} />
                         </div>
-                        <div className={cx('photo-item')}>
+                        {/* <div className={cx('photo-item')}>
                             <div className={cx('photo-detail')}>
                                 <img
                                     className={cx('photo-img')}
@@ -68,7 +91,7 @@ function DetailChat() {
                                 <span>photo.jpg</span>
                             </div>
                             <FontAwesomeIcon icon={faDownload} />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <div className={cx('option')}>
@@ -78,7 +101,9 @@ function DetailChat() {
                     </div>
                 </div>
 
-                <Button>Block User</Button>
+                <Button onClick={handleBlock}>
+                    {isCurrentUserBlocked ? 'You are blocked!' : isReceiverBlocked ? 'User blocked' : 'Block User '}
+                </Button>
             </div>
         </div>
     );

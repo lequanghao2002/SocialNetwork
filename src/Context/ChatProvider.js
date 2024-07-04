@@ -12,23 +12,23 @@ function ChatProvider({ children }) {
     const { user: currentUser } = useContext(AuthContext);
 
     const changeChat = (chatId, user) => {
-        // if (user?.blocked?.includes(currentUser.Uid)) {
-        //     setChatId(chatId);
-        //     setUser(null);
-        //     setIsCurrentUserBlocked(true);
-        //     setIsReceiverBlocked(false);
+        if (user?.blocked?.includes(currentUser.Uid)) {
+            setChatId(chatId);
+            setUser(null);
+            setIsCurrentUserBlocked(true);
+            setIsReceiverBlocked(false);
 
-        //     return;
-        // }
+            return;
+        }
 
-        // if (currentUser?.blocked?.includes(user.id)) {
-        //     setChatId(chatId);
-        //     setUser(user);
-        //     setIsCurrentUserBlocked(false);
-        //     setIsReceiverBlocked(true);
+        if (currentUser?.blocked?.includes(user.id)) {
+            setChatId(chatId);
+            setUser(user);
+            setIsCurrentUserBlocked(false);
+            setIsReceiverBlocked(true);
 
-        //     return;
-        // }
+            return;
+        }
 
         setChatId(chatId);
         setUser(user);
@@ -40,7 +40,13 @@ function ChatProvider({ children }) {
         setIsReceiverBlocked((prev) => !prev);
     };
 
-    return <ChatContext.Provider value={{ user, chatId, changeChat }}>{children}</ChatContext.Provider>;
+    return (
+        <ChatContext.Provider
+            value={{ user, chatId, isReceiverBlocked, isCurrentUserBlocked, changeChat, changeBlock }}
+        >
+            {children}
+        </ChatContext.Provider>
+    );
 }
 
 export { ChatContext, ChatProvider };

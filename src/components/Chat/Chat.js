@@ -21,11 +21,20 @@ import { ChatContext } from '~/context/ChatProvider';
 import { message } from 'antd';
 import { AuthContext } from '~/context';
 import upload from '~/firebase/upload';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import utc from 'dayjs/plugin/utc';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
+dayjs.extend(customParseFormat);
+dayjs.extend(relativeTime);
+dayjs.extend(utc);
 const cx = classNames.bind(styles);
 
+const format = 'MMMM D, YYYY [at] h:mm:ss A [UTC]Z';
+
 function Chat() {
-    const { user, chatId } = useContext(ChatContext);
+    const { user, chatId, isReceiverBlocked, isCurrentUserBlocked } = useContext(ChatContext);
     const { user: currentUser } = useContext(AuthContext);
     const [open, setOpen] = useState(false);
     const [chat, setChat] = useState();
@@ -79,7 +88,7 @@ function Chat() {
                 message: arrayUnion({
                     senderId: currentUser.Uid,
                     text,
-                    createAt: new Date(),
+                    createAt: new Date().toISOString(),
                     ...(imgUrl && { img: imgUrl }),
                 }),
             });
@@ -113,16 +122,18 @@ function Chat() {
         });
 
         setText('');
+
+        endRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     return (
         <div className={cx('wrapper')}>
             <div className={cx('top')}>
                 <div className={cx('user')}>
-                    <Image src="" alt="" className={cx('img')} />
+                    <Image src={user?.avatar} alt="" className={cx('img')} />
                     <div className={cx('info')}>
-                        <span>Quang Hào</span>
-                        <p>Hello workkkkkkkkkkkkkkkkkkkkkkkkk</p>
+                        <span>{user?.username}</span>
+                        {/* <p>Hello workkkkkkkkkkkkkkkkkkkkkkkkk</p> */}
                     </div>
                 </div>
                 <div className={cx('icons')}>
@@ -133,22 +144,17 @@ function Chat() {
             </div>
 
             <div className={cx('center')}>
-                {/* <div key={message.id} className={cx('message')}>
-                        <Image src="" alt="" className={cx('img')} />
-                        <div className={cx('texts')}>
-                            <p>Hello</p>
-                            <span>1 min ago</span>
-                        </div>
-                    </div> */}
                 {chat?.message?.map((message) => (
                     <div
                         key={message?.createAt}
                         className={cx('message', message.senderId === currentUser.Uid ? 'own' : '')}
                     >
                         <div className={cx('texts')}>
-                            {message.img && <img src={message.img} alt="" />}
+                            {message.img && (
+                                <img src={message.img} alt="" style={{ borderRadius: '8px', width: '100%' }} />
+                            )}
                             <p>{message.text}</p>
-                            <span>1 min ago</span>
+                            <span>{dayjs(message.createAt).utc().utcOffset(7).fromNow()}</span>
                         </div>
                     </div>
                 ))}
@@ -169,7 +175,14 @@ function Chat() {
                     <label htmlFor="file">
                         <FontAwesomeIcon icon={faImage} />
                     </label>
-                    <input type="file" id="file" style={{ display: 'none' }} onChange={handleImg} />
+                    <input
+                        className={cx('input-text')}
+                        type="file"
+                        id="file"
+                        style={{ display: 'none' }}
+                        onChange={handleImg}
+                        disabled={isCurrentUserBlocked || isReceiverBlocked}
+                    />
                     <FontAwesomeIcon icon={faCamera} />
                     <FontAwesomeIcon icon={faMicrophone} />
                 </div>
@@ -179,6 +192,10 @@ function Chat() {
                     placeholder="Type a message..."
                     value={text}
                     onChange={(e) => setText(e.target.value)}
+                    disabled={isCurrentUserBlocked || isReceiverBlocked}
+                    style={{
+                        cursor: isCurrentUserBlocked || isReceiverBlocked ? 'not-allowed' : 'auto',
+                    }}
                 />
                 <div className={cx('emoji')}>
                     <FontAwesomeIcon icon={faFaceSmile} onClick={() => setOpen((prev) => !prev)} />
@@ -186,7 +203,16 @@ function Chat() {
                         <EmojiPicker open={open} onEmojiClick={handleClickEmoji} theme="dark" />
                     </div>
                 </div>
-                <Button primary small onClick={handleSend}>
+                <Button
+                    className={cx('send-btn')}
+                    primary
+                    small
+                    onClick={handleSend}
+                    disabled={isCurrentUserBlocked || isReceiverBlocked}
+                    style={{
+                        cursor: isCurrentUserBlocked || isReceiverBlocked ? 'not-allowed' : 'pointer',
+                    }}
+                >
                     Send
                 </Button>
             </div>

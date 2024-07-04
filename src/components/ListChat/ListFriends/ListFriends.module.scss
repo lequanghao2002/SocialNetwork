@@ -8,15 +8,16 @@
         gap: 20px;
         padding: 20px;
         cursor: pointer;
+        border-radius: 15px;
+        margin: 10px 15px;
 
         .info {
-          span {
-          }
+            span {
+            }
 
-          p {
-            font-size: 1.4rem;
-
-          }
+            p {
+                font-size: 1.4rem;
+            }
         }
     }
 }

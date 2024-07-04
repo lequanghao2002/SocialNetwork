@@ -10,6 +10,8 @@ function Message() {
     return (
         <div style={{ display: 'flex', position: 'fixed', top: '60px', width: ' 100%' }}>
             <ListChat />
+            {/* <Chat />
+            <DetailChat /> */}
             {chatId && <Chat />}
             {chatId && <DetailChat />}
         </div>

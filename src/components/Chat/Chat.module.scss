@@ -63,7 +63,7 @@
         .message {
             display: flex;
             gap: 20px;
-            // width: 70%;
+            width: 70%;
             align-items: end;
 
             .img {
@@ -95,6 +95,7 @@
 
             &.own {
                 align-self: flex-end;
+                justify-content: end;
 
                 p {
                     background-color: var(--primary);
