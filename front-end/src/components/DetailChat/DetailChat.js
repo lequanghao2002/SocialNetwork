@@ -61,11 +61,7 @@ function DetailChat() {
                     <div className={cx('photos')}>
                         <div className={cx('photo-item')}>
                             <div className={cx('photo-detail')}>
-                                <img
-                                    className={cx('photo-img')}
-                                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbKKq80PgBVyLpEBhwgkzg77u9jihRZINHiQ&s"
-                                    alt=""
-                                />
+                                <img className={cx('photo-img')} src={user?.avatar} alt="" />
                                 <span>photo.jpg</span>
                             </div>
                             <FontAwesomeIcon icon={faDownload} />

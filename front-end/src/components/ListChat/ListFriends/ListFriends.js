@@ -15,6 +15,7 @@ function ListFriends() {
     const { user } = useContext(AuthContext);
     const { chatId, changeChat } = useContext(ChatContext);
     const [chats, setChats] = useState([]);
+    const [selectedChat, setSelectedChat] = useState();
 
     useEffect(() => {
         if (!user?.Uid) return;
@@ -41,6 +42,7 @@ function ListFriends() {
     }, [user.Uid]);
 
     const handleSelect = async (chat) => {
+        setSelectedChat(chat);
         const userChats = chats.map((item) => {
             const { user, ...rest } = item;
 
@@ -65,9 +67,11 @@ function ListFriends() {
         <div className={cx('wrapper')}>
             {chats?.map((chat) => (
                 <div
-                    style={{ backgroundColor: chat.isSeen ? 'transparent' : '#f18404' }}
+                    style={{ backgroundColor: chat.isSeen ? '' : '#f18404' }}
                     key={chat.chatId}
-                    className={cx('item')}
+                    className={cx('item', {
+                        active: chat === selectedChat,
+                    })}
                     onClick={() => handleSelect(chat)}
                 >
                     <Image src={chat.user.avatar} alt="" className={cx('img')} />

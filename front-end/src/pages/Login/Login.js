@@ -35,24 +35,25 @@ function Login() {
 
         //const imgUrl = await upload();
 
-        await setDoc(doc(db, 'users', userData.uid), {
-            username: userData.displayName,
-            email: userData.email,
-            avatar: userData.photoURL,
-            id: userData.uid,
-            blocked: [],
-        });
-
-        await setDoc(doc(db, 'userchats', userData.uid), {
-            chat: [],
-        });
-
         try {
             const result = await accountService.externalLogin(userData);
             if (result !== '') {
                 localStorage.setItem('userToken', result);
                 const decodedToken = jwtDecode(result);
                 setUser(decodedToken);
+
+                await setDoc(doc(db, 'users', userData.uid), {
+                    username: `${decodedToken.FirstName} ${decodedToken.LastName}`,
+                    email: userData.email,
+                    avatar: userData.photoURL,
+                    id: userData.uid,
+                    blocked: [],
+                });
+
+                await setDoc(doc(db, 'userchats', userData.uid), {
+                    chat: [],
+                });
+
                 navigate(config.routes.home);
             } else {
                 console.error('Get token user error');

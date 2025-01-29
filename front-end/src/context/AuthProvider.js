@@ -18,7 +18,6 @@ function AuthProvider({ children }) {
             const decodedUser = jwtDecode(userToken);
             setUser(decodedUser);
             setIsLoading(false);
-            navigate(config.routes.home);
         } else {
             setIsLoading(false);
             navigate(config.routes.login);
