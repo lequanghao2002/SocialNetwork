@@ -12,8 +12,8 @@ using SocialNetwork.Data;
 namespace SocialNetwork.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    [Migration("20240625003344_add-favourite")]
-    partial class addfavourite
+    [Migration("20250227080429_initial_db")]
+    partial class initial_db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

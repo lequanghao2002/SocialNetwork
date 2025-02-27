@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bJzrJdbpsLVpqEG71qwUAutOX8gjJPljy9EN6ycwyCAv7D0DRpaSODomyfXoGTg2ynt0TbdObRiJUSm6Eh7dYg==",
+  "dgSpecHash": "tBGh4emquZ0=",
   "success": true,
-  "projectFilePath": "D:\\ITMain\\SocialNetwork\\SocialNetwork.csproj",
+  "projectFilePath": "D:\\ITMain\\SocialNetwork\\back-end\\SocialNetwork.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Acer\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\Acer\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
