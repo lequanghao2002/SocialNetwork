@@ -1,31 +1,11 @@
-import * as httpRequest from '~/utils/httpRequest';
+import apiClient from '../apiClient';
 
-export const signUp = async (data) => {
-    try {
-        const res = await httpRequest.post('Accounts/sign-up', data, {});
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
+const authService = {
+    signUp: (data) => apiClient.post('Accounts/sign-up', data),
+
+    signIn: (data) => apiClient.post('Accounts/sign-in', data),
+
+    externalLogin: (data) => apiClient.post('Accounts/external-login', data),
 };
 
-export const signIn = async (data) => {
-    try {
-        const res = await httpRequest.post('Accounts/sign-in', data, {});
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
-};
-
-export const externalLogin = async (data) => {
-    try {
-        const res = await httpRequest.post('Accounts/external-login', data, {});
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
-};
+export default authService;

@@ -1,20 +1,8 @@
-import * as httpRequest from '~/utils/httpRequest';
+import apiClient from '../apiClient';
 
-export const addTag = async (data) => {
-    try {
-        const res = await httpRequest.post('Tag/add', data);
-
-        return res.data;
-    } catch (error) {
-        console.log(error);
-    }
+const tagService = {
+    addTag: (data) => apiClient.post('Tag/add', data),
+    getAllTag: () => apiClient.get('Tag/get-all'),
 };
 
-export const getAllTag = async () => {
-    try {
-        const res = await httpRequest.get('Tag/get-all');
-        return res;
-    } catch (error) {
-        console.log(error);
-    }
-};
+export default tagService;

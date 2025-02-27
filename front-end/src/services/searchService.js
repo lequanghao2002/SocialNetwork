@@ -1,15 +1,7 @@
-import * as httpRequest from '~/utils/httpRequest';
+import apiClient from '../apiClient';
 
-export const search = async (keyword) => {
-    try {
-        const res = await httpRequest.get('Posts/search-post', {
-            params: {
-                keyword,
-            },
-        });
-
-        return res;
-    } catch (error) {
-        console.log(error);
-    }
+const postService = {
+    search: (keyword) => apiClient.get('Posts/search-post', { params: { keyword } }),
 };
+
+export default postService;

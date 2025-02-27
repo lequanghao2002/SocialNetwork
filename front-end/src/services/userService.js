@@ -1,78 +1,22 @@
-import * as httpRequest from '~/utils/httpRequest';
+import apiClient from './apiClient';
 
-export const getUserById = async (id) => {
-    try {
-        const res = await httpRequest.get('Users/get-by-id', {
-            params: {
-                id,
-            },
-        });
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
-};
+const userService = {
+    getUserById: (id) => apiClient.get(`Users/get-by-id/${id}`),
 
-export const updateUserProfile = async (data) => {
-    try {
-        const res = await httpRequest.post('Users/update-user-profile', data);
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
-};
+    updateUserProfile: (data) => apiClient.put('Users/update-user-profile', data),
 
-export const updateUser = async (data) => {
-    try {
-        const res = await httpRequest.post('Users/update-user', data, {
+    updateUser: (data) =>
+        apiClient.put('Users/update-user', data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
-        });
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
+        }),
+
+    getStatusFriend: (userId, friendId) => apiClient.get('Users/get-status-friend', { params: { userId, friendId } }),
+
+    changeStatusFriend: (data) => apiClient.post('Users/change-status-friend', data),
+
+    getListFriendship: (id) => apiClient.get('Users/get-list-friendship', { params: { id } }),
 };
 
-export const getStatusFriend = async (userId, friendId) => {
-    try {
-        const res = await httpRequest.get('Users/get-status-friend', {
-            params: {
-                userId,
-                friendId,
-            },
-        });
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
-};
-
-export const changeStatusFriend = async (data) => {
-    try {
-        const res = await httpRequest.post('Users/change-status-friend', data);
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
-};
-
-export const getListFriendship = async (Id) => {
-    try {
-        const res = await httpRequest.get('Users/get-list-friendship', {
-            params: {
-                Id,
-            },
-        });
-        return res;
-    } catch (error) {
-        console.error('There was an error!', error);
-        return null;
-    }
-};
+export default userService;
