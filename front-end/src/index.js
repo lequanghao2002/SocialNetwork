@@ -3,17 +3,22 @@ import ReactDOM from 'react-dom/client';
 import App from '~/App';
 import reportWebVitals from './reportWebVitals';
 import GlobalStyles from '~/components/GlobalStyles';
-import { AppProvider, NotificationProvider } from './context';
-import {} from './context/AuthProvider';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AppProvider } from './context/AppProvider';
+import { NotificationProvider } from './context/Notification';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
     //<React.StrictMode>
     <GlobalStyles>
-        <AppProvider>
-            <NotificationProvider>
-                <App />
-            </NotificationProvider>
-        </AppProvider>
+        <GoogleOAuthProvider clientId="938372474737-9qrdlj8jurm1c1j3dpaasptv4stu27e5.apps.googleusercontent.com">
+            <AppProvider>
+                <NotificationProvider>
+                    <App />
+                </NotificationProvider>
+            </AppProvider>
+        </GoogleOAuthProvider>
     </GlobalStyles>,
     //</React.StrictMode>,
 );

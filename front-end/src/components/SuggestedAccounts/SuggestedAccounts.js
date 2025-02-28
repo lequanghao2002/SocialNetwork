@@ -1,10 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './SuggestedAccounts.module.scss';
 import AccountItem from './AccountItem';
-import * as userServices from '~/services/userService';
+import userServices from '~/services/userService';
 import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '~/context';
-
+import AuthContext from '~/context/AuthContext/authContext';
 const cx = classNames.bind(styles);
 
 function SuggestedAccounts({ label }) {

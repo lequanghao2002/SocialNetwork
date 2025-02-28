@@ -2,7 +2,7 @@ import { Form, Input, Modal, Upload, Image, message } from 'antd';
 import './ProfileModal.scss';
 import Button from '../Button';
 import { useEffect, useState } from 'react';
-import * as userService from '~/services/userService';
+import userService from '~/services/userService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileImage } from '@fortawesome/free-solid-svg-icons';
 

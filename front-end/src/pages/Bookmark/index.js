@@ -17,12 +17,12 @@ import Icon from '~/components/Icon';
 import Post from '~/components/Post';
 import { useContext, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { AppContext, AuthContext } from '~/context';
-import * as postService from '~/services/postService';
+import postService from '~/services/postService';
 import PostModal from '~/components/Modals/PostModal';
 import { Empty, message } from 'antd';
-import * as modePostConstant from '~/constant';
+import modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
+import AuthContext from '~/context/AuthContext/authContext';
 
 const cx = classNames.bind(styles);
 

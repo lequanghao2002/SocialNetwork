@@ -8,8 +8,7 @@ import Button from '../Button';
 import { ChatContext } from '~/context/ChatProvider';
 import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { db } from '~/firebase/config';
-import { AuthContext } from '~/context';
-
+import AuthContext from '~/context/AuthContext/authContext';
 const cx = classNames.bind(styles);
 
 function DetailChat() {

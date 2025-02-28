@@ -37,15 +37,17 @@ namespace SocialNetwork.Repositories
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var key = new
-           SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+            // Tạo khóa bảo mật
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
             var token = new JwtSecurityToken(
-            _configuration["Jwt:ValidIssuer"],
-            _configuration["Jwt:ValidAudience"],
-            claims,
-            //expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: credentials);
+                issuer: _configuration["Jwt:ValidIssuer"],
+                audience: _configuration["Jwt:ValidAudience"],
+                claims: claims,
+                //expires: DateTime.UtcNow.AddMinutes(30),
+                signingCredentials: credentials
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

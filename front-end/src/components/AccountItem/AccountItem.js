@@ -5,7 +5,7 @@ import { faCheckCircle, faMessage, faShare, faThumbsUp } from '@fortawesome/free
 import { Link, useNavigate } from 'react-router-dom';
 import Image from '../Image';
 import { useEffect, useState } from 'react';
-import * as postService from '~/services/postService';
+import postService from '~/services/postService';
 import config from '~/config';
 
 const cx = classNames.bind(styles);

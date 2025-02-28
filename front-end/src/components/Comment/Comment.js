@@ -4,12 +4,13 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import { useContext, useState } from 'react';
-import { AppContext, AuthContext, NotificationContext } from '~/context';
 import { faCamera, faFaceSmile, faImage, faMicrophone, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import EmojiPicker from 'emoji-picker-react';
 import Button from '../Button';
-import * as commentService from '~/services/commentService';
+import commentService from '~/services/commentService';
 import { message } from 'antd';
+import AuthContext from '~/context/AuthContext/authContext';
+import { NotificationContext } from '~/context/Notification';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);

@@ -13,12 +13,12 @@ namespace SocialNetwork.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly UserManager<User> _userManager; 
-        private readonly IAccountRepository _accountRepository;
+        private readonly IAuthRepository _authRepository;
 
-        public AccountsController(UserManager<User> userManager, IAccountRepository accountRepository)
+        public AccountsController(UserManager<User> userManager, IAuthRepository authRepository)
         {
             _userManager = userManager;
-            _accountRepository = accountRepository;
+            _authRepository = authRepository;
         }
 
         [HttpPost("sign-up")]
@@ -37,7 +37,7 @@ namespace SocialNetwork.Controllers
                     return BadRequest("Passwords do not math");
                 }
 
-                var userSignUp = await _accountRepository.SignUp(signUpDTO);
+                var userSignUp = await _authRepository.SignUp(signUpDTO);
                 if (userSignUp == true)
                 {
                     return Ok("Sign up account success");
@@ -56,7 +56,7 @@ namespace SocialNetwork.Controllers
         {
             try
             {
-                var loginAccount = await _accountRepository.SignIn(signInDTO);
+                var loginAccount = await _authRepository.SignIn(signInDTO);
 
                 if (!string.IsNullOrEmpty(loginAccount))
                 {
@@ -75,7 +75,7 @@ namespace SocialNetwork.Controllers
         [HttpPost("external-login")]
         public async Task<IActionResult> ExternalLogin(ExternalLoginDTO externalLoginDTO)
         {
-            var token = await _accountRepository.ExternalLogin(externalLoginDTO);
+            var token = await _authRepository.ExternalLogin(externalLoginDTO);
             if (!string.IsNullOrEmpty(token))
             {
                 return Ok(token);

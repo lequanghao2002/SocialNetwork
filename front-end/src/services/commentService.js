@@ -1,4 +1,4 @@
-import apiClient from '../apiClient';
+import apiClient from '~/utils/apiClient';
 
 const commentService = {
     getAll: (postId) => apiClient.get('Comments/get-list-comment', { params: { postId } }),

@@ -3,7 +3,7 @@ import Image from '../Image';
 import './ProfileModal.scss';
 import Button from '../Button';
 import { useEffect } from 'react';
-import * as userServies from '~/services/userService';
+import userServies from '~/services/userService';
 
 function ProfileModal({ visible, setVisible, onClose, userInfo, onUpdate }) {
     const [form] = Form.useForm();

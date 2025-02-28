@@ -11,13 +11,12 @@ import {
     faUserGroup,
 } from '@fortawesome/free-solid-svg-icons';
 
-import * as postService from '~/services/postService';
-import * as tagService from '~/services/tagService';
+import postService from '~/services/postService';
+import tagService from '~/services/tagService';
 import { AppContext } from '~/context/AppProvider';
 import './PostModal.css';
 import * as modePostConstant from '~/constant';
-import { AuthContext } from '~/context';
-
+import AuthContext from '~/context/AuthContext/authContext';
 const items = [
     {
         label: 'Public',

@@ -15,13 +15,14 @@ import {
 import AccountPopper from '~/components/AccountPopper';
 import { Image } from 'antd';
 import Menu from '~/components/Popper/Menu';
-import { AppContext } from '~/context/AppProvider';
 import PostModal from '~/components/Modals/PostModal';
-import * as postService from '~/services/postService';
-import { AuthContext, NotificationContext } from '~/context';
+import postService from '~/services/postService';
 import * as modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
 import PostDetailModal from '../Modals/PostDetailModal';
+import AuthContext from '~/context/AuthContext/authContext';
+import { NotificationContext } from '~/context/Notification';
+import { AppContext } from '~/context/AppProvider';
 
 const cx = classNames.bind(styles);
 

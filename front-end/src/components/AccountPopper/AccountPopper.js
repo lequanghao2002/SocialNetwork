@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEarthAfrica, faLock, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import config from '~/config';
-import * as userService from '~/services/userService';
+import userService from '~/services/userService';
 import { useEffect, useState } from 'react';
 
 const cx = classNames.bind(styles);

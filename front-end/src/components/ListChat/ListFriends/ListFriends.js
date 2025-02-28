@@ -4,7 +4,7 @@ import styles from './ListFriends.module.scss';
 import Image from '~/components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, faPenToSquare, faPlus, faPlusSquare, faSearch, faVideo } from '@fortawesome/free-solid-svg-icons';
-import { AuthContext } from '~/context';
+import AuthContext from '~/context/AuthContext/authContext';
 import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '~/firebase/config';
 import { ChatContext } from '~/context/ChatProvider';

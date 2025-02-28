@@ -10,9 +10,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faFaceSmile, faImage, faMicrophone, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { useContext, useState } from 'react';
 import EmojiPicker from 'emoji-picker-react';
-import * as commentService from '~/services/commentService';
-import { AppContext, AuthContext, NotificationContext } from '~/context';
+import commentService from '~/services/commentService';
 import Comment from '../Comment/Comment';
+import AuthContext from '~/context/AuthContext/authContext';
+import { NotificationContext } from '~/context/Notification';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
@@ -47,7 +48,7 @@ function PostDetailModal({
             postId: post.id,
             content: text,
         };
-        const result = await commentService.addComment(data);
+        const result = await commentService.add(data);
         if (result != null) {
             console.log(result);
             setText('');

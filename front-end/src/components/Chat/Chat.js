@@ -19,12 +19,12 @@ import { db } from '~/firebase/config';
 import { useContext } from 'react';
 import { ChatContext } from '~/context/ChatProvider';
 import { message } from 'antd';
-import { AuthContext } from '~/context';
 import upload from '~/firebase/upload';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import AuthContext from '~/context/AuthContext/authContext';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);

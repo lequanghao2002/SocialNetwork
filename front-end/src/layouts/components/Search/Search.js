@@ -8,7 +8,7 @@ import { Wrapper as PopperWrapper } from '~/components/Popper';
 import AccountItem from '~/components/AccountItem';
 import styles from './Search.module.scss';
 import { useDebounce } from '~/hook';
-import * as searchServices from '~/services/searchService';
+import searchServices from '~/services/searchService';
 import { useNavigate } from 'react-router-dom';
 import config from '~/config';
 

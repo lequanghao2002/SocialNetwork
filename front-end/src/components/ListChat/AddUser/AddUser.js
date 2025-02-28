@@ -17,7 +17,7 @@ import {
     where,
 } from 'firebase/firestore';
 import { auth, db } from '~/firebase/config';
-import { AuthContext } from '~/context';
+import AuthContext from '~/context/AuthContext/authContext';
 const cx = classNames.bind(styles);
 
 function AddUser({ visible, onClose }) {

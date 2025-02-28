@@ -17,11 +17,11 @@ import { faLinkedin, faSquareFacebook, faSquareGithub, faUpwork } from '@fortawe
 import Home from '../Home';
 import FriendStatusButton from '~/components/FriendStatusButton';
 import { useContext, useEffect, useState } from 'react';
-import { AppContext, AuthContext } from '~/context';
-import * as userServices from '~/services/userService';
+import userServices from '~/services/userService';
 import { useParams } from 'react-router-dom';
 import ProfileModal from '~/components/Modals/ProfileModal';
 import InfoModal from '~/components/Modals/InfoModal';
+import AuthContext from '~/context/AuthContext/authContext';
 
 const cx = classNames.bind(styles);
 

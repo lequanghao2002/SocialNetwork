@@ -1,4 +1,4 @@
-import apiClient from '../apiClient';
+import apiClient from '~/utils/apiClient';
 
 const tagService = {
     addTag: (data) => apiClient.post('Tag/add', data),
