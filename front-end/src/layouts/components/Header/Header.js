@@ -26,6 +26,7 @@ import AuthContext from '~/context/AuthContext/authContext';
 import { useContext, useEffect } from 'react';
 import { auth } from '~/firebase/config';
 import { useNavigate } from 'react-router-dom';
+import { removeLocalStorage } from '~/utils/localStorage';
 
 const cx = classNames.bind(styles);
 
@@ -74,13 +75,9 @@ function Header() {
                 break;
             }
             case 'Log out': {
-                localStorage.removeItem('userToken');
-                auth.signOut();
-
-                // Update user state
-                // setUser(null);
-
-                // navigate(config.routes.login);
+                removeLocalStorage('token');
+                setUser(null);
+                navigate(config.routes.login);
 
                 break;
             }

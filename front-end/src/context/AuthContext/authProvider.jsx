@@ -28,18 +28,18 @@ function AuthProvider({ children }) {
         if (token) {
             const user = jwtDecode(token);
             setUser(user);
-            setLoading(false);
 
             navigate(config.routes.home);
         } else {
-            setLoading(false);
-
             navigate(config.routes.login);
         }
+
+        setLoading(false);
     }, []);
 
     const setUser = (payload) => {
         dispatch({ type: SET_USER, payload });
+        navigate(config.routes.home);
     };
 
     return (
