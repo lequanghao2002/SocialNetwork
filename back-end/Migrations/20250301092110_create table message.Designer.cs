@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialNetwork.Data;
 
@@ -11,9 +12,10 @@ using SocialNetwork.Data;
 namespace SocialNetwork.Migrations
 {
     [DbContext(typeof(SocialNetworkDbContext))]
-    partial class SocialNetworkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250301092110_create table message")]
+    partial class createtablemessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,10 +232,10 @@ namespace SocialNetwork.Migrations
 
             modelBuilder.Entity("SocialNetwork.Models.Domain.Friendship", b =>
                 {
-                    b.Property<string>("RequesterId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AddresseeId")
+                    b.Property<string>("FriendId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("AcceptDate")
@@ -242,12 +244,10 @@ namespace SocialNetwork.Migrations
                     b.Property<DateTime>("RequestDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("status")
                         .HasColumnType("int");
 
-                    b.HasKey("RequesterId", "AddresseeId");
-
-                    b.HasIndex("AddresseeId");
+                    b.HasKey("UserId", "FriendId");
 
                     b.ToTable("Friendships", (string)null);
                 });
@@ -598,21 +598,13 @@ namespace SocialNetwork.Migrations
 
             modelBuilder.Entity("SocialNetwork.Models.Domain.Friendship", b =>
                 {
-                    b.HasOne("SocialNetwork.Models.Domain.User", "Addressee")
-                        .WithMany("ReceivedFriendRequests")
-                        .HasForeignKey("AddresseeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("SocialNetwork.Models.Domain.User", "User")
+                        .WithMany("Friendships")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SocialNetwork.Models.Domain.User", "Requester")
-                        .WithMany("SentFriendRequests")
-                        .HasForeignKey("RequesterId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Addressee");
-
-                    b.Navigation("Requester");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialNetwork.Models.Domain.Like", b =>
@@ -737,15 +729,13 @@ namespace SocialNetwork.Migrations
 
                     b.Navigation("Follows");
 
+                    b.Navigation("Friendships");
+
                     b.Navigation("Likes");
 
                     b.Navigation("Posts");
 
-                    b.Navigation("ReceivedFriendRequests");
-
                     b.Navigation("ReceivedMessages");
-
-                    b.Navigation("SentFriendRequests");
 
                     b.Navigation("SentMessages");
 

@@ -111,11 +111,11 @@ namespace SocialNetwork.Repositories
             if (filter == "Friends" && userId != null)
             {
                 var lstFriendship = await _dbContext.Friendships
-                    .Where(x => x.status == FriendshipStatus.Friend && (x.UserId == userId || x.FriendId == userId))
+                    .Where(x => x.Status == FriendshipStatus.Friends && (x.RequesterId == userId || x.AddresseeId == userId))
                     .ToListAsync();
 
                 var friendUserIds = lstFriendship
-                   .Select(x => x.UserId == userId ? x.FriendId : x.UserId)
+                   .Select(x => x.RequesterId == userId ? x.AddresseeId : x.RequesterId)
                    .Distinct()
                    .ToList();
 

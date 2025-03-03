@@ -23,7 +23,6 @@ namespace SocialNetwork.Repositories
             var claims = new List<Claim>
             {
                 new Claim("Id", user.Id),
-                new Claim("Uid", Uid),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim("FirstName", user.FirstName),
                 new Claim("LastName", user.LastName),
@@ -45,7 +44,7 @@ namespace SocialNetwork.Repositories
                 issuer: _configuration["Jwt:ValidIssuer"],
                 audience: _configuration["Jwt:ValidAudience"],
                 claims: claims,
-                //expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: credentials
             );
 

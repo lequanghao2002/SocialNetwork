@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useState } from 'react';
 import AuthContext from './authContext';
 import AuthReducer from './authReducer';
-import { SET_USER } from './authTypes';
+import { SET_FRIENDS, SET_USER } from './authTypes';
 import { useNavigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import config from '~/config';
@@ -10,13 +10,15 @@ import { jwtDecode } from 'jwt-decode';
 
 function AuthProvider({ children }) {
     const initialState = {
-        id: '',
-        email: '',
-        firstName: '',
-        lastName: '',
-        avatarUrl: '',
-        dateOfBirth: '',
-        createDate: '',
+        user: {
+            id: '',
+            email: '',
+            firstName: '',
+            lastName: '',
+            avatarUrl: '',
+            dateOfBirth: '',
+            createDate: '',
+        },
     };
 
     const [state, dispatch] = useReducer(AuthReducer, initialState);
@@ -43,7 +45,9 @@ function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user: state, setUser }}>{loading ? <Spin /> : children}</AuthContext.Provider>
+        <AuthContext.Provider value={{ user: state.user, friends: state.friends, setUser }}>
+            {loading ? <Spin /> : children}
+        </AuthContext.Provider>
     );
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Chat.module.scss';
 import Image from '../Image';
@@ -14,17 +14,15 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Button from '../Button';
 import EmojiPicker from 'emoji-picker-react';
-import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from '~/firebase/config';
 import { useContext } from 'react';
-import { ChatContext } from '~/context/ChatProvider';
-import { message } from 'antd';
-import upload from '~/firebase/upload';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import AuthContext from '~/context/AuthContext/authContext';
+import ChatContext from '~/context/ChatContext/chatContext';
+import { chatHubService } from '~/signalR/chatHubService';
+import messageService from '~/services/messageService';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
@@ -34,31 +32,48 @@ const cx = classNames.bind(styles);
 const format = 'MMMM D, YYYY [at] h:mm:ss A [UTC]Z';
 
 function Chat() {
-    const { user, chatId, isReceiverBlocked, isCurrentUserBlocked } = useContext(ChatContext);
-    const { user: currentUser } = useContext(AuthContext);
+    //const { user, chatId, isReceiverBlocked, isCurrentUserBlocked } = useContext(ChatContext);
+    //------------- Để tạm thời, mình sẽ hard code giá trị cho các biến này ------------\
+    const isReceiverBlocked = false;
+    const isCurrentUserBlocked = false;
+    //-------------
+
+    const { selectedFriendId, setMessage, setChat, friends } = useContext(ChatContext);
+    const { user } = useContext(AuthContext);
     const [open, setOpen] = useState(false);
-    const [chat, setChat] = useState();
-    const [text, setText] = useState('');
     const [img, setImg] = useState({
         file: null,
         url: '',
     });
 
+    const selectedFriend = useMemo(() => {
+        if (!Array.isArray(friends) || !selectedFriendId) return null;
+        return friends.find((friend) => friend.info.id === selectedFriendId);
+    }, [friends, selectedFriendId]);
+
     const endRef = useRef(null);
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, []);
+    }, [selectedFriend?.chat]);
 
     useEffect(() => {
-        const unSub = onSnapshot(doc(db, 'chats', chatId), (res) => {
-            setChat(res.data());
-        });
+        if (!selectedFriendId || !user?.Id) return;
+        if (selectedFriend?.chat?.length > 0) return;
 
-        return () => {
-            unSub();
-        };
-    }, [chatId]);
+        fetchChat(user.Id, selectedFriendId);
+    }, [selectedFriendId]);
+    //}, [user?.Id, selectedFriendId, selectedFriend?.chat]); // Cập nhật dependencies đầy đủ
+
+    const fetchChat = async (userId, ortherUserId) => {
+        try {
+            const result = await messageService.getMessagesByUserId(userId, ortherUserId);
+            console.log('result', result);
+            setChat(result);
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+        }
+    };
 
     const handleImg = (e) => {
         if (e.target.files[0]) {
@@ -70,105 +85,83 @@ function Chat() {
     };
 
     const handleClickEmoji = (e) => {
-        setText((prev) => prev + e.emoji);
+        setMessage({
+            content: (selectedFriend?.message?.content || '') + e.emoji,
+            imageUrl: null,
+        });
         setOpen(false);
     };
 
     const handleSend = async () => {
-        if (text === '') return;
+        if (!selectedFriend?.message?.content) return;
 
-        let imgUrl = null;
+        const message = {
+            senderId: user.Id,
+            receiverId: selectedFriend.info.id,
+            content: selectedFriend.message.content,
+            imageUrl: null,
+        };
 
         try {
-            if (img.file) {
-                imgUrl = await upload(img.file);
-            }
-
-            await updateDoc(doc(db, 'chats', chatId), {
-                message: arrayUnion({
-                    senderId: currentUser.Uid,
-                    text,
-                    createAt: new Date().toISOString(),
-                    ...(imgUrl && { img: imgUrl }),
-                }),
-            });
-
-            const userIDs = [currentUser.Uid, user.id];
-
-            userIDs.forEach(async (id) => {
-                const userChatsRef = doc(db, 'userchats', id);
-                const userChatsSnapshot = await getDoc(userChatsRef);
-
-                if (userChatsSnapshot.exists()) {
-                    const userChatsData = userChatsSnapshot.data();
-
-                    const chatIndex = userChatsData.chats.findIndex((c) => c.chatId === chatId);
-                    userChatsData.chats[chatIndex].lastMessage = text;
-                    userChatsData.chats[chatIndex].isSeen = id === currentUser.Uid ? true : false;
-                    userChatsData.chats[chatIndex].updatedAt = Date.now();
-
-                    await updateDoc(userChatsRef, {
-                        chats: userChatsData.chats,
-                    });
-                }
-            });
+            await chatHubService.sendMessage(message);
+            setMessage({ content: '', imageUrl: null });
         } catch (err) {
-            console.log(err);
+            console.error('Lỗi gửi tin nhắn: ', err);
         }
-
-        setImg({
-            file: null,
-            url: '',
-        });
-
-        setText('');
 
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     return (
         <div className={cx('wrapper')}>
-            <div className={cx('top')}>
-                <div className={cx('user')}>
-                    <Image src={user?.avatar} alt="" className={cx('img')} />
-                    <div className={cx('info')}>
-                        <span>{user?.username}</span>
-                        {/* <p>Hello workkkkkkkkkkkkkkkkkkkkkkkkk</p> */}
-                    </div>
-                </div>
-                <div className={cx('icons')}>
-                    <FontAwesomeIcon icon={faPhone} />
-                    <FontAwesomeIcon icon={faVideo} />
-                    <FontAwesomeIcon icon={faCircleInfo} />
-                </div>
-            </div>
-
-            <div className={cx('center')}>
-                {chat?.message?.map((message) => (
-                    <div
-                        key={message?.createAt}
-                        className={cx('message', message.senderId === currentUser.Uid ? 'own' : '')}
-                    >
-                        <div className={cx('texts')}>
-                            {message.img && (
-                                <img src={message.img} alt="" style={{ borderRadius: '8px', width: '100%' }} />
-                            )}
-                            <p>{message.text}</p>
-                            <span>{dayjs(message.createAt).utc().utcOffset(7).fromNow()}</span>
+            {selectedFriend && (
+                <>
+                    <div className={cx('top')}>
+                        <div className={cx('user')}>
+                            <Image src={selectedFriend.info.avatarUrl} alt="" className={cx('img')} />
+                            <div className={cx('info')}>
+                                <span>
+                                    {selectedFriend.info.firstName} {selectedFriend.info.lastName}
+                                </span>
+                                {/* <p>Hello workkkkkkkkkkkkkkkkkkkkkkkkk</p> */}
+                            </div>
+                        </div>
+                        <div className={cx('icons')}>
+                            <FontAwesomeIcon icon={faPhone} />
+                            <FontAwesomeIcon icon={faVideo} />
+                            <FontAwesomeIcon icon={faCircleInfo} />
                         </div>
                     </div>
-                ))}
 
-                {img.url && (
-                    <div className={cx('message', 'own')}>
-                        <div className={cx('texts')}>
-                            <img src={img.url} alt="" />
-                        </div>
+                    <div className={cx('center')}>
+                        {selectedFriend.chat?.map((message) => (
+                            <div key={message?.id} className={cx('message', message.senderId === user.Id ? 'own' : '')}>
+                                <div className={cx('texts')}>
+                                    {message.imageUrl && (
+                                        <img
+                                            src={message.imageUrl}
+                                            alt=""
+                                            style={{ borderRadius: '8px', width: '100%' }}
+                                        />
+                                    )}
+                                    <p>{message.content}</p>
+                                    <span>{dayjs(message.createAt).utc().utcOffset(7).fromNow()}</span>
+                                </div>
+                            </div>
+                        ))}
+
+                        {img.url && (
+                            <div className={cx('message', 'own')}>
+                                <div className={cx('texts')}>
+                                    <img src={img.url} alt="" />
+                                </div>
+                            </div>
+                        )}
+
+                        <div ref={endRef}></div>
                     </div>
-                )}
-
-                <div ref={endRef}></div>
-            </div>
+                </>
+            )}
 
             <div className={cx('bottom')}>
                 <div className={cx('icons')}>
@@ -190,8 +183,8 @@ function Chat() {
                     className={cx('input-send')}
                     type="text"
                     placeholder="Type a message..."
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    value={selectedFriend?.message?.content}
+                    onChange={(e) => setMessage({ content: e.target.value, imageUrl: null })}
                     disabled={isCurrentUserBlocked || isReceiverBlocked}
                     style={{
                         cursor: isCurrentUserBlocked || isReceiverBlocked ? 'not-allowed' : 'auto',

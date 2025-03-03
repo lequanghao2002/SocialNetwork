@@ -20,7 +20,8 @@ function Login() {
         try {
             // Gửi token lên backend để xác thực
             const res = await authService.googleLogin(credential);
-            setLocalStorage('token', res);
+            console.log('res', res);
+            setLocalStorage('token', res.replace(/^"|"$/g, ''));
 
             const user = jwtDecode(res);
             setUser(user);

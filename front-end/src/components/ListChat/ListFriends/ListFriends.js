@@ -2,82 +2,53 @@ import React, { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './ListFriends.module.scss';
 import Image from '~/components/Image';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, faPenToSquare, faPlus, faPlusSquare, faSearch, faVideo } from '@fortawesome/free-solid-svg-icons';
 import AuthContext from '~/context/AuthContext/authContext';
-import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from '~/firebase/config';
-import { ChatContext } from '~/context/ChatProvider';
+import userService from '~/services/userService';
+import ChatContext from '~/context/ChatContext/chatContext';
 
 const cx = classNames.bind(styles);
 
 function ListFriends() {
     const { user } = useContext(AuthContext);
-    const { chatId, changeChat } = useContext(ChatContext);
-    const [chats, setChats] = useState([]);
-    const [selectedChat, setSelectedChat] = useState();
+    const { setSelectedFriendId, friends, setFriends, selectedFriendId } = useContext(ChatContext);
 
     useEffect(() => {
-        if (!user?.Uid) return;
+        fetchListFriendship(user.Id);
+    }, []);
 
-        const unSub = onSnapshot(doc(db, 'userchats', user.Uid), async (res) => {
-            const items = res.data().chats || [];
-
-            const promises = items.map(async (item) => {
-                const userDocRef = doc(db, 'users', item.receiverId);
-                const userDocSnap = await getDoc(userDocRef);
-
-                const user = userDocSnap.data();
-
-                return { ...item, user };
-            });
-
-            const chatData = await Promise.all(promises);
-            setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
-        });
-
-        return () => {
-            unSub();
-        };
-    }, [user.Uid]);
-
-    const handleSelect = async (chat) => {
-        setSelectedChat(chat);
-        const userChats = chats.map((item) => {
-            const { user, ...rest } = item;
-
-            return rest;
-        });
-
-        const chatIndex = userChats.findIndex((item) => item.chatId === chat.chatId);
-        userChats[chatIndex].isSeen = true;
-
-        const userChatsRef = doc(db, 'userchats', user.Uid);
+    const fetchListFriendship = async (Id) => {
         try {
-            await updateDoc(userChatsRef, {
-                chats: userChats,
-            });
-            changeChat(chat.chatId, chat.user);
+            const result = await userService.getListFriendship(Id);
+            setFriends(result);
         } catch (error) {
-            console.log(error);
+            console.error('Failed to fetch posts:', error);
         }
+    };
+
+    const handleSelect = async (id) => {
+        if (selectedFriendId === id) return;
+
+        setSelectedFriendId(id);
     };
 
     return (
         <div className={cx('wrapper')}>
-            {chats?.map((chat) => (
+            {friends?.map((friend) => (
                 <div
-                    style={{ backgroundColor: chat.isSeen ? '' : '#f18404' }}
-                    key={chat.chatId}
+                    //style={{ backgroundColor: chat.isSeen ? '' : '#f18404' }}
+                    key={friend.Id}
                     className={cx('item', {
-                        active: chat === selectedChat,
+                        active: friend.info.id === selectedFriendId,
                     })}
-                    onClick={() => handleSelect(chat)}
+                    onClick={() => handleSelect(friend.info.id)}
                 >
-                    <Image src={chat.user.avatar} alt="" className={cx('img')} />
+                    <Image src={friend.info.avatarUrl} alt="" className={cx('img')} />
                     <div className={cx('info')}>
-                        <span>{chat.user.username}</span>
-                        <p>{chat.lastMessage}</p>
+                        <span>
+                            {friend.info.firstName} {friend.info.lastName}
+                        </span>
+                        {/* <p>{friend.lastMessage}</p> */}
                     </div>
                 </div>
             ))}

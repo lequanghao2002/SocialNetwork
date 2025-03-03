@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using SocialNetwork.Data;
 using SocialNetwork.Helpers;
@@ -138,7 +139,7 @@ namespace SocialNetwork.Repositories
 
         public async Task<Friendship> GetStatusFriend(string userId, string friendId)
         {
-            var friendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.UserId == userId && x.FriendId == friendId || x.UserId == friendId && x.FriendId == userId);
+            var friendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.RequesterId == userId && x.AddresseeId == friendId || x.RequesterId == friendId && x.AddresseeId == userId);
 
             if(friendShip != null)
             {
@@ -148,7 +149,7 @@ namespace SocialNetwork.Repositories
 
             var not = new Friendship()
             {
-                status = 0,
+                Status = 0,
             };
 
             return not;
@@ -159,7 +160,7 @@ namespace SocialNetwork.Repositories
         {
             if(changeStatusFriendDTO.Status == 0)
             {
-                var findfriendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.UserId == changeStatusFriendDTO.UserId && x.FriendId == changeStatusFriendDTO.FriendId || x.UserId == changeStatusFriendDTO.FriendId && x.FriendId == changeStatusFriendDTO.UserId);
+                var findfriendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.RequesterId == changeStatusFriendDTO.UserId && x.AddresseeId == changeStatusFriendDTO.FriendId || x.RequesterId == changeStatusFriendDTO.FriendId && x.AddresseeId == changeStatusFriendDTO.UserId);
 
                  _socialNetworkDbContext.Friendships.Remove(findfriendShip);
                 await _socialNetworkDbContext.SaveChangesAsync();
@@ -169,9 +170,9 @@ namespace SocialNetwork.Repositories
             {
                 var friendShip = new Friendship()
                 {
-                    UserId = changeStatusFriendDTO.UserId,
-                    FriendId = changeStatusFriendDTO.FriendId,
-                    status = (FriendshipStatus)changeStatusFriendDTO.Status,
+                    RequesterId = changeStatusFriendDTO.UserId,
+                    AddresseeId = changeStatusFriendDTO.FriendId,
+                    Status = (FriendshipStatus)changeStatusFriendDTO.Status,
                     RequestDate = DateTime.Now,
                 };
                 await _socialNetworkDbContext.Friendships.AddAsync(friendShip);
@@ -181,9 +182,9 @@ namespace SocialNetwork.Repositories
             }  
             else if (changeStatusFriendDTO.Status == 2)
             {
-                var findfriendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.UserId == changeStatusFriendDTO.UserId && x.FriendId == changeStatusFriendDTO.FriendId || x.UserId == changeStatusFriendDTO.FriendId && x.FriendId == changeStatusFriendDTO.UserId);
+                var findfriendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.RequesterId == changeStatusFriendDTO.UserId && x.AddresseeId == changeStatusFriendDTO.FriendId || x.RequesterId == changeStatusFriendDTO.FriendId && x.AddresseeId == changeStatusFriendDTO.UserId);
 
-                findfriendShip.status = FriendshipStatus.Friend;
+                findfriendShip.Status = FriendshipStatus.Friends;
                 findfriendShip.AcceptDate = DateTime.Now;
 
                 await _socialNetworkDbContext.SaveChangesAsync();
@@ -191,9 +192,9 @@ namespace SocialNetwork.Repositories
             }
             else if (changeStatusFriendDTO.Status == 3)
             {
-                var findfriendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.UserId == changeStatusFriendDTO.UserId && x.FriendId == changeStatusFriendDTO.FriendId);
+                var findfriendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.RequesterId == changeStatusFriendDTO.UserId && x.AddresseeId == changeStatusFriendDTO.FriendId);
 
-                findfriendShip.status = FriendshipStatus.Blocked;
+                findfriendShip.Status = FriendshipStatus.Blocked;
 
                 await _socialNetworkDbContext.SaveChangesAsync();
                 return true;
@@ -205,48 +206,24 @@ namespace SocialNetwork.Repositories
             
         }
 
-        public async Task<List<GetFriendshipDTO>> GetListFriendShip(string id)
+        public async Task<List<GetFriendshipDTO>> GetListFriendShip(string userId)
         {
-            var lstFriendshipById = await _socialNetworkDbContext.Friendships
-                .Where(x => x.status == FriendshipStatus.Friend && (x.UserId == id || x.FriendId == id))
+            var friendIds = await _socialNetworkDbContext.Friendships
+             .Where(x => x.Status == FriendshipStatus.Friends && (x.RequesterId == userId || x.AddresseeId == userId))
+             .Select(x => x.RequesterId == userId ? x.AddresseeId : x.RequesterId) // Lấy ID của bạn bè
+             .ToListAsync();
+
+            // Nếu không có bạn bè thì return danh sách rỗng
+            if (!friendIds.Any()) return new List<GetFriendshipDTO>(); 
+
+            var friends = await _socialNetworkDbContext.Users
+                .Include(x => x.UserProfile)
+                .Where(x => friendIds.Contains(x.Id))
+                .ProjectTo<GetFriendshipDTO>(_mapper.ConfigurationProvider) // Sử dụng AutoMapper
                 .ToListAsync();
 
-            List<GetFriendshipDTO> lstUserDTO = new List<GetFriendshipDTO>();
+            return friends;
 
-            foreach (var item in lstFriendshipById)
-            {
-                var userQuery = _socialNetworkDbContext.Users
-                    .Include(x => x.UserProfile) // Đảm bảo UserProfile được load
-                    .Where(x => x.Id == (item.UserId == id ? item.FriendId : item.UserId))
-                    .Select(x => new GetFriendshipDTO
-                    {
-                        Id = x.Id,
-                        FirstName = x.FirstName,
-                        LastName = x.LastName,
-                        AvatarUrl = x.AvatarUrl,
-                        UserProfile = new GetUserProfileDTO
-                        {
-                            CoverPhotoUrl = x.UserProfile.CoverPhotoUrl,
-                            Introduce = x.UserProfile.Introduce,
-                            LiveAt = x.UserProfile.LiveAt,
-                            StudyAt = x.UserProfile.StudyAt,
-                            WorkingAt = x.UserProfile.WorkingAt,
-                            Github = x.UserProfile.Github,
-                            Facebook = x.UserProfile.Facebook,
-                            LinkedIn = x.UserProfile.LinkedIn,
-                            IsActive = x.UserProfile.IsActive,
-                        }
-                    });
-
-                var userNew = await userQuery.FirstOrDefaultAsync(); // Sử dụng FirstOrDefault để tránh null
-
-                if (userNew != null)
-                {
-                    lstUserDTO.Add(userNew);
-                }
-            }
-
-            return lstUserDTO;
         }
 
     }

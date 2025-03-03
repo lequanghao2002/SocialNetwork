@@ -25,6 +25,7 @@ namespace SocialNetwork.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<Favourite> Favourites { get; set; }
+        public DbSet<Message> Messages { get; set; }
         #endregion
 
         protected override async void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,11 +55,17 @@ namespace SocialNetwork.Data
             modelBuilder.Entity<Friendship>(entity =>
             {
                 entity.ToTable("Friendships");
-                entity.HasKey(fs => new { fs.UserId, fs.FriendId });
+                entity.HasKey(fs => new { fs.RequesterId, fs.AddresseeId });
 
-                entity.HasOne(fs => fs.User)
-                    .WithMany(u => u.Friendships)
-                    .HasForeignKey(fs => fs.UserId);
+                entity.HasOne(fs => fs.Requester)
+                    .WithMany(u => u.SentFriendRequests)
+                    .HasForeignKey(fs => fs.RequesterId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(fs => fs.Addressee)
+                    .WithMany(u => u.ReceivedFriendRequests)
+                    .HasForeignKey(fs => fs.AddresseeId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Post>(entity =>
@@ -141,6 +148,23 @@ namespace SocialNetwork.Data
                     .WithMany(p => p.Favourites)
                     .HasForeignKey(pt => pt.PostId)
                     .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<Message>(entity =>
+            {
+                entity.ToTable("Messages");
+                entity.HasKey(m => m.Id);
+
+                entity.HasOne(m => m.Sender)
+                    .WithMany(u => u.SentMessages)
+                    .HasForeignKey(m => m.SenderId)
+                    .OnDelete(DeleteBehavior.Restrict); // Không xóa tin nhắn khi xóa user
+
+                entity.HasOne(m => m.Receiver)
+                    .WithMany(u => u.ReceivedMessages)
+                    .HasForeignKey(m => m.ReceiverId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
             });
 
             ConfigIdentityCore(modelBuilder);
