@@ -29,44 +29,34 @@ function ListFriends() {
 
     return (
         <div className={cx('wrapper')}>
-            {friends?.map((friend) => (
-                <div
-                    key={friend.Id}
-                    className={cx('item', {
-                        active: friend.info.id === selectedFriendId,
-                    })}
-                    onClick={() => handleSelect(friend.info.id)}
-                >
-                    <Image src={friend.info.avatarUrl} alt="" className={cx('img')} />
-                    <div className={cx('info')}>
-                        <EllipsisText>
-                            {friend.info.firstName} {friend.info.lastName}
-                        </EllipsisText>
-                        <EllipsisText
-                            small
-                            sub={
-                                friend.info.lastMessage &&
-                                friend.info.lastMessage.receiverId === user.id &&
-                                friend.info?.lastMessage?.isSeen
-                            }
-                            bold={
-                                friend.info.lastMessage &&
-                                friend.info.lastMessage.receiverId === user.id &&
-                                !friend.info?.lastMessage?.isSeen
-                            }
-                        >
-                            {friend.info.lastMessage?.senderId === user.id && 'Bạn: '}
-                            {friend.info?.lastMessage?.content}
-                        </EllipsisText>
-                    </div>
+            {friends?.map((friend) => {
+                const lastMessage = friend.info?.lastMessage;
 
-                    {friend.info.lastMessage &&
-                        friend.info.lastMessage.receiverId === user.id &&
-                        !friend.info.lastMessage.isSeen && (
-                            <FontAwesomeIcon icon={faCircle} className={cx('seen-icon')} />
-                        )}
-                </div>
-            ))}
+                const isMesssageUnSeen = lastMessage && lastMessage.receiverId === user.id && !lastMessage?.isSeen;
+
+                return (
+                    <div
+                        key={friend.Id}
+                        className={cx('item', {
+                            active: friend.info.id === selectedFriendId,
+                        })}
+                        onClick={() => handleSelect(friend.info.id)}
+                    >
+                        <Image src={friend.info.avatarUrl} alt="" className={cx('img')} />
+                        <div className={cx('info')}>
+                            <EllipsisText bold={isMesssageUnSeen}>
+                                {friend.info.firstName} {friend.info.lastName}
+                            </EllipsisText>
+                            <EllipsisText small sub={isMesssageUnSeen} bold={isMesssageUnSeen}>
+                                {lastMessage?.senderId === user.id && 'Bạn: '}
+                                {lastMessage?.content}
+                            </EllipsisText>
+                        </div>
+
+                        {isMesssageUnSeen && <FontAwesomeIcon icon={faCircle} className={cx('seen-icon')} />}
+                    </div>
+                );
+            })}
         </div>
     );
 }

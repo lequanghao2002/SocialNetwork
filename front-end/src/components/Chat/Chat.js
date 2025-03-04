@@ -59,7 +59,6 @@ function Chat() {
 
     console.log('selectedFriendId', selectedFriendId);
     useEffect(() => {
-        console.log('chạy nè');
         if (!selectedFriendId || !user.id) return;
         if (selectedFriend?.chat?.length > 0) return;
 
