@@ -3,7 +3,6 @@ import classNames from 'classnames/bind';
 import styles from './Login.module.scss';
 import { Col, Row, Form, Input } from 'antd';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import authService from '~/services/authService';
 import AuthContext from '~/context/AuthContext/authContext';
@@ -13,17 +12,15 @@ const cx = classNames.bind(styles);
 
 function Login() {
     const { setUser } = useContext(AuthContext);
-    const navigate = useNavigate();
 
     const handleGoogleLogin = async (response) => {
         const { credential } = response;
         try {
             // Gửi token lên backend để xác thực
-            const res = await authService.googleLogin(credential);
-            console.log('res', res);
-            setLocalStorage('token', res.replace(/^"|"$/g, ''));
+            const token = await authService.googleLogin(credential);
+            setLocalStorage('token', token);
 
-            const user = jwtDecode(res);
+            const user = await authService.me();
             setUser(user);
         } catch (error) {}
     };

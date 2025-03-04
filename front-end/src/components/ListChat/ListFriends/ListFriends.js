@@ -2,41 +2,35 @@ import React, { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './ListFriends.module.scss';
 import Image from '~/components/Image';
-import { faEllipsis, faPenToSquare, faPlus, faPlusSquare, faSearch, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faCircle } from '@fortawesome/free-solid-svg-icons';
 import AuthContext from '~/context/AuthContext/authContext';
 import userService from '~/services/userService';
 import ChatContext from '~/context/ChatContext/chatContext';
+import EllipsisText from '~/components/Text/EllipsisText';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import messageService from '~/services/messageService';
 
 const cx = classNames.bind(styles);
 
 function ListFriends() {
     const { user } = useContext(AuthContext);
-    const { setSelectedFriendId, friends, setFriends, selectedFriendId } = useContext(ChatContext);
-
-    useEffect(() => {
-        fetchListFriendship(user.Id);
-    }, []);
-
-    const fetchListFriendship = async (Id) => {
-        try {
-            const result = await userService.getListFriendship(Id);
-            setFriends(result);
-        } catch (error) {
-            console.error('Failed to fetch posts:', error);
-        }
-    };
+    const { setSelectedFriendId, friends, selectedFriendId, markMessageAsSeen } = useContext(ChatContext);
 
     const handleSelect = async (id) => {
-        if (selectedFriendId === id) return;
-
         setSelectedFriendId(id);
+
+        const friendSelected = friends.find((friend) => friend.info.id === id);
+        const lastMessage = friendSelected.info.lastMessage;
+        if (lastMessage && lastMessage.receiverId === user.id && !lastMessage.isSeen) {
+            await messageService.markMessageAsSeen(user.id, id);
+            markMessageAsSeen(true);
+        }
     };
 
     return (
         <div className={cx('wrapper')}>
             {friends?.map((friend) => (
                 <div
-                    //style={{ backgroundColor: chat.isSeen ? '' : '#f18404' }}
                     key={friend.Id}
                     className={cx('item', {
                         active: friend.info.id === selectedFriendId,
@@ -45,11 +39,32 @@ function ListFriends() {
                 >
                     <Image src={friend.info.avatarUrl} alt="" className={cx('img')} />
                     <div className={cx('info')}>
-                        <span>
+                        <EllipsisText>
                             {friend.info.firstName} {friend.info.lastName}
-                        </span>
-                        {/* <p>{friend.lastMessage}</p> */}
+                        </EllipsisText>
+                        <EllipsisText
+                            small
+                            sub={
+                                friend.info.lastMessage &&
+                                friend.info.lastMessage.receiverId === user.id &&
+                                friend.info?.lastMessage?.isSeen
+                            }
+                            bold={
+                                friend.info.lastMessage &&
+                                friend.info.lastMessage.receiverId === user.id &&
+                                !friend.info?.lastMessage?.isSeen
+                            }
+                        >
+                            {friend.info.lastMessage?.senderId === user.id && 'Bạn: '}
+                            {friend.info?.lastMessage?.content}
+                        </EllipsisText>
                     </div>
+
+                    {friend.info.lastMessage &&
+                        friend.info.lastMessage.receiverId === user.id &&
+                        !friend.info.lastMessage.isSeen && (
+                            <FontAwesomeIcon icon={faCircle} className={cx('seen-icon')} />
+                        )}
                 </div>
             ))}
         </div>

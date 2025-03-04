@@ -11,7 +11,7 @@ import Bookmark from '~/pages/Bookmark';
 import Login from '~/pages/Login';
 import Profile from '~/pages/Profile';
 
-const publicRoutes = [
+const privateRoutes = [
     { path: config.routes.home, component: Home },
     //W{ path: '/friend', component: Friend },
     { path: config.routes.friend, component: Friend },
@@ -20,10 +20,10 @@ const publicRoutes = [
     //{ path: config.routes.message, component: Message },
     { path: config.routes.message, component: Message, layout: HeaderOnly },
     { path: config.routes.bookmark, component: Bookmark },
-    { path: config.routes.login, component: Login, layout: null },
+
     { path: config.routes.profile, component: Profile, layout: HeaderOnly },
 ];
 
-const privateRoutes = [];
+const publicRoutes = [{ path: config.routes.login, component: Login, layout: null }];
 
 export { publicRoutes, privateRoutes };

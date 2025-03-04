@@ -1,0 +1,31 @@
+.ellipsis-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+
+    &.line-1 {
+        -webkit-line-clamp: 1;
+    }
+
+    &.line-2 {
+        -webkit-line-clamp: 2;
+    }
+}
+
+// Text Color
+.sub {
+    color: var(--text-sub-color);
+}
+
+// Text Size
+.small {
+    font-size: var(--small-text);
+}
+
+// Type
+.bold {
+    font-weight: bold;
+}

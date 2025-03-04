@@ -1,10 +1,21 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import ChatReducer from './chatReducer';
 import ChatContext from './chatContext';
-import { ADD_MESSAGE_TO_CHAT, SET_CHAT, SET_FRIENDS, SET_MESSAGE, SET_SELECTED } from './chatTypes';
+import {
+    ADD_MESSAGE_TO_CHAT,
+    MARK_MESSAGE_AS_SEEN,
+    SET_CHAT,
+    SET_FRIENDS,
+    SET_MESSAGE,
+    SET_SELECTED,
+} from './chatTypes';
 import { chatHubService } from '~/signalR/chatHubService';
+import AuthContext from '../AuthContext/authContext';
+import userService from '~/services/userService';
 
 function ChatProvider({ children }) {
+    const { user } = useContext(AuthContext);
+
     const initialState = {
         friends: [
             {
@@ -13,7 +24,8 @@ function ChatProvider({ children }) {
                     firstName: null,
                     lastName: null,
                     avatarUrl: null,
-                    userProfile: null,
+                    userProfile: {},
+                    lastMessage: {},
                 },
                 message: {
                     content: null,
@@ -26,6 +38,29 @@ function ChatProvider({ children }) {
     };
 
     const [state, dispatch] = useReducer(ChatReducer, initialState);
+
+    useEffect(() => {
+        chatHubService.startConnection();
+
+        chatHubService.onReceiveMessage((message) => {
+            addMessageToChat(message);
+        });
+
+        return () => chatHubService.stopConnection();
+    }, []);
+
+    useEffect(() => {
+        fetchListFriendship(user.id);
+    }, []);
+
+    const fetchListFriendship = async (Id) => {
+        try {
+            const result = await userService.getListFriendship(Id);
+            setFriends(result);
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+        }
+    };
 
     const setFriends = (payload) => {
         dispatch({ type: SET_FRIENDS, payload });
@@ -46,16 +81,9 @@ function ChatProvider({ children }) {
     const addMessageToChat = (payload) => {
         dispatch({ type: ADD_MESSAGE_TO_CHAT, payload });
     };
-
-    useEffect(() => {
-        chatHubService.startConnection();
-
-        chatHubService.onReceiveMessage((message) => {
-            addMessageToChat(message);
-        });
-
-        return () => chatHubService.stopConnection();
-    }, []);
+    const markMessageAsSeen = (payload) => {
+        dispatch({ type: MARK_MESSAGE_AS_SEEN, payload });
+    };
 
     return (
         <ChatContext.Provider
@@ -66,6 +94,7 @@ function ChatProvider({ children }) {
                 setChat,
                 setSelectedFriendId,
                 setMessage,
+                markMessageAsSeen,
             }}
         >
             {children}

@@ -57,13 +57,14 @@ function Chat() {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [selectedFriend?.chat]);
 
+    console.log('selectedFriendId', selectedFriendId);
     useEffect(() => {
-        if (!selectedFriendId || !user?.Id) return;
+        console.log('chạy nè');
+        if (!selectedFriendId || !user.id) return;
         if (selectedFriend?.chat?.length > 0) return;
 
-        fetchChat(user.Id, selectedFriendId);
+        fetchChat(user.id, selectedFriendId);
     }, [selectedFriendId]);
-    //}, [user?.Id, selectedFriendId, selectedFriend?.chat]); // Cập nhật dependencies đầy đủ
 
     const fetchChat = async (userId, ortherUserId) => {
         try {
@@ -96,7 +97,7 @@ function Chat() {
         if (!selectedFriend?.message?.content) return;
 
         const message = {
-            senderId: user.Id,
+            senderId: user.id,
             receiverId: selectedFriend.info.id,
             content: selectedFriend.message.content,
             imageUrl: null,
@@ -135,7 +136,7 @@ function Chat() {
 
                     <div className={cx('center')}>
                         {selectedFriend.chat?.map((message) => (
-                            <div key={message?.id} className={cx('message', message.senderId === user.Id ? 'own' : '')}>
+                            <div key={message?.id} className={cx('message', message.senderId === user.id ? 'own' : '')}>
                                 <div className={cx('texts')}>
                                     {message.imageUrl && (
                                         <img

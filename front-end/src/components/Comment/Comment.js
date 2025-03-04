@@ -32,7 +32,7 @@ function Comment({ item, postId, posts, setPosts }) {
     const handleRelyComment = async () => {
         setLoading(true);
         const data = {
-            userId: user.Id,
+            userId: user.id,
             postId: postId,
             content: text,
             parentId: item.id,
@@ -98,7 +98,7 @@ function Comment({ item, postId, posts, setPosts }) {
 
                 <div className="rely">
                     <span className="hour">{dayjs(item.createdDate).local().fromNow()}</span>
-                    {item.user?.id !== user.Id ? (
+                    {item.user?.id !== user.id ? (
                         relyMode ? (
                             <div
                                 className="bottom"

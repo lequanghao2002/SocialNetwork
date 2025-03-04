@@ -5,6 +5,7 @@ using SocialNetwork.Data;
 using SocialNetwork.Helpers;
 using SocialNetwork.Models.Domain;
 using SocialNetwork.Models.DTO.LikeDTO;
+using SocialNetwork.Models.DTO.MessageDTO;
 using SocialNetwork.Models.DTO.PostDTO;
 using SocialNetwork.Models.DTO.TagDTO;
 using SocialNetwork.Models.DTO.UserDTO;
@@ -19,7 +20,7 @@ namespace SocialNetwork.Repositories
         public Task<bool> UpdateUser(UpdateUserDTO userDTO);
         public Task<Friendship> GetStatusFriend(string userId, string friendId);
         public Task<bool> ChangeStatusFriend(ChangeStatusFriendDTO changeStatusFriendDTO);
-        public Task<List<GetFriendshipDTO>> GetListFriendShip(string id);
+        public Task<List<GetFriendshipWithLastMsgDTO>> GetListFriendShip(string id);
     }
 
     public class UserRepository : IUserRepository
@@ -206,21 +207,55 @@ namespace SocialNetwork.Repositories
             
         }
 
-        public async Task<List<GetFriendshipDTO>> GetListFriendShip(string userId)
+        public async Task<List<GetFriendshipWithLastMsgDTO>> GetListFriendShip(string userId)
         {
-            var friendIds = await _socialNetworkDbContext.Friendships
-             .Where(x => x.Status == FriendshipStatus.Friends && (x.RequesterId == userId || x.AddresseeId == userId))
-             .Select(x => x.RequesterId == userId ? x.AddresseeId : x.RequesterId) // Lấy ID của bạn bè
-             .ToListAsync();
+            //var friendIds = await _socialNetworkDbContext.Friendships
+            // .Where(x => x.Status == FriendshipStatus.Friends && (x.RequesterId == userId || x.AddresseeId == userId))
+            // .Select(x => x.RequesterId == userId ? x.AddresseeId : x.RequesterId) // Lấy ID của bạn bè
+            // .ToListAsync();
 
-            // Nếu không có bạn bè thì return danh sách rỗng
-            if (!friendIds.Any()) return new List<GetFriendshipDTO>(); 
+            //// Nếu không có bạn bè thì return danh sách rỗng
+            //if (!friendIds.Any()) return new List<GetFriendshipWithLastMsgDTO>(); 
 
+            //var friends = await _socialNetworkDbContext.Users
+            //    .Include(x => x.UserProfile)
+            //    .Where(x => friendIds.Contains(x.Id))
+            //    .ProjectTo<GetFriendshipWithLastMsgDTO>(_mapper.ConfigurationProvider) // Sử dụng AutoMapper
+            //    .ToListAsync();
+
+#pragma warning disable CS8601 // Possible null reference assignment.
             var friends = await _socialNetworkDbContext.Users
-                .Include(x => x.UserProfile)
-                .Where(x => friendIds.Contains(x.Id))
-                .ProjectTo<GetFriendshipDTO>(_mapper.ConfigurationProvider) // Sử dụng AutoMapper
-                .ToListAsync();
+                .Where(user => _socialNetworkDbContext.Friendships
+                    .Where(f => f.Status == FriendshipStatus.Friends &&
+                                (f.RequesterId == userId || f.AddresseeId == userId))
+                    .Select(f => f.RequesterId == userId ? f.AddresseeId : f.RequesterId)
+                    .Contains(user.Id))
+                .Select(user => new GetFriendshipWithLastMsgDTO
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    AvatarUrl = user.AvatarUrl,
+                    UserProfile = _mapper.Map<GetUserProfileDTO>(user.UserProfile),
+                    LastMessage = _socialNetworkDbContext.Messages
+                        .Where(m => (m.SenderId == userId && m.ReceiverId == user.Id) ||
+                                    (m.SenderId == user.Id && m.ReceiverId == userId))
+                        .OrderByDescending(m => m.CreatedDate) // Sắp xếp ngay trong SQL
+                        .Select(m => new GetMessageDTO
+                        {
+                            Id = m.Id,
+                            SenderId = m.SenderId,
+                            ReceiverId = m.ReceiverId,
+                            Content = m.Content,
+                            ImageUrl = m.ImageUrl,
+                            IsSeen = m.IsSeen,
+                            CreatedDate = m.CreatedDate,
+                        })
+                        .FirstOrDefault()
+                })
+                .OrderByDescending(f => f.LastMessage.CreatedDate) // Sắp xếp ngay trong database
+                .ToListAsync(); // Lấy dữ liệu sau khi đã sắp xếp xong
+#pragma warning restore CS8601 // Possible null reference assignment.
 
             return friends;
 

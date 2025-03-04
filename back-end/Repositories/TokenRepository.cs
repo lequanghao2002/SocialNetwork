@@ -22,13 +22,18 @@ namespace SocialNetwork.Repositories
         {
             var claims = new List<Claim>
             {
-                new Claim("Id", user.Id),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim("FirstName", user.FirstName),
-                new Claim("LastName", user.LastName),
-                new Claim("AvatarUrl", user.AvatarUrl),
-                new Claim("DateOfBirth", user.DateOfBirth.ToString("O")), 
-                new Claim("CreatedDate", user.CreatedDate.ToString("O")) 
+                //new Claim("Id", user.Id),
+                //new Claim(ClaimTypes.Email, user.Email),
+                //new Claim("FirstName", user.FirstName),
+                //new Claim("LastName", user.LastName),
+                //new Claim("AvatarUrl", user.AvatarUrl),
+                //new Claim("DateOfBirth", user.DateOfBirth.ToString("O")), 
+                //new Claim("CreatedDate", user.CreatedDate.ToString("O"))
+
+
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id), // Dùng "sub" theo chuẩn
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique Token ID
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64) // Issued At
             };
 
             foreach (var role in roles)

@@ -8,6 +8,7 @@ namespace SocialNetwork.Repositories.MessageRepository
     public interface IMessageRepository
     {
         public Task<List<GetMessageDTO>> GetByUserId(string userId, string otherUserId);
+        public Task MarkMessagesAsSeen(string userId, string otherUserId);
         //public Task<GetPostDTO> CreateComment(CreateCommentDTO comment);
         //public Task<GetPostDTO> UpdateComment(UpdateCommentDTO comment);
         //public Task<GetPostDTO> DeleteComment(string id);

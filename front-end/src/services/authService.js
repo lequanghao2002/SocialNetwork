@@ -8,6 +8,8 @@ const authService = {
     externalLogin: (data) => apiClient.post('Accounts/external-login', data),
 
     googleLogin: (tokenId) => apiClient.post('auth/google-login', { tokenId }),
+
+    me: () => apiClient.get('auth/me'),
 };
 
 export default authService;

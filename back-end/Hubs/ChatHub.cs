@@ -23,7 +23,7 @@ namespace SocialNetwork.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User.FindFirst("Id")?.Value;
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (!string.IsNullOrEmpty(userId))
             {

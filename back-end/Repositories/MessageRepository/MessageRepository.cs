@@ -31,5 +31,10 @@ namespace SocialNetwork.Repositories.MessageRepository
 
             return _mapper.Map<List<GetMessageDTO>>(messages);
         }
+
+        public async Task MarkMessagesAsSeen(string userId, string otherUserId)
+        {
+            await _dbContext.Database.ExecuteSqlRawAsync("UPDATE Messages SET IsSeen = 1 WHERE SenderId = {0} AND ReceiverId = {1} AND IsSeen = 0", otherUserId, userId) ;
+        }
     }
 }

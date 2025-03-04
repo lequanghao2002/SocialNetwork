@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using SocialNetwork.Models.Domain;
 using SocialNetwork.Models.DTO.AuthDTO;
 using SocialNetwork.Repositories;
+using System.Security.Claims;
 
 namespace SocialNetwork.Controllers
 {
@@ -39,5 +40,19 @@ namespace SocialNetwork.Controllers
                 return BadRequest(new { message = "Invalid Google Token", error = ex.Message });
             }
         }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            var userInfo = await _authRepository.GetInfoUser(User);
+
+            if (userInfo == null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(userInfo);
+        }
+
     }
 }

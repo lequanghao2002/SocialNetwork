@@ -31,5 +31,20 @@ namespace SocialNetwork.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("mark-message-as-seen")]
+        public async Task<IActionResult> MarkMessagesAsSeen(string userId, string otherUserId)
+        {
+            try
+            {
+                await _messageRepository.MarkMessagesAsSeen(userId, otherUserId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

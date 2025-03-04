@@ -1,6 +1,17 @@
-import { ADD_MESSAGE_TO_CHAT, SET_CHAT, SET_FRIENDS, SET_MESSAGE, SET_SELECTED } from './chatTypes';
+import {
+    ADD_LAST_MESSAGE_TO_USER,
+    ADD_MESSAGE_TO_CHAT,
+    MARK_MESSAGE_AS_SEEN,
+    SET_CHAT,
+    SET_FRIENDS,
+    SET_MESSAGE,
+    SET_SELECTED,
+} from './chatTypes';
 
 function ChatReducer(state, action) {
+    console.log('state', state);
+    console.log('action', action);
+
     switch (action.type) {
         case SET_FRIENDS:
             return {
@@ -13,6 +24,7 @@ function ChatReducer(state, action) {
                     },
                     chat: [],
                 })),
+                selectedFriendId: action.payload[0].id,
             };
         case SET_SELECTED:
             return {
@@ -46,15 +58,39 @@ function ChatReducer(state, action) {
         case ADD_MESSAGE_TO_CHAT:
             const { type, message } = action.payload;
 
-            let id = type === 'sent' ? message.receiverId : message.senderId;
+            // Type = 'sent' => Mình gửi
+            // Type = 'received' => Bạn bè gửi
+            const id = type === 'sent' ? message.receiverId : message.senderId;
+            const friend = state.friends.find((friend) => friend.info.id === id);
+
+            // Cập nhật lại tin nhắn
+            const updatedFriend = {
+                ...friend,
+                info: {
+                    ...friend.info,
+                    lastMessage: message,
+                },
+                chat: [...friend.chat, message],
+            };
 
             return {
                 ...state,
+                friends: [updatedFriend, ...state.friends.filter((f) => f.info.id !== id)],
+            };
+        case MARK_MESSAGE_AS_SEEN:
+            return {
+                ...state,
                 friends: state.friends.map((friend) =>
-                    friend.info.id === id
+                    friend.info.id === state.selectedFriendId
                         ? {
                               ...friend,
-                              chat: [...friend.chat, message],
+                              info: {
+                                  ...friend.info,
+                                  lastMessage: {
+                                      ...friend.info.lastMessage,
+                                      isSeen: action.payload,
+                                  },
+                              },
                           }
                         : friend,
                 ),

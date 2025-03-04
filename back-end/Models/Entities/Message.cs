@@ -11,5 +11,6 @@ namespace SocialNetwork.Models.Entities
         public User Receiver { get; set; }
         public string Content { get; set; }
         public string? ImageUrl { get; set; } = string.Empty;
+        public bool IsSeen { get; set; } = false;
     }
 }

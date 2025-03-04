@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SocialNetwork.Models.Domain;
+using SocialNetwork.Models.DTO.AuthDTO;
 using SocialNetwork.Models.DTO.CommentDTO;
 using SocialNetwork.Models.DTO.LikeDTO;
 using SocialNetwork.Models.DTO.MessageDTO;
@@ -30,6 +31,7 @@ namespace SocialNetwork.Helpers
             CreateMap<UserProfile, UpdateUserProfileDTO>().ReverseMap();
 
             CreateMap<User, GetUserByIdDTO>().ReverseMap();
+            CreateMap<User, GetInfoUser>();
 
             CreateMap<Comment, CreateCommentDTO>().ReverseMap();
 
@@ -42,8 +44,8 @@ namespace SocialNetwork.Helpers
                 .ForMember(dest => dest.Deleted, opt => opt.MapFrom(src => false))
                 .ForMember(dest => dest.DeletedDate, opt => opt.MapFrom(src => (DateTime?)null));
 
-            CreateMap<User, GetFriendshipDTO>()
-                .ForMember(dest => dest.UserProfile, opt => opt.MapFrom(src => src.UserProfile));
+            //CreateMap<User, GetFriendshipWithLastMsgDTO>()
+            //    .ForMember(dest => dest.UserProfile, opt => opt.MapFrom(src => src.UserProfile));
 
             CreateMap<UserProfile, GetUserProfileDTO>();
 

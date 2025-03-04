@@ -22,21 +22,21 @@ import { useParams } from 'react-router-dom';
 import ProfileModal from '~/components/Modals/ProfileModal';
 import InfoModal from '~/components/Modals/InfoModal';
 import AuthContext from '~/context/AuthContext/authContext';
+import ChatProvider from '~/context/ChatContext/chatProvider';
 
 const cx = classNames.bind(styles);
 
 function Profile() {
     const { id } = useParams();
+    const { friends } = useContext(ChatProvider);
     const { user } = useContext(AuthContext);
     const [userInfo, setUserInfo] = useState(null);
     const [friendShip, setFriendShip] = useState({});
-    const [listFriendShip, setListFriendShip] = useState({});
     const [showProfileModal, setShowProfileModal] = useState(null);
     const [showInfoModal, setShowInfoModal] = useState(null);
 
     useEffect(() => {
         fetchUserProfileById(id);
-        fetchListFriendship(id);
 
         if (id !== user.Id) {
             fetchFriendship(user.Id, id);
@@ -52,15 +52,6 @@ function Profile() {
             } else {
                 console.error('Invalid data format:', result);
             }
-        } catch (error) {
-            console.error('Failed to fetch posts:', error);
-        }
-    };
-
-    const fetchListFriendship = async (Id) => {
-        try {
-            const result = await userServices.getListFriendship(Id);
-            setListFriendShip(result);
         } catch (error) {
             console.error('Failed to fetch posts:', error);
         }
@@ -85,7 +76,8 @@ function Profile() {
 
         if (result) {
             fetchFriendship(user.Id, id);
-            fetchListFriendship(id);
+            // chỗ này chưa xử lý
+            //fetchListFriendship(id);
         }
     };
 
@@ -127,7 +119,7 @@ function Profile() {
                         />
                         <div className={cx('info')}>
                             <span className={cx('full-name')}>{`${userInfo?.firstName} ${userInfo?.lastName}`}</span>
-                            <span className={cx('num-friends')}>{`${listFriendShip?.length} friends`}</span>
+                            <span className={cx('num-friends')}>{`${friends?.length} friends`}</span>
                         </div>
 
                         {userInfo?.id === user.Id && (
@@ -280,11 +272,11 @@ function Profile() {
 
                                     <div className={cx('friends')}>
                                         <h2>Friends</h2>
-                                        <p className={cx('')}>{`${listFriendShip?.length} friends`}</p>
+                                        <p className={cx('')}>{`${friends?.length} friends`}</p>
 
                                         <div className={cx('list-friends')}>
-                                            {listFriendShip?.length >= 0 &&
-                                                listFriendShip.map((item, index) => (
+                                            {friends?.length >= 0 &&
+                                                friends.map((item, index) => (
                                                     <div key={index} className={cx('item-friends')}>
                                                         <img
                                                             className={cx('img-friend')}

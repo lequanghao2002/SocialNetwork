@@ -2,51 +2,72 @@ import { useEffect, useReducer, useState } from 'react';
 import AuthContext from './authContext';
 import AuthReducer from './authReducer';
 import { SET_FRIENDS, SET_USER } from './authTypes';
-import { useNavigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import config from '~/config';
 import { getLocalStorage } from '~/utils/localStorage';
 import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
+import authService from '~/services/authService';
 
 function AuthProvider({ children }) {
+    const navigate = useNavigate();
     const initialState = {
-        user: {
-            id: '',
-            email: '',
-            firstName: '',
-            lastName: '',
-            avatarUrl: '',
-            dateOfBirth: '',
-            createDate: '',
-        },
+        user: null,
+        // user: {
+        //     id: '',
+        //     email: '',
+        //     firstName: '',
+        //     lastName: '',
+        //     avatarUrl: '',
+        //     dateOfBirth: '',
+        //     createDate: '',
+        // },
     };
 
     const [state, dispatch] = useReducer(AuthReducer, initialState);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+
+    // Lấy user từ API khi có token
+    useEffect(() => {
+        const fetchUser = async () => {
+            const token = getLocalStorage('token');
+
+            if (token && !state.user) {
+                try {
+                    const user = await authService.me();
+                    dispatch({ type: SET_USER, payload: user });
+                } catch (error) {
+                    console.error('Lỗi khi lấy thông tin user:', error);
+                }
+            }
+
+            setLoading(false);
+        };
+
+        fetchUser();
+    }, []);
 
     useEffect(() => {
-        const token = getLocalStorage('token');
-        if (token) {
-            const user = jwtDecode(token);
-            setUser(user);
-
-            navigate(config.routes.home);
-        } else {
-            navigate(config.routes.login);
+        if (!loading) {
+            if (state.user) {
+                navigate(config.routes.home);
+            } else {
+                navigate(config.routes.login);
+            }
         }
-
-        setLoading(false);
-    }, []);
+    }, [state.user, loading]);
 
     const setUser = (payload) => {
         dispatch({ type: SET_USER, payload });
-        navigate(config.routes.home);
     };
+
+    if (loading) {
+        return <Spin size="large" />;
+    }
 
     return (
         <AuthContext.Provider value={{ user: state.user, friends: state.friends, setUser }}>
-            {loading ? <Spin /> : children}
+            {children}
         </AuthContext.Provider>
     );
 }

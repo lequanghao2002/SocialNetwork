@@ -1,11 +1,14 @@
-﻿using Google.Apis.Auth;
+﻿using AutoMapper;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialNetwork.Data;
 using SocialNetwork.Models.Domain;
+using SocialNetwork.Models.DTO.AuthDTO;
 using SocialNetwork.Models.DTO.UserDTO;
 using System.Runtime.Serialization;
+using System.Security.Claims;
 
 namespace SocialNetwork.Repositories
 {
@@ -15,6 +18,7 @@ namespace SocialNetwork.Repositories
         public Task<bool> SignUp(SignUpDTO signUpDTO);
         public Task<string> SignIn(SignInDTO signInDTO);
         public Task<string> ExternalLogin(ExternalLoginDTO externalLoginDTO);
+        public Task<GetInfoUser> GetInfoUser(ClaimsPrincipal userPrincipal);
     }
 
     public class AuthRepository : IAuthRepository
@@ -22,12 +26,14 @@ namespace SocialNetwork.Repositories
         private readonly SocialNetworkDbContext _socialNetworkDbContext;
         private readonly UserManager<User> _userManager;
         private readonly ITokenRepository _tokenRepository;
+        private readonly IMapper _mapper;
 
-        public AuthRepository(SocialNetworkDbContext socialNetworkDbContext, UserManager<User> userManager, ITokenRepository tokenRepository)
+        public AuthRepository(SocialNetworkDbContext socialNetworkDbContext, UserManager<User> userManager, ITokenRepository tokenRepository, IMapper mapper)
         {
             _socialNetworkDbContext = socialNetworkDbContext;
             _userManager = userManager;
             _tokenRepository = tokenRepository;
+            _mapper = mapper;
         }
 
         public async Task<string> GoogleLogin(string tokenId)
@@ -193,6 +199,16 @@ namespace SocialNetwork.Repositories
             var jwtToken = _tokenRepository.CreateJwtToken(user, externalLoginDTO.Uid, roles.ToList());
 
             return jwtToken;
+        }
+
+        public async Task<GetInfoUser> GetInfoUser(ClaimsPrincipal userPrincipal)
+        {
+            var user = await _socialNetworkDbContext.Users
+               .Include(u => u.UserProfile)
+               .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(userPrincipal));
+
+
+            return _mapper.Map<GetInfoUser>(user);
         }
 
     }

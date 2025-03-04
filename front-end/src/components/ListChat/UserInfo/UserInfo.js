@@ -13,8 +13,8 @@ function UserInfo() {
     return (
         <div className={cx('wrapper')}>
             <div className={cx('user-info')}>
-                <Image src={user.AvatarUrl} alt={user.email} />
-                <h2>{`${user.FirstName} ${user.LastName}`}</h2>
+                <Image src={user.avatarUrl} alt={user.email} />
+                <h2>{`${user.firstName} ${user.lastName}`}</h2>
             </div>
 
             <div className={cx('icons')}>
