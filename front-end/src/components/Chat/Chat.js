@@ -23,6 +23,7 @@ import AuthContext from '~/context/AuthContext/authContext';
 import ChatContext from '~/context/ChatContext/chatContext';
 import { chatHubService } from '~/signalR/chatHubService';
 import messageService from '~/services/messageService';
+import { uploadChatImage } from '~/utils/uploadHelper';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
@@ -41,10 +42,6 @@ function Chat() {
     const { selectedFriendId, setMessage, setChat, friends } = useContext(ChatContext);
     const { user } = useContext(AuthContext);
     const [open, setOpen] = useState(false);
-    const [img, setImg] = useState({
-        file: null,
-        url: '',
-    });
 
     const selectedFriend = useMemo(() => {
         if (!Array.isArray(friends) || !selectedFriendId) return null;
@@ -57,7 +54,6 @@ function Chat() {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [selectedFriend?.chat]);
 
-    console.log('selectedFriendId', selectedFriendId);
     useEffect(() => {
         if (!selectedFriendId || !user.id) return;
         if (selectedFriend?.chat?.length > 0) return;
@@ -75,12 +71,25 @@ function Chat() {
         }
     };
 
-    const handleImg = (e) => {
-        if (e.target.files[0]) {
-            setImg({
-                file: e.target.files[0],
-                url: URL.createObjectURL(e.target.files[0]),
-            });
+    const handleImg = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const downloadURL = await uploadChatImage(file);
+
+            if (!downloadURL) return;
+
+            const message = {
+                senderId: user.id,
+                receiverId: selectedFriend.info.id,
+                content: '',
+                imageUrl: downloadURL,
+            };
+
+            await chatHubService.sendMessage(message);
+        } catch (err) {
+            console.error('Lỗi upload ảnh hoặc gửi tin nhắn:', err);
         }
     };
 
@@ -144,19 +153,12 @@ function Chat() {
                                             style={{ borderRadius: '8px', width: '100%' }}
                                         />
                                     )}
-                                    <p>{message.content}</p>
-                                    <span>{dayjs(message.createAt).utc().utcOffset(7).fromNow()}</span>
+
+                                    {message.content && <p>{message.content}</p>}
+                                    <span>{dayjs(message.createdDate).utc().utcOffset(7).fromNow()}</span>
                                 </div>
                             </div>
                         ))}
-
-                        {img.url && (
-                            <div className={cx('message', 'own')}>
-                                <div className={cx('texts')}>
-                                    <img src={img.url} alt="" />
-                                </div>
-                            </div>
-                        )}
 
                         <div ref={endRef}></div>
                     </div>

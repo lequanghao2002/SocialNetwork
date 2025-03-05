@@ -1,28 +1,35 @@
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 const storage = getStorage();
 
-const upload = async (file) => {
-    const metadata = {
-        contentType: 'image/jpeg',
-    };
+const upload = async (file, folder, allowedTypes = null) => {
+    if (!file) {
+        return Promise.reject('No file selected!');
+    }
 
-    const storageRef = ref(storage, 'images/' + file.name);
-    const uploadTask = uploadBytesResumable(storageRef, file, metadata);
+    if (allowedTypes && !allowedTypes.includes(file.type)) {
+        return Promise.reject('Invalid file type!');
+    }
+
+    // Tạo đường dẫn lưu ảnh trong Firebase Storage
+    const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
 
     return new Promise((resolve, reject) => {
         uploadTask.on(
             'state_changed',
             (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
+                // Có thể thêm logic để hiển thị tiến trình upload
+                // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                // console.log('Upload is ' + progress + '% done');
             },
-            (error) => {
-                reject('Something went wrong!' + error.code);
-            },
-            () => {
-                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    resolve(downloadURL);
-                });
+            (error) => reject('Something went wrong!' + error.code),
+            async () => {
+                try {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve(downloadURL); // Trả về URL ảnh sau khi upload
+                } catch (err) {
+                    reject(err);
+                }
             },
         );
     });

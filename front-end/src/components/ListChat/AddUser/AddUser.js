@@ -16,7 +16,6 @@ import {
     updateDoc,
     where,
 } from 'firebase/firestore';
-import { auth, db } from '~/firebase/config';
 import AuthContext from '~/context/AuthContext/authContext';
 const cx = classNames.bind(styles);
 
@@ -36,60 +35,51 @@ function AddUser({ visible, onClose }) {
     };
 
     const handleSearch = async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData(e.target);
-        const username = formData.get('username');
-
-        try {
-            const userRef = collection(db, 'users');
-
-            const q = query(userRef, where('username', '==', username));
-
-            const querySnapShot = await getDocs(q);
-
-            if (!querySnapShot.empty) {
-                setFriends(querySnapShot.docs[0].data());
-            } else {
-                setFriends(null);
-            }
-        } catch (err) {
-            console.log(err);
-        }
+        // e.preventDefault();
+        // const formData = new FormData(e.target);
+        // const username = formData.get('username');
+        // try {
+        //     const userRef = collection(db, 'users');
+        //     const q = query(userRef, where('username', '==', username));
+        //     const querySnapShot = await getDocs(q);
+        //     if (!querySnapShot.empty) {
+        //         setFriends(querySnapShot.docs[0].data());
+        //     } else {
+        //         setFriends(null);
+        //     }
+        // } catch (err) {
+        //     console.log(err);
+        // }
     };
 
     const handleAdd = async () => {
-        try {
-            const chatRef = collection(db, 'chats');
-            const userChatsRef = collection(db, 'userchats');
-
-            const newChatRef = doc(chatRef);
-
-            await setDoc(newChatRef, {
-                createdAt: serverTimestamp(),
-                message: [],
-            });
-
-            await updateDoc(doc(userChatsRef, friend.id), {
-                chats: arrayUnion({
-                    chatId: newChatRef.id,
-                    lastMessage: '',
-                    receiverId: user.Uid,
-                    updatedAt: Date.now(),
-                }),
-            });
-
-            await updateDoc(doc(userChatsRef, user.Uid), {
-                chats: arrayUnion({
-                    chatId: newChatRef.id,
-                    lastMessage: '',
-                    receiverId: friend.id,
-                    updatedAt: Date.now(),
-                }),
-            });
-        } catch (err) {
-            console.log(err);
-        }
+        // try {
+        //     const chatRef = collection(db, 'chats');
+        //     const userChatsRef = collection(db, 'userchats');
+        //     const newChatRef = doc(chatRef);
+        //     await setDoc(newChatRef, {
+        //         createdAt: serverTimestamp(),
+        //         message: [],
+        //     });
+        //     await updateDoc(doc(userChatsRef, friend.id), {
+        //         chats: arrayUnion({
+        //             chatId: newChatRef.id,
+        //             lastMessage: '',
+        //             receiverId: user.Uid,
+        //             updatedAt: Date.now(),
+        //         }),
+        //     });
+        //     await updateDoc(doc(userChatsRef, user.Uid), {
+        //         chats: arrayUnion({
+        //             chatId: newChatRef.id,
+        //             lastMessage: '',
+        //             receiverId: friend.id,
+        //             updatedAt: Date.now(),
+        //         }),
+        //     });
+        // } catch (err) {
+        //     console.log(err);
+        // }
     };
 
     return (
