@@ -35,11 +35,23 @@ class ChatHubService {
         this.connection.on('ReceiveMessage', callback);
     }
 
+    onMessageUpdated(callback) {
+        this.connection.on('MessageUpdated', callback);
+    }
+
     // Gửi tin nhắn lên server
     // Dùng this.connection.invoke() để gọi hàm trên server có tên "SendMessage".
     // Trả về một Promise, giúp xử lý async nếu cần
     sendMessage(message) {
         return this.connection.invoke('SendMessage', message);
+    }
+
+    updateMessage(message) {
+        return this.connection.invoke('UpdateMessage', message);
+    }
+
+    deleteMessage(message) {
+        return this.connection.invoke('DeleteMessage', message);
     }
 
     stopConnection() {

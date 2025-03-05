@@ -42,7 +42,8 @@ namespace SocialNetwork.Helpers
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => (DateTime?)null))
                 .ForMember(dest => dest.Deleted, opt => opt.MapFrom(src => false))
-                .ForMember(dest => dest.DeletedDate, opt => opt.MapFrom(src => (DateTime?)null));
+                .ForMember(dest => dest.DeletedDate, opt => opt.MapFrom(src => (DateTime?)null))
+                .ReverseMap();
 
             //CreateMap<User, GetFriendshipWithLastMsgDTO>()
             //    .ForMember(dest => dest.UserProfile, opt => opt.MapFrom(src => src.UserProfile));

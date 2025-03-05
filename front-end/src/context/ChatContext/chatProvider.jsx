@@ -8,8 +8,9 @@ import {
     SET_FRIENDS,
     SET_MESSAGE,
     SET_SELECTED,
+    UPDATE_MESSAGE_IN_CHAT,
 } from './chatTypes';
-import { chatHubService } from '~/signalR/chatHubService';
+import { chatHubService } from '~/sockets/chatHubService';
 import AuthContext from '../AuthContext/authContext';
 import userService from '~/services/userService';
 
@@ -44,6 +45,10 @@ function ChatProvider({ children }) {
 
         chatHubService.onReceiveMessage((message) => {
             addMessageToChat(message);
+        });
+
+        chatHubService.onMessageUpdated((message) => {
+            updateMessageInChat(message);
         });
 
         return () => chatHubService.stopConnection();
@@ -81,6 +86,11 @@ function ChatProvider({ children }) {
     const addMessageToChat = (payload) => {
         dispatch({ type: ADD_MESSAGE_TO_CHAT, payload });
     };
+
+    const updateMessageInChat = (payload) => {
+        dispatch({ type: UPDATE_MESSAGE_IN_CHAT, payload });
+    };
+
     const markMessageAsSeen = (payload) => {
         dispatch({ type: MARK_MESSAGE_AS_SEEN, payload });
     };

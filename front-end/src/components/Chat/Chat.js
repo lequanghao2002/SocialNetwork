@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faCamera,
     faCircleInfo,
+    faEllipsisVertical,
     faFaceSmile,
     faImage,
     faMicrophone,
@@ -21,9 +22,10 @@ import utc from 'dayjs/plugin/utc';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import AuthContext from '~/context/AuthContext/authContext';
 import ChatContext from '~/context/ChatContext/chatContext';
-import { chatHubService } from '~/signalR/chatHubService';
+import { chatHubService } from '~/sockets/chatHubService';
 import messageService from '~/services/messageService';
 import { uploadChatImage } from '~/utils/uploadHelper';
+import { Dropdown, Flex } from 'antd';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
@@ -42,13 +44,25 @@ function Chat() {
     const { selectedFriendId, setMessage, setChat, friends } = useContext(ChatContext);
     const { user } = useContext(AuthContext);
     const [open, setOpen] = useState(false);
+    const [typeInput, setTypeInput] = useState('add'); // add, update
+    const [selectedMessageId, setSelectedMessageId] = useState(null);
+    const endRef = useRef(null);
 
     const selectedFriend = useMemo(() => {
         if (!Array.isArray(friends) || !selectedFriendId) return null;
         return friends.find((friend) => friend.info.id === selectedFriendId);
     }, [friends, selectedFriendId]);
 
-    const endRef = useRef(null);
+    const items = [
+        {
+            key: 'update',
+            label: 'Update',
+        },
+        {
+            key: 'delete',
+            label: 'Delete',
+        },
+    ];
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -121,6 +135,32 @@ function Chat() {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const handleSave = async () => {
+        if (!selectedFriend?.message?.content) return;
+
+        const message = {
+            id: selectedMessageId,
+            content: selectedFriend.message.content,
+        };
+
+        try {
+            await chatHubService.updateMessage(message);
+            setMessage({ content: '', imageUrl: null });
+            setSelectedMessageId(null);
+            setTypeInput('add');
+        } catch (err) {
+            console.error('Lỗi update tin nhắn: ', err);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await chatHubService.deleteMessage(id);
+        } catch (err) {
+            console.error('Lỗi update tin nhắn: ', err);
+        }
+    };
+
     return (
         <div className={cx('wrapper')}>
             {selectedFriend && (
@@ -146,15 +186,43 @@ function Chat() {
                         {selectedFriend.chat?.map((message) => (
                             <div key={message?.id} className={cx('message', message.senderId === user.id ? 'own' : '')}>
                                 <div className={cx('texts')}>
-                                    {message.imageUrl && (
-                                        <img
-                                            src={message.imageUrl}
-                                            alt=""
-                                            style={{ borderRadius: '8px', width: '100%' }}
-                                        />
-                                    )}
+                                    <Flex align="center" gap={12}>
+                                        {message.senderId === user.id && !message.deleted && (
+                                            <Dropdown
+                                                menu={{
+                                                    items,
+                                                    onClick: ({ key }) => {
+                                                        if (key === 'update') {
+                                                            setTypeInput('update');
+                                                            setMessage({ content: message.content, imageUrl: '' });
+                                                            setSelectedMessageId(message.id);
+                                                        } else if (key === 'delete') {
+                                                            handleDelete(message.id);
+                                                        }
+                                                    },
+                                                }}
+                                                placement="top"
+                                            >
+                                                <FontAwesomeIcon icon={faEllipsisVertical} />
+                                            </Dropdown>
+                                        )}
 
-                                    {message.content && <p>{message.content}</p>}
+                                        {message.imageUrl && (
+                                            <img
+                                                src={message.imageUrl}
+                                                alt=""
+                                                style={{ borderRadius: '8px', width: '100%' }}
+                                            />
+                                        )}
+                                        {message.content && !message.deleted ? (
+                                            <p style={{ flex: 1 }}>{message.content}</p>
+                                        ) : (
+                                            <p style={{ flex: 1 }}>This message has been deleted.</p>
+                                        )}
+
+                                        {/* Thực hiện logic của người nhận
+                                        {message.receiverId === user.id} */}
+                                    </Flex>
                                     <span>{dayjs(message.createdDate).utc().utcOffset(7).fromNow()}</span>
                                 </div>
                             </div>
@@ -202,13 +270,13 @@ function Chat() {
                     className={cx('send-btn')}
                     primary
                     small
-                    onClick={handleSend}
+                    onClick={typeInput === 'add' ? handleSend : handleSave}
                     disabled={isCurrentUserBlocked || isReceiverBlocked}
                     style={{
                         cursor: isCurrentUserBlocked || isReceiverBlocked ? 'not-allowed' : 'pointer',
                     }}
                 >
-                    Send
+                    {typeInput === 'add' ? 'Send' : 'Save'}
                 </Button>
             </div>
         </div>

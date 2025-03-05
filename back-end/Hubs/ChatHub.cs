@@ -2,11 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using SocialNetwork.Data;
-using SocialNetwork.Models.Domain;
+using SocialNetwork.Extensions;
 using SocialNetwork.Models.DTO.MessageDTO;
-using SocialNetwork.Models.Entities;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using SocialNetwork.Repositories.MessageRepository;
 
 namespace SocialNetwork.Hubs
 {
@@ -15,15 +13,17 @@ namespace SocialNetwork.Hubs
     {
         private readonly SocialNetworkDbContext _socialNetworkDbContext;
         private readonly IMapper _mapper;
-        public ChatHub(SocialNetworkDbContext socialNetworkDbContext, IMapper mapper)
+        private readonly IMessageRepository _messageRepository;
+        public ChatHub(SocialNetworkDbContext socialNetworkDbContext, IMapper mapper, IMessageRepository messageRepository)
         {
             _socialNetworkDbContext = socialNetworkDbContext;
             _mapper = mapper;
+            _messageRepository = messageRepository;
         }
 
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = Context.GetUserId();
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -34,28 +34,37 @@ namespace SocialNetwork.Hubs
             await base.OnConnectedAsync();
         }
 
-
         public async Task SendMessage(AddMessageDTO addMessageDTO)
         {
-            var newMsg = _mapper.Map<Message>(addMessageDTO);
+            var newMsg = await _messageRepository.Add(addMessageDTO);
 
-            await _socialNetworkDbContext.Messages.AddAsync(newMsg);
-            await _socialNetworkDbContext.SaveChangesAsync();
-
-            var senderMessage = new
-            {
-                type = "sent",
-                message = newMsg
-            };
-
-            var receiverMessage = new
-            {
-                type = "received",
-                message = newMsg
-            };
-
-            await Clients.Group(addMessageDTO.SenderId).SendAsync("ReceiveMessage", senderMessage);
-            await Clients.Group(addMessageDTO.ReceiverId).SendAsync("ReceiveMessage", receiverMessage);
+            await Clients.Group(addMessageDTO.SenderId).SendAsync("ReceiveMessage", newMsg);
+            await Clients.Group(addMessageDTO.ReceiverId).SendAsync("ReceiveMessage", newMsg);
         }
+
+        public async Task UpdateMessage(UpdateMessageDTO updateMessageDTO)
+        {
+            var userId = Context.GetUserId();
+            var updatedMessage = await _messageRepository.Update(userId, updateMessageDTO);
+
+            if (updatedMessage != null)
+            {
+                await Clients.Group(updatedMessage.SenderId).SendAsync("MessageUpdated", updatedMessage);
+                await Clients.Group(updatedMessage.ReceiverId).SendAsync("MessageUpdated", updatedMessage);
+            }
+        }
+
+        public async Task DeleteMessage(string messageId)
+        {
+            var userId = Context.GetUserId();
+            var msg = await _messageRepository.Delete(userId, messageId);
+
+            if (msg != null)
+            {
+                await Clients.Group(msg.SenderId).SendAsync("MessageUpdated", msg);
+                await Clients.Group(msg.ReceiverId).SendAsync("MessageUpdated", msg);
+            }
+        }
+
     }
 }
