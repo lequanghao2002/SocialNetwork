@@ -1,9 +1,7 @@
 import * as signalR from '@microsoft/signalr';
 import { getLocalStorage } from '~/utils/localStorage';
 
-const hubUrl = process.env.REACT_APP_URL_CHATHUB;
-
-console.log('Token:', getLocalStorage('token'));
+const hubUrl = import.meta.env.VITE_URL_CHATHUB;
 
 class ChatHubService {
     constructor() {
@@ -13,17 +11,22 @@ class ChatHubService {
                 transport: signalR.HttpTransportType.WebSockets,
                 skipNegotiation: true,
             })
-            //.withAutomaticReconnect()
+            .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
     }
 
     async startConnection() {
+        if (this.connection.state !== signalR.HubConnectionState.Disconnected) {
+            console.warn('⚠️ SignalR is already connected or connecting.');
+            return;
+        }
+
         try {
             await this.connection.start();
-            console.log('SignalR Connected.');
+            console.log('✅ SignalR Connected.');
         } catch (err) {
-            console.error('SignalR Connection Error: ', err);
+            console.error('❌ SignalR Connection Error: ', err);
             //setTimeout(() => this.startConnection(), 5000); // Thử kết nối lại sau 5s
         }
     }
@@ -55,7 +58,9 @@ class ChatHubService {
     }
 
     stopConnection() {
-        this.connection.stop();
+        if (this.connection.state === signalR.HubConnectionState.Connected) {
+            this.connection.stop();
+        }
     }
 }
 

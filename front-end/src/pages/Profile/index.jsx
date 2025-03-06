@@ -13,7 +13,7 @@ import {
     faUserXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { Col, Row, message } from 'antd';
-import { faLinkedin, faSquareFacebook, faSquareGithub, faUpwork } from '@fortawesome/free-brands-svg-icons';
+import { faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import Home from '../Home';
 import FriendStatusButton from '~/components/FriendStatusButton';
 import { useContext, useEffect, useState } from 'react';
@@ -104,7 +104,7 @@ function Profile() {
                     {userInfo?.userProfile?.coverPhotoUrl && (
                         <img
                             className={cx('image')}
-                            src={`${process.env.REACT_APP_BASE_URL2}${userInfo?.userProfile?.coverPhotoUrl}`}
+                            src={`${import.meta.env.REACT_APP_BASE_URL2}${userInfo?.userProfile?.coverPhotoUrl}`}
                             alt=""
                         />
                     )}
@@ -114,7 +114,7 @@ function Profile() {
                     <div className={cx('header')}>
                         <img
                             className={cx('avatar')}
-                            src={`${process.env.REACT_APP_BASE_URL2}${userInfo?.avatarUrl}`}
+                            src={`${import.meta.env.REACT_APP_BASE_URL2}${userInfo?.avatarUrl}`}
                             alt={userInfo?.firstName}
                         />
                         <div className={cx('info')}>
@@ -228,10 +228,10 @@ function Profile() {
 
                                             {userInfo?.userProfile?.github && (
                                                 <span>
-                                                    <FontAwesomeIcon
+                                                    {/* <FontAwesomeIcon
                                                         icon={faSquareGithub}
                                                         className={cx('icon-intro')}
-                                                    />
+                                                    /> */}
                                                     Github:
                                                     <Button text className={cx('study-at')}>
                                                         {userInfo?.userProfile?.github}
@@ -251,10 +251,10 @@ function Profile() {
 
                                             {userInfo?.userProfile?.facebook && (
                                                 <span>
-                                                    <FontAwesomeIcon
+                                                    {/* <FontAwesomeIcon
                                                         icon={faSquareFacebook}
                                                         className={cx('icon-intro')}
-                                                    />
+                                                    /> */}
                                                     Facebook:
                                                     <Button text className={cx('study-at')}>
                                                         {userInfo?.userProfile?.facebook}
@@ -280,7 +280,9 @@ function Profile() {
                                                     <div key={index} className={cx('item-friends')}>
                                                         <img
                                                             className={cx('img-friend')}
-                                                            src={`${process.env.REACT_APP_BASE_URL2}${item.avatarUrl}`}
+                                                            src={`${import.meta.env.REACT_APP_BASE_URL2}${
+                                                                item.avatarUrl
+                                                            }`}
                                                             alt={item.email}
                                                         />
                                                         <span>{`${item.firstName} ${item.lastName}`}</span>

@@ -1,5 +1,7 @@
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-const storage = getStorage();
+import app from './config';
+
+const storage = getStorage(app);
 
 const upload = async (file, folder, allowedTypes = null) => {
     if (!file) {

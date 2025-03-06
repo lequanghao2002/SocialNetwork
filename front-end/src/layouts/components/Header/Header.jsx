@@ -24,7 +24,6 @@ import Search from '../Search';
 import config from '~/config';
 import AuthContext from '~/context/AuthContext/authContext';
 import { useContext, useEffect } from 'react';
-import { auth } from '~/firebase/config';
 import { useNavigate } from 'react-router-dom';
 import { removeLocalStorage } from '~/utils/localStorage';
 

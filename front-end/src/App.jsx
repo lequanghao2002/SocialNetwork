@@ -5,6 +5,8 @@ import { Fragment, useContext } from 'react';
 import ChatProvider from './context/ChatContext/chatProvider';
 import AuthContext from './context/AuthContext/authContext';
 import AuthProvider from './context/AuthContext/authProvider';
+import { Provider } from 'react-redux';
+import store from './features/store';
 
 function RenderRoutes({ routes }) {
     return (
@@ -31,10 +33,12 @@ function AppContent() {
     const { user } = useContext(AuthContext);
 
     return user ? (
+        //<Provider store={store}>
         <ChatProvider>
             <RenderRoutes routes={privateRoutes} />
         </ChatProvider>
     ) : (
+        //</Provider>
         <RenderRoutes routes={publicRoutes} />
     );
 }

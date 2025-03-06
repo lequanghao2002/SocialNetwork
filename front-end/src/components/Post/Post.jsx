@@ -210,7 +210,11 @@ function Post({
                     >
                         {sharedImageArray.map((imageUrl, index) => (
                             <div className={cx('image')} key={index}>
-                                <Image width={100} height={100} src={`${process.env.REACT_APP_BASE_URL2}${imageUrl}`} />
+                                <Image
+                                    width={100}
+                                    height={100}
+                                    src={`${import.meta.env.REACT_APP_BASE_URL2}${imageUrl}`}
+                                />
                             </div>
                         ))}
                     </Image.PreviewGroup>
@@ -280,7 +284,11 @@ function Post({
                     >
                         {imageArray.map((imageUrl, index) => (
                             <div key={index} className={cx('image')}>
-                                <Image width={100} height={100} src={`${process.env.REACT_APP_BASE_URL2}${imageUrl}`} />
+                                <Image
+                                    width={100}
+                                    height={100}
+                                    src={`${import.meta.env.REACT_APP_BASE_URL2}${imageUrl}`}
+                                />
                             </div>
                         ))}
                     </Image.PreviewGroup>

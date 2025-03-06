@@ -74,7 +74,7 @@ function PostModal({ onSubmit }) {
                     const fileList = imageArray.map((img, index) => ({
                         uid: index,
                         name: img.split('/').pop(),
-                        url: `${process.env.REACT_APP_BASE_URL2}${img}`,
+                        url: `${import.meta.env.REACT_APP_BASE_URL2}${img}`,
                     }));
 
                     setFileList(fileList);

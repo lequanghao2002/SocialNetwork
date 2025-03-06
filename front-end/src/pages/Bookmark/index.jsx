@@ -20,7 +20,6 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import postService from '~/services/postService';
 import PostModal from '~/components/Modals/PostModal';
 import { Empty, message } from 'antd';
-import modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '~/context/AuthContext/authContext';
 

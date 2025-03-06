@@ -11,7 +11,7 @@ const Image = forwardRef(
             setFallback(customFallback);
         };
 
-        const processedSrc = src?.startsWith('UploadFiles') ? `${process.env.REACT_APP_BASE_URL2}${src}` : src;
+        const processedSrc = src?.startsWith('UploadFiles') ? `${import.meta.env.REACT_APP_BASE_URL2}${src}` : src;
         return (
             <img
                 className={classNames(styles.wrapper, className)}

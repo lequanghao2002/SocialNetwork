@@ -42,7 +42,7 @@ function InfoModal({ visible, setVisible, onClose, userInfo, onUpdate }) {
         if (userInfo?.avatarUrl) {
             const avatar = {
                 name: userInfo?.avatarUrl.split('/').pop(),
-                url: `${process.env.REACT_APP_BASE_URL2}${userInfo?.avatarUrl}`,
+                url: `${import.meta.env.REACT_APP_BASE_URL2}${userInfo?.avatarUrl}`,
             };
             setFileAvatar([avatar]);
         } else {
@@ -52,7 +52,7 @@ function InfoModal({ visible, setVisible, onClose, userInfo, onUpdate }) {
         if (userInfo?.userProfile?.coverPhotoUrl) {
             const photo = {
                 name: userInfo?.userProfile?.coverPhotoUrl.split('/').pop(),
-                url: `${process.env.REACT_APP_BASE_URL2}${userInfo?.userProfile?.coverPhotoUrl}`,
+                url: `${import.meta.env.REACT_APP_BASE_URL2}${userInfo?.userProfile?.coverPhotoUrl}`,
             };
             setFileCoverPhoto([photo]);
         } else {
