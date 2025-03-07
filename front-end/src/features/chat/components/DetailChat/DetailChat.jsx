@@ -1,17 +1,19 @@
 import React, { useContext, useMemo } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DetailChat.module.scss';
-import Image from '../Image';
+import Image from '../../../../components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp, faDownload } from '@fortawesome/free-solid-svg-icons';
-import Button from '../Button';
+import Button from '../../../../components/Button';
 import AuthContext from '~/context/AuthContext/authContext';
-import ChatContext from '~/context/ChatContext/chatContext';
+import { friendsSelector, selectedFriendIdSelector } from '../../chatSelectors';
+import { useSelector } from 'react-redux';
 
 const cx = classNames.bind(styles);
 
 function DetailChat() {
-    const { selectedFriendId, friends } = useContext(ChatContext);
+    const friends = useSelector(friendsSelector);
+    const selectedFriendId = useSelector(selectedFriendIdSelector);
     const { user } = useContext(AuthContext);
 
     //------------- Để tạm thời, mình sẽ hard code giá trị cho các biến này ------------\

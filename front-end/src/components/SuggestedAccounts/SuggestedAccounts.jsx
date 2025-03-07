@@ -1,12 +1,13 @@
 import classNames from 'classnames/bind';
 import styles from './SuggestedAccounts.module.scss';
 import AccountItem from './AccountItem';
-import { useContext, useEffect, useState } from 'react';
-import ChatContext from '~/context/ChatContext/chatContext';
+import { useSelector } from 'react-redux';
+import { friendsSelector } from '~/features/chat/chatSelectors';
+
 const cx = classNames.bind(styles);
 
 function SuggestedAccounts({ label }) {
-    const { friends } = useContext(ChatContext);
+    const friends = useSelector(friendsSelector);
 
     return (
         <div className={cx('wrapper')}>

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Chat.module.scss';
-import Image from '../Image';
+import Image from '../../../../components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faCamera,
@@ -13,7 +13,7 @@ import {
     faPhone,
     faVideo,
 } from '@fortawesome/free-solid-svg-icons';
-import Button from '../Button';
+import Button from '../../../../components/Button';
 import EmojiPicker from 'emoji-picker-react';
 import { useContext } from 'react';
 import dayjs from 'dayjs';
@@ -21,11 +21,13 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import AuthContext from '~/context/AuthContext/authContext';
-import ChatContext from '~/context/ChatContext/chatContext';
 import { chatHubService } from '~/sockets/chatHubService';
 import messageService from '~/services/messageService';
 import { uploadChatImage } from '~/utils/uploadHelper';
 import { Dropdown, Flex } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelectors';
+import { setChat, setMessage } from '~/features/chat/chatSlice';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
@@ -41,7 +43,10 @@ function Chat() {
     const isCurrentUserBlocked = false;
     //-------------
 
-    const { selectedFriendId, setMessage, setChat, friends } = useContext(ChatContext);
+    const dispatch = useDispatch();
+    const friends = useSelector(friendsSelector);
+    const selectedFriendId = useSelector(selectedFriendIdSelector);
+
     const { user } = useContext(AuthContext);
     const [open, setOpen] = useState(false);
     const [typeInput, setTypeInput] = useState('add'); // add, update
@@ -52,17 +57,6 @@ function Chat() {
         if (!Array.isArray(friends) || !selectedFriendId) return null;
         return friends.find((friend) => friend.info.id === selectedFriendId);
     }, [friends, selectedFriendId]);
-
-    const items = [
-        {
-            key: 'update',
-            label: 'Update',
-        },
-        {
-            key: 'delete',
-            label: 'Delete',
-        },
-    ];
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -78,8 +72,7 @@ function Chat() {
     const fetchChat = async (userId, ortherUserId) => {
         try {
             const result = await messageService.getMessagesByUserId(userId, ortherUserId);
-            console.log('result', result);
-            setChat(result);
+            dispatch(setChat(result));
         } catch (error) {
             console.error('Failed to fetch posts:', error);
         }
@@ -108,10 +101,12 @@ function Chat() {
     };
 
     const handleClickEmoji = (e) => {
-        setMessage({
-            content: (selectedFriend?.message?.content || '') + e.emoji,
-            imageUrl: null,
-        });
+        dispatch(
+            setMessage({
+                content: (selectedFriend?.message?.content || '') + e.emoji,
+                imageUrl: null,
+            }),
+        );
         setOpen(false);
     };
 
@@ -127,7 +122,7 @@ function Chat() {
 
         try {
             await chatHubService.sendMessage(message);
-            setMessage({ content: '', imageUrl: null });
+            dispatch(setMessage({ content: '', imageUrl: null }));
         } catch (err) {
             console.error('Lỗi gửi tin nhắn: ', err);
         }
@@ -145,7 +140,8 @@ function Chat() {
 
         try {
             await chatHubService.updateMessage(message);
-            setMessage({ content: '', imageUrl: null });
+            dispatch(setMessage({ content: '', imageUrl: null }));
+
             setSelectedMessageId(null);
             setTypeInput('add');
         } catch (err) {
@@ -190,11 +186,23 @@ function Chat() {
                                         {message.senderId === user.id && !message.deleted && (
                                             <Dropdown
                                                 menu={{
-                                                    items,
+                                                    items: [
+                                                        {
+                                                            key: 'update',
+                                                            label: 'Update',
+                                                            disabled: message.imageUrl,
+                                                        },
+                                                        {
+                                                            key: 'delete',
+                                                            label: 'Delete',
+                                                        },
+                                                    ],
                                                     onClick: ({ key }) => {
                                                         if (key === 'update') {
                                                             setTypeInput('update');
-                                                            setMessage({ content: message.content, imageUrl: '' });
+                                                            dispatch(
+                                                                setMessage({ content: message.content, imageUrl: '' }),
+                                                            );
                                                             setSelectedMessageId(message.id);
                                                         } else if (key === 'delete') {
                                                             handleDelete(message.id);
@@ -207,17 +215,20 @@ function Chat() {
                                             </Dropdown>
                                         )}
 
-                                        {message.imageUrl && (
+                                        {message.deleted ? (
+                                            message.imageUrl ? (
+                                                <p style={{ flex: 1 }}>This image has been deleted.</p>
+                                            ) : (
+                                                <p style={{ flex: 1 }}>This message has been deleted.</p>
+                                            )
+                                        ) : message.imageUrl ? (
                                             <img
                                                 src={message.imageUrl}
-                                                alt=""
+                                                alt="Sent image"
                                                 style={{ borderRadius: '8px', width: '100%' }}
                                             />
-                                        )}
-                                        {message.content && !message.deleted ? (
-                                            <p style={{ flex: 1 }}>{message.content}</p>
                                         ) : (
-                                            <p style={{ flex: 1 }}>This message has been deleted.</p>
+                                            <p style={{ flex: 1 }}>{message.content}</p>
                                         )}
 
                                         {/* Thực hiện logic của người nhận
@@ -254,7 +265,7 @@ function Chat() {
                     type="text"
                     placeholder="Type a message..."
                     value={selectedFriend?.message?.content}
-                    onChange={(e) => setMessage({ content: e.target.value, imageUrl: null })}
+                    onChange={(e) => dispatch(setMessage({ content: e.target.value, imageUrl: null }))}
                     disabled={isCurrentUserBlocked || isReceiverBlocked}
                     style={{
                         cursor: isCurrentUserBlocked || isReceiverBlocked ? 'not-allowed' : 'auto',

@@ -1,29 +1,32 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import classNames from 'classnames/bind';
 import styles from './ListFriends.module.scss';
 import Image from '~/components/Image';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
 import AuthContext from '~/context/AuthContext/authContext';
-import userService from '~/services/userService';
-import ChatContext from '~/context/ChatContext/chatContext';
 import EllipsisText from '~/components/Text/EllipsisText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import messageService from '~/services/messageService';
+import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelectors';
+import { useDispatch, useSelector } from 'react-redux';
+import { markMessageAsSeen, setSelectedFriendId } from '~/features/chat/chatSlice';
 
 const cx = classNames.bind(styles);
 
 function ListFriends() {
     const { user } = useContext(AuthContext);
-    const { setSelectedFriendId, friends, selectedFriendId, markMessageAsSeen } = useContext(ChatContext);
+    const dispatch = useDispatch();
+    const friends = useSelector(friendsSelector);
+    const selectedFriendId = useSelector(selectedFriendIdSelector);
 
     const handleSelect = async (id) => {
-        setSelectedFriendId(id);
+        dispatch(setSelectedFriendId(id));
 
         const friendSelected = friends.find((friend) => friend.info.id === id);
         const lastMessage = friendSelected.info.lastMessage;
         if (lastMessage && lastMessage.receiverId === user.id && !lastMessage.isSeen) {
             await messageService.markMessageAsSeen(user.id, id);
-            markMessageAsSeen(true);
+            dispatch(markMessageAsSeen(true));
         }
     };
 
@@ -36,7 +39,7 @@ function ListFriends() {
 
                 return (
                     <div
-                        key={friend.Id}
+                        key={friend.info.id}
                         className={cx('item', {
                             active: friend.info.id === selectedFriendId,
                         })}

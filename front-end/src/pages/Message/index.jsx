@@ -1,11 +1,12 @@
-import { useContext } from 'react';
-import Chat from '~/components/Chat';
-import DetailChat from '~/components/DetailChat';
-import ListChat from '~/components/ListChat';
-import ChatContext from '~/context/ChatContext/chatContext';
+import { useSelector } from 'react-redux';
+import { selectedFriendIdSelector } from '~/features/chat/chatSelectors';
+import Chat from '~/features/chat/components/Chat';
+import DetailChat from '~/features/chat/components/DetailChat';
+import ListChat from '~/features/chat/components/ListChat';
 
 function Message() {
-    const { selectedFriendId } = useContext(ChatContext);
+    const selectedFriendId = useSelector(selectedFriendIdSelector);
+    console.log('selectedFriendId', selectedFriendId);
     return (
         <div style={{ display: 'flex', position: 'fixed', top: '60px', width: ' 100%' }}>
             <ListChat />

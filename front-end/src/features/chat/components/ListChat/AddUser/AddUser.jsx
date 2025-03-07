@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import classNames from 'classnames/bind';
 import styles from './AddUser.module.scss';
-import Image from '../../Image';
 import Button from '~/components/Button';
 import { Empty, Modal } from 'antd';
 import {
@@ -17,6 +16,7 @@ import {
     where,
 } from 'firebase/firestore';
 import AuthContext from '~/context/AuthContext/authContext';
+import Image from '~/components/Image';
 const cx = classNames.bind(styles);
 
 function AddUser({ visible, onClose }) {

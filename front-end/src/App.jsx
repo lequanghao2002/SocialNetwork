@@ -1,12 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { privateRoutes, publicRoutes } from '~/routes';
 import { DefaultLayout } from '~/layouts';
-import { Fragment, useContext } from 'react';
-import ChatProvider from './context/ChatContext/chatProvider';
+import { Fragment, useContext, useEffect } from 'react';
 import AuthContext from './context/AuthContext/authContext';
 import AuthProvider from './context/AuthContext/authProvider';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import store from './features/store';
+import { fetchFriendsThunk } from './features/chat/chatThunks';
+import { chatHubService } from './sockets/chatHubService';
+import { addMessageToChat, updateMessageInChat } from './features/chat/chatSlice';
 
 function RenderRoutes({ routes }) {
     return (
@@ -31,23 +33,38 @@ function RenderRoutes({ routes }) {
 
 function AppContent() {
     const { user } = useContext(AuthContext);
+    const dispatch = useDispatch();
 
-    return user ? (
-        //<Provider store={store}>
-        <ChatProvider>
-            <RenderRoutes routes={privateRoutes} />
-        </ChatProvider>
-    ) : (
-        //</Provider>
-        <RenderRoutes routes={publicRoutes} />
-    );
+    useEffect(() => {
+        chatHubService.startConnection();
+
+        chatHubService.onReceiveMessage((message) => {
+            dispatch(addMessageToChat(message));
+        });
+
+        chatHubService.onMessageUpdated((message) => {
+            dispatch(updateMessageInChat(message));
+        });
+
+        return () => chatHubService.stopConnection();
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            dispatch(fetchFriendsThunk(user.id));
+        }
+    }, [user]);
+
+    return user ? <RenderRoutes routes={privateRoutes} /> : <RenderRoutes routes={publicRoutes} />;
 }
 
 function App() {
     return (
         <Router>
             <AuthProvider>
-                <AppContent />
+                <Provider store={store}>
+                    <AppContent />
+                </Provider>
             </AuthProvider>
         </Router>
     );

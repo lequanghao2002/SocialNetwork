@@ -22,13 +22,14 @@ import { useParams } from 'react-router-dom';
 import ProfileModal from '~/components/Modals/ProfileModal';
 import InfoModal from '~/components/Modals/InfoModal';
 import AuthContext from '~/context/AuthContext/authContext';
-import ChatProvider from '~/context/ChatContext/chatProvider';
+import { useSelector } from 'react-redux';
+import { friendsSelector } from '~/features/chat/chatSelectors';
 
 const cx = classNames.bind(styles);
 
 function Profile() {
     const { id } = useParams();
-    const { friends } = useContext(ChatProvider);
+    const friends = useSelector(friendsSelector);
     const { user } = useContext(AuthContext);
     const [userInfo, setUserInfo] = useState(null);
     const [friendShip, setFriendShip] = useState({});
