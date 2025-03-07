@@ -6,11 +6,12 @@ import { Spin } from 'antd';
 import config from '~/config';
 import { getLocalStorage } from '~/utils/localStorage';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import authService from '~/services/authService';
 
 function AuthProvider({ children }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const initialState = {
         user: null,
         // user: {
@@ -27,7 +28,6 @@ function AuthProvider({ children }) {
     const [state, dispatch] = useReducer(AuthReducer, initialState);
     const [loading, setLoading] = useState(true);
 
-    // Lấy user từ API khi có token
     useEffect(() => {
         const fetchUser = async () => {
             const token = getLocalStorage('token');
@@ -48,14 +48,14 @@ function AuthProvider({ children }) {
     }, []);
 
     useEffect(() => {
-        if (!loading) {
-            if (state.user) {
-                navigate(config.routes.home);
-            } else {
-                navigate(config.routes.login);
-            }
+        const isOnLoginPage = location.pathname === config.routes.login;
+
+        if (!state.user && !isOnLoginPage) {
+            navigate(config.routes.login);
+        } else if (state.user && isOnLoginPage) {
+            navigate(config.routes.home);
         }
-    }, [state.user, loading]);
+    }, [state.user]);
 
     const setUser = (payload) => {
         dispatch({ type: SET_USER, payload });

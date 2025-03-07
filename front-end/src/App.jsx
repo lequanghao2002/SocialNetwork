@@ -36,22 +36,20 @@ function AppContent() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        chatHubService.startConnection();
-
-        chatHubService.onReceiveMessage((message) => {
-            dispatch(addMessageToChat(message));
-        });
-
-        chatHubService.onMessageUpdated((message) => {
-            dispatch(updateMessageInChat(message));
-        });
-
-        return () => chatHubService.stopConnection();
-    }, []);
-
-    useEffect(() => {
         if (user) {
             dispatch(fetchFriendsThunk(user.id));
+
+            chatHubService.startConnection();
+
+            chatHubService.onReceiveMessage((message) => {
+                dispatch(addMessageToChat(message));
+            });
+
+            chatHubService.onMessageUpdated((message) => {
+                dispatch(updateMessageInChat(message));
+            });
+
+            return () => chatHubService.stopConnection();
         }
     }, [user]);
 
