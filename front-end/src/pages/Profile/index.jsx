@@ -23,7 +23,7 @@ import ProfileModal from '~/components/Modals/ProfileModal';
 import InfoModal from '~/components/Modals/InfoModal';
 import AuthContext from '~/context/AuthContext/authContext';
 import { useSelector } from 'react-redux';
-import { friendsSelector } from '~/features/chat/chatSelectors';
+import { friendsSelector } from '~/features/chat/chatSelector';
 
 const cx = classNames.bind(styles);
 

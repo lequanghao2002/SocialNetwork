@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { selectedFriendIdSelector } from '~/features/chat/chatSelectors';
+import { selectedFriendIdSelector } from '~/features/chat/chatSelector';
 import Chat from '~/features/chat/components/Chat';
 import DetailChat from '~/features/chat/components/DetailChat';
 import ListChat from '~/features/chat/components/ListChat';
