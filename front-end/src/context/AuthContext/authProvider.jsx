@@ -48,14 +48,26 @@ function AuthProvider({ children }) {
     }, []);
 
     useEffect(() => {
-        const isOnLoginPage = location.pathname === config.routes.login;
+        if (loading) return;
 
-        if (!state.user && !isOnLoginPage) {
-            navigate(config.routes.login);
-        } else if (state.user && isOnLoginPage) {
-            navigate(config.routes.home);
+        const isOnLoginPage = location.pathname === config.routes.login;
+        const isValidRoute = Object.values(config.routes).includes(location.pathname);
+
+        if (!state.user) {
+            if (!isOnLoginPage) {
+                console.log('Chưa đăng nhập, chuyển về Login');
+                navigate(config.routes.login);
+            }
+        } else {
+            if (isOnLoginPage) {
+                console.log('Đã đăng nhập, chuyển về Home');
+                navigate(config.routes.home);
+            } else if (!isValidRoute) {
+                console.log('URL sai, chuyển về Home');
+                navigate(config.routes.home);
+            }
         }
-    }, [state.user]);
+    }, [state.user, location.pathname]);
 
     const setUser = (payload) => {
         dispatch({ type: SET_USER, payload });
