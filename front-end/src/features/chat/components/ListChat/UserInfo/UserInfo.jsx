@@ -1,14 +1,15 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import classNames from 'classnames/bind';
 import styles from './UserInfo.module.scss';
 import Image from '~/components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, faPenToSquare, faVideo } from '@fortawesome/free-solid-svg-icons';
-import AuthContext from '~/context/AuthContext/authContext';
+import { userSelector } from '~/features/auth/authSelector';
+import { useSelector } from 'react-redux';
 const cx = classNames.bind(styles);
 
 function UserInfo() {
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
 
     return (
         <div className={cx('wrapper')}>

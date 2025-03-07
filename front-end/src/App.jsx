@@ -1,14 +1,18 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { privateRoutes, publicRoutes } from '~/routes';
 import { DefaultLayout } from '~/layouts';
 import { Fragment, useContext, useEffect } from 'react';
 import AuthContext from './context/AuthContext/authContext';
 import AuthProvider from './context/AuthContext/authProvider';
-import { Provider, useDispatch } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from './features/store';
 import { fetchFriendsThunk } from './features/chat/chatThunks';
 import { chatHubService } from './sockets/chatHubService';
 import { addMessageToChat, updateMessageInChat } from './features/chat/chatSlice';
+import { loadingSelector, userSelector } from './features/auth/authSelector';
+import { fetchUserThunk } from './features/auth/authThunk';
+import { Spin } from 'antd';
+import config from './config';
 
 function RenderRoutes({ routes }) {
     return (
@@ -32,39 +36,63 @@ function RenderRoutes({ routes }) {
 }
 
 function AppContent() {
-    const { user } = useContext(AuthContext);
     const dispatch = useDispatch();
+    const user = useSelector(userSelector);
+    const loading = useSelector(loadingSelector);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Gọi fetchUserThunk() chỉ khi app khởi động
+    useEffect(() => {
+        dispatch(fetchUserThunk());
+    }, [dispatch]);
 
     useEffect(() => {
-        if (user) {
-            dispatch(fetchFriendsThunk(user.id));
+        if (!user) return;
 
-            chatHubService.startConnection();
+        dispatch(fetchFriendsThunk(user.id));
 
-            chatHubService.onReceiveMessage((message) => {
-                dispatch(addMessageToChat(message));
-            });
+        chatHubService.startConnection();
 
-            chatHubService.onMessageUpdated((message) => {
-                dispatch(updateMessageInChat(message));
-            });
+        chatHubService.onReceiveMessage((message) => {
+            dispatch(addMessageToChat(message));
+        });
 
-            return () => chatHubService.stopConnection();
+        chatHubService.onMessageUpdated((message) => {
+            dispatch(updateMessageInChat(message));
+        });
+
+        return () => chatHubService.stopConnection();
+    }, [user, dispatch]);
+
+    // Xử lý điều hướng
+    useEffect(() => {
+        if (loading) return;
+
+        const isOnLoginPage = location.pathname === config.routes.login;
+        const isValidRoute = Object.values(config.routes).includes(location.pathname);
+
+        if (!user) {
+            !isOnLoginPage && navigate(config.routes.login);
+        } else {
+            if (isOnLoginPage || !isValidRoute) {
+                navigate(config.routes.home);
+            }
         }
-    }, [user]);
+    }, [user, location.pathname, loading, navigate]);
 
-    return user ? <RenderRoutes routes={privateRoutes} /> : <RenderRoutes routes={publicRoutes} />;
+    if (loading) return <Spin size="large" />;
+
+    return <RenderRoutes routes={user ? privateRoutes : publicRoutes} />;
 }
 
 function App() {
     return (
-        <Router>
-            <AuthProvider>
-                <Provider store={store}>
-                    <AppContent />
-                </Provider>
-            </AuthProvider>
-        </Router>
+        <Provider store={store}>
+            <Router>
+                <AppContent />
+            </Router>
+        </Provider>
     );
 }
 

@@ -15,12 +15,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../../../components/Button';
 import EmojiPicker from 'emoji-picker-react';
-import { useContext } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import AuthContext from '~/context/AuthContext/authContext';
 import { chatHubService } from '~/sockets/chatHubService';
 import messageService from '~/services/messageService';
 import { uploadChatImage } from '~/utils/uploadHelper';
@@ -28,6 +26,7 @@ import { Dropdown, Flex } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelectors';
 import { setChat, setMessage } from '~/features/chat/chatSlice';
+import { userSelector } from '~/features/auth/authSelector';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
@@ -47,7 +46,7 @@ function Chat() {
     const friends = useSelector(friendsSelector);
     const selectedFriendId = useSelector(selectedFriendIdSelector);
 
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const [open, setOpen] = useState(false);
     const [typeInput, setTypeInput] = useState('add'); // add, update
     const [selectedMessageId, setSelectedMessageId] = useState(null);

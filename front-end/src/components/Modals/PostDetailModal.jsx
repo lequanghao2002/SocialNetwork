@@ -12,8 +12,9 @@ import { useContext, useState } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import commentService from '~/services/commentService';
 import Comment from '../Comment/Comment';
-import AuthContext from '~/context/AuthContext/authContext';
 import { NotificationContext } from '~/context/Notification';
+import { useSelector } from 'react-redux';
+import { userSelector } from '~/features/auth/authSelector';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
@@ -32,7 +33,7 @@ function PostDetailModal({
     const [form] = Form.useForm();
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const { success, error } = useContext(NotificationContext);
     const [loading, setLoading] = useState(false);
 

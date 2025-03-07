@@ -21,13 +21,14 @@ import postService from '~/services/postService';
 import PostModal from '~/components/Modals/PostModal';
 import { Empty, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import AuthContext from '~/context/AuthContext/authContext';
+import { useSelector } from 'react-redux';
+import { userSelector } from '~/features/auth/authSelector';
 
 const cx = classNames.bind(styles);
 
 function Bookmark() {
     const [posts, setPosts] = useState([]);
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [messageApi, contextHolder] = message.useMessage();

@@ -3,18 +3,18 @@ import classNames from 'classnames/bind';
 import styles from './ListFriends.module.scss';
 import Image from '~/components/Image';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
-import AuthContext from '~/context/AuthContext/authContext';
 import EllipsisText from '~/components/Text/EllipsisText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import messageService from '~/services/messageService';
 import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelectors';
 import { useDispatch, useSelector } from 'react-redux';
 import { markMessageAsSeen, setSelectedFriendId } from '~/features/chat/chatSlice';
+import { userSelector } from '~/features/auth/authSelector';
 
 const cx = classNames.bind(styles);
 
 function ListFriends() {
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const dispatch = useDispatch();
     const friends = useSelector(friendsSelector);
     const selectedFriendId = useSelector(selectedFriendIdSelector);

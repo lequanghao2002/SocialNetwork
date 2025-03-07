@@ -11,12 +11,14 @@ import commentService from '~/services/commentService';
 import { message } from 'antd';
 import AuthContext from '~/context/AuthContext/authContext';
 import { NotificationContext } from '~/context/Notification';
+import { useSelector } from 'react-redux';
+import { userSelector } from '~/features/auth/authSelector';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
 function Comment({ item, postId, posts, setPosts }) {
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const [relyMode, setRelyMode] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [open, setOpen] = useState(false);

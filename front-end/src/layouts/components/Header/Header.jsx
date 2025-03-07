@@ -26,6 +26,9 @@ import AuthContext from '~/context/AuthContext/authContext';
 import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { removeLocalStorage } from '~/utils/localStorage';
+import { useDispatch, useSelector } from 'react-redux';
+import { userSelector } from '~/features/auth/authSelector';
+import { logout } from '~/features/auth/authSlice';
 
 const cx = classNames.bind(styles);
 
@@ -62,7 +65,8 @@ const MENU_ITEMS = [
 
 function Header() {
     const navigate = useNavigate();
-    const { user, setUser } = useContext(AuthContext);
+    const dispatch = useDispatch();
+    const user = useSelector(userSelector);
 
     console.log({ user });
 
@@ -74,10 +78,7 @@ function Header() {
                 break;
             }
             case 'Log out': {
-                removeLocalStorage('token');
-                setUser(null);
-                navigate(config.routes.login);
-
+                dispatch(logout());
                 break;
             }
             default:

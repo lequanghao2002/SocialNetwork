@@ -7,11 +7,13 @@ import { GoogleLogin } from '@react-oauth/google';
 import authService from '~/services/authService';
 import AuthContext from '~/context/AuthContext/authContext';
 import { setLocalStorage } from '~/utils/localStorage';
+import { useDispatch } from 'react-redux';
+import { setUser } from '~/features/auth/authSlice';
 
 const cx = classNames.bind(styles);
 
 function Login() {
-    const { setUser } = useContext(AuthContext);
+    const dispatch = useDispatch();
 
     const handleGoogleLogin = async (response) => {
         const { credential } = response;
@@ -21,7 +23,7 @@ function Login() {
             setLocalStorage('token', token);
 
             const user = await authService.me();
-            setUser(user);
+            dispatch(setUser(user));
         } catch (error) {}
     };
 

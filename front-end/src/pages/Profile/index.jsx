@@ -24,13 +24,14 @@ import InfoModal from '~/components/Modals/InfoModal';
 import AuthContext from '~/context/AuthContext/authContext';
 import { useSelector } from 'react-redux';
 import { friendsSelector } from '~/features/chat/chatSelectors';
+import { userSelector } from '~/features/auth/authSelector';
 
 const cx = classNames.bind(styles);
 
 function Profile() {
     const { id } = useParams();
     const friends = useSelector(friendsSelector);
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const [userInfo, setUserInfo] = useState(null);
     const [friendShip, setFriendShip] = useState({});
     const [showProfileModal, setShowProfileModal] = useState(null);

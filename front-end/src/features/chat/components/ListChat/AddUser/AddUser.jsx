@@ -1,26 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from './AddUser.module.scss';
 import Button from '~/components/Button';
 import { Empty, Modal } from 'antd';
-import {
-    arrayUnion,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    serverTimestamp,
-    setDoc,
-    updateDoc,
-    where,
-} from 'firebase/firestore';
-import AuthContext from '~/context/AuthContext/authContext';
 import Image from '~/components/Image';
+import { userSelector } from '~/features/auth/authSelector';
+import { useSelector } from 'react-redux';
 const cx = classNames.bind(styles);
 
 function AddUser({ visible, onClose }) {
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const [friend, setFriends] = useState(null);
     const [name, setName] = useState('');
 

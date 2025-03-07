@@ -5,16 +5,16 @@ import Image from '../../../../components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp, faDownload } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../../../components/Button';
-import AuthContext from '~/context/AuthContext/authContext';
 import { friendsSelector, selectedFriendIdSelector } from '../../chatSelectors';
 import { useSelector } from 'react-redux';
+import { userSelector } from '~/features/auth/authSelector';
 
 const cx = classNames.bind(styles);
 
 function DetailChat() {
     const friends = useSelector(friendsSelector);
     const selectedFriendId = useSelector(selectedFriendIdSelector);
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
 
     //------------- Để tạm thời, mình sẽ hard code giá trị cho các biến này ------------\
     const isReceiverBlocked = false;

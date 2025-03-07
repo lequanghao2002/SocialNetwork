@@ -24,13 +24,15 @@ import * as modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '~/context/AuthContext/authContext';
 import { AppContext } from '~/context/AppProvider';
+import { userSelector } from '~/features/auth/authSelector';
+import { useSelector } from 'react-redux';
 
 const cx = classNames.bind(styles);
 
 function Home({ profile, profileId }) {
     const [posts, setPosts] = useState([]);
     const { isPostModalVisible, setIsPostModalVisible, modePost, setModePost } = useContext(AppContext);
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [messageApi, contextHolder] = message.useMessage();

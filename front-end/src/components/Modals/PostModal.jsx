@@ -16,7 +16,8 @@ import tagService from '~/services/tagService';
 import { AppContext } from '~/context/AppProvider';
 import './PostModal.css';
 import * as modePostConstant from '~/constant';
-import AuthContext from '~/context/AuthContext/authContext';
+import { useSelector } from 'react-redux';
+import { userSelector } from '~/features/auth/authSelector';
 const items = [
     {
         label: 'Public',
@@ -49,7 +50,7 @@ function PostModal({ onSubmit }) {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const inputRef = useRef();
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
 
     useEffect(() => {
         if (isPostModalVisible) {

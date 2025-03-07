@@ -20,9 +20,10 @@ import postService from '~/services/postService';
 import * as modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
 import PostDetailModal from '../Modals/PostDetailModal';
-import AuthContext from '~/context/AuthContext/authContext';
 import { NotificationContext } from '~/context/Notification';
 import { AppContext } from '~/context/AppProvider';
+import { useSelector } from 'react-redux';
+import { userSelector } from '~/features/auth/authSelector';
 
 const cx = classNames.bind(styles);
 
@@ -38,7 +39,7 @@ function Post({
     const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
         useContext(AppContext);
     const [checkLike, setCheckLike] = useState();
-    const { user } = useContext(AuthContext);
+    const user = useSelector(userSelector);
     const [sharedPost, setSharedPost] = useState(null);
     const [sharedCount, setSharedCount] = useState(0);
     const [showPostDetailModal, setShowPostDetailModal] = useState(null);
