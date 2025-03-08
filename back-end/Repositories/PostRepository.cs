@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using SocialNetwork.Data;
 using SocialNetwork.Helpers;
 using SocialNetwork.Models.Domain;
@@ -515,25 +516,28 @@ namespace SocialNetwork.Repositories
 
         public async Task<GetPostDTO> Update(UpdatePostDTO postDTO)
         {
-            //var postUpdate = _mapper.Map<Post>(postDTO);
-            var postUpdate = await _dbContext.Posts.SingleOrDefaultAsync(p => p.Id == postDTO.Id);
-            postUpdate.Content = postDTO.Content;
-            postUpdate.Status = postDTO.Status;
+            var post = await _dbContext.Posts.SingleOrDefaultAsync(p => p.Id == postDTO.Id);
 
-            postUpdate.Images = "";
-            if (postDTO.FileList != null)
+            if (post == null)
             {
-                postUpdate.Images = await HandleUpload.UploadImages(postDTO.FileList);
+                throw new Exception("Post not found");
             }
+
+            if (post.UserId != postDTO.UserId)
+            {
+                throw new UnauthorizedAccessException("You are not allowed to update this post");
+            }
+
+            _mapper.Map(postDTO, post);
             await _dbContext.SaveChangesAsync();
 
-            await _postTagRepository.Delete(postUpdate.Id);
-            if (postDTO.TagList != null)
+            await _postTagRepository.Delete(post.Id);
+            if (postDTO.Tags != null)
             {
-                await _postTagRepository.Add(postDTO.TagList, postDTO.Id);
+                await _postTagRepository.Add(postDTO.Tags, postDTO.Id);
             }
 
-            var postNewById = await GetById(postUpdate.Id);
+            var postNewById = await GetById(post.Id);
 
             return postNewById;
         }

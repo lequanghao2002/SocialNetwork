@@ -18,13 +18,15 @@ namespace SocialNetwork.Helpers
         {
             CreateMap<AddPostDTO, Post>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
-                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Count > 0 ? JsonConvert.SerializeObject(src.Images) : null))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => (src.Images != null && src.Images.Count > 0) ? JsonConvert.SerializeObject(src.Images) : null))
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => (DateTime?)null)) 
                 .ForMember(dest => dest.Deleted, opt => opt.MapFrom(src => false))
                 .ForMember(dest => dest.DeletedDate, opt => opt.MapFrom(src => (DateTime?)null));
-
             CreateMap<Post, GetPostDTO>().ReverseMap();
+            CreateMap<UpdatePostDTO, Post>()
+               .ForMember(dest => dest.Images, opt => opt.MapFrom(src => (src.Images != null && src.Images.Count > 0) ?  JsonConvert.SerializeObject(src.Images) : null))
+               .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow)); 
 
             CreateMap<Tag, GetTagDTO>().ReverseMap();
             CreateMap<Tag, AddTagDTO>().ReverseMap();

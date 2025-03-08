@@ -60,6 +60,6 @@ const postSlice = createSlice({
     },
 });
 
-export const { setPosts, setStatus, addPost, setLike } = postSlice.actions;
+export const { setPosts, setStatus, addPost, updatePost, setLike } = postSlice.actions;
 
 export default postSlice;

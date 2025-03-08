@@ -133,10 +133,19 @@ namespace SocialNetwork.Controllers
         }
 
         [HttpPut("update")]
-        public async Task<IActionResult> Update([FromForm] UpdatePostDTO postDTO)
+        public async Task<IActionResult> Update(UpdatePostDTO postDTO)
         {
             try
             {
+                var userId = _userService.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                postDTO.UserId = userId;
+
                 var result = await _postRepository.Update(postDTO);
 
                 if (result != null)
@@ -145,7 +154,7 @@ namespace SocialNetwork.Controllers
                     return Ok(result);
                 }
 
-                return BadRequest("Create post failed");
+                return BadRequest("Update post failed");
             }
             catch (Exception ex)
             {

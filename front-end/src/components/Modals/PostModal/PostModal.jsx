@@ -26,7 +26,7 @@ import TagSelectField from '~/components/Form/Fields/Tag/TagSelectField';
 import PostStatusField from '~/components/Form/Fields/PostStatus/PostStatusField';
 import { useWatch } from 'antd/es/form/Form';
 import LoadingModal from '../LoadingModal/LoadingModal';
-import { addPost } from '~/features/post/postSlice';
+import { addPost, updatePost } from '~/features/post/postSlice';
 
 function PostModal() {
     const dispatch = useDispatch();
@@ -41,16 +41,25 @@ function PostModal() {
 
     useEffect(() => {
         if (postModal.isOpen) {
+            if (postModal.type === 'add') {
+                form.setFieldsValue({
+                    content: '',
+                    status: 1,
+                    images: [],
+                    tags: [],
+                });
+            } else if (postModal.type === 'update') {
+                form.setFieldsValue({
+                    content: postModal.data.content,
+                    status: postModal.data.status,
+                    images: JSON.parse(postModal.data.images).map((image) => ({ url: image })),
+                    tags: postModal.data.listTag.map((tag) => tag.name),
+                });
+            }
+
             setTimeout(() => {
                 inputAreaRef.current && inputAreaRef.current.focus();
             }, 0);
-
-            form.setFieldsValue({
-                content: '',
-                status: 1,
-                images: [],
-                tags: [],
-            });
         }
     }, [postModal.isOpen]);
 
@@ -67,6 +76,9 @@ function PostModal() {
             if (postModal.type === 'add') {
                 res = await postService.add(data);
                 dispatch(addPost(res));
+            } else if (postModal.type === 'update') {
+                res = await postService.update({ ...data, id: postModal.data.id });
+                dispatch(updatePost(res));
             }
         } catch (error) {
             console.error('Error:', error);

@@ -24,6 +24,7 @@ import { AppContext } from '~/context/AppProvider';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { setLike } from '~/features/post/postSlice';
+import { openModal } from '~/features/modal/modalSlice';
 
 const cx = classNames.bind(styles);
 
@@ -35,63 +36,37 @@ function Post({ data, disableActionButton = false }) {
     const { success, error } = useNotification();
     const navigate = useNavigate();
 
+    const isOwner = data.userId === user.id;
+    const isSaved = data?.usersFavourite?.some((item) => item.userId === user.id);
+
     const imageArray = data.images ? JSON.parse(data.images) : null;
     const isLiked = data.likes.some((like) => like.userId === user.id);
 
-    const ACTION_POST =
-        data.userId === user.Id
-            ? data?.usersFavourite?.find((item) => item.userId === user.Id)
-                ? [
-                      {
-                          icon: <FontAwesomeIcon icon={faPenToSquare}></FontAwesomeIcon>,
-                          title: 'Update post',
-                      },
-                      {
-                          icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
-                          title: 'UnSave post',
-                      },
+    console.log(data);
 
-                      {
-                          icon: <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>,
-                          title: 'Delete post',
-                      },
-                  ]
-                : [
-                      {
-                          icon: <FontAwesomeIcon icon={faPenToSquare}></FontAwesomeIcon>,
-                          title: 'Update post',
-                      },
-                      {
-                          icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
-                          title: 'Save post',
-                      },
-
-                      {
-                          icon: <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>,
-                          title: 'Delete post',
-                      },
-                  ]
-            : data?.usersFavourite?.find((item) => item.userId === user.Id)
+    const ACTION_POST = [
+        ...(isOwner
             ? [
                   {
-                      icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
-                      title: 'UnSave post',
+                      icon: <FontAwesomeIcon icon={faPenToSquare} />,
+                      title: 'Update post',
+                  },
+                  {
+                      icon: <FontAwesomeIcon icon={faTrash} />,
+                      title: 'Delete post',
                   },
               ]
-            : [
-                  {
-                      icon: <FontAwesomeIcon icon={faBookmark}></FontAwesomeIcon>,
-                      title: 'Save post',
-                  },
-              ];
+            : []),
+        {
+            icon: <FontAwesomeIcon icon={faBookmark} />,
+            title: isSaved ? 'UnSave post' : 'Save post',
+        },
+    ];
 
-    // Handle logic
     const handleMenuChange = (menuItem) => {
         switch (menuItem.title) {
             case 'Update post': {
-                setPostCurrent(data);
-                setModePost(modePostConstant.modeUpdate);
-                setIsPostModalVisible(true);
+                dispath(openModal({ name: 'post', type: 'update', data }));
                 break;
             }
             case 'Delete post': {
@@ -215,7 +190,7 @@ function Post({ data, disableActionButton = false }) {
     };
 
     useEffect(() => {
-        fetchCountPostShared(data.id);
+        //fetchCountPostShared(data.id);
     }, [data.id]);
 
     const fetchCountPostShared = async (id) => {
@@ -244,8 +219,6 @@ function Post({ data, disableActionButton = false }) {
                 <div className={cx('header')}>
                     <AccountPopper data={data} />
 
-                    {/* <PostModal data={data} /> */}
-                    {/* <PostModal onSubmit={handlePostSubmit} /> */}
                     <Menu items={ACTION_POST} onChange={handleMenuChange}>
                         <span>
                             <FontAwesomeIcon className={cx('icon-ellipsis')} icon={faEllipsisVertical} />
