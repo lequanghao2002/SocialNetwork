@@ -30,6 +30,7 @@ namespace SocialNetwork.Helpers
             CreateMap<Tag, AddTagDTO>().ReverseMap();
 
             CreateMap<Like, GetLikeDTO>().ReverseMap();
+            CreateMap<Like, ChangeLikeDTO>().ReverseMap();
 
             CreateMap<UserProfile, GetUserProfileDTO>().ReverseMap();
             CreateMap<UserProfile, UpdateUserProfileDTO>().ReverseMap();

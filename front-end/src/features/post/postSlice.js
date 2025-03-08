@@ -20,11 +20,29 @@ const postSlice = createSlice({
         // setPosts: (state, action) => {
         //     state.posts = action.payload;
         // },
+        addPost: (state, action) => {
+            state.posts.unshift(action.payload);
+        },
+        updatePost: (state, action) => {
+            const post = state.posts.find((post) => post.id === action.payload.id);
+            if (post) {
+                Object.assign(post, action.payload);
+            }
+        },
         setStatus: (state, action) => {
             state.filter.status = action.payload;
         },
-        addPost: (state, action) => {
-            state.posts.unshift(action.payload);
+        setLike: (state, action) => {
+            const { id, userId, type } = action.payload;
+            const post = state.posts.find((post) => post.id === id);
+
+            if (post) {
+                if (type === 'add' && !post.likes.includes(userId)) {
+                    post.likes.push({ userId });
+                } else if (type === 'delete') {
+                    post.likes = post.likes.filter((like) => like.userId !== userId);
+                }
+            }
         },
     },
     extraReducers: (builder) => {
@@ -42,6 +60,6 @@ const postSlice = createSlice({
     },
 });
 
-export const { setPosts, setStatus, addPost } = postSlice.actions;
+export const { setPosts, setStatus, addPost, setLike } = postSlice.actions;
 
 export default postSlice;

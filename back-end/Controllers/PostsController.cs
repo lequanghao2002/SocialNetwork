@@ -174,7 +174,7 @@ namespace SocialNetwork.Controllers
         }
 
         [HttpPost("change-like")]
-        public async Task<IActionResult> ChangeLike(GetLikeDTO likeDTO)
+        public async Task<IActionResult> ChangeLike(ChangeLikeDTO likeDTO)
         {
             try
             {

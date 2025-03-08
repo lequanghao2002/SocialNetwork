@@ -24,7 +24,7 @@ namespace SocialNetwork.Repositories
         public Task<GetPostDTO> Add(AddPostDTO postDTO);
         public Task<GetPostDTO> Update(UpdatePostDTO postDTO);
         public Task<bool> Delete(string Id);
-        public Task<string> ChangeLike(GetLikeDTO likeDTO);
+        public Task<string> ChangeLike(ChangeLikeDTO likeDTO);
         public Task<int> CountShared(string id);
         public Task<GetPostDTO> Save(FavouritePostDTO favouriteDT0);
 
@@ -74,7 +74,6 @@ namespace SocialNetwork.Repositories
                     Likes = p.Likes.Select(l => new GetLikeDTO
                     {
                         UserId = l.User.Id,
-                        PostId = l.PostId,
                     }).ToList(),
                     Comments = p.Comments.Select(c => new GetCommentDTO
                     {
@@ -151,7 +150,6 @@ namespace SocialNetwork.Repositories
                     Likes = p.Likes.Select(l => new GetLikeDTO
                     {
                         UserId = l.User.Id,
-                        PostId = l.PostId,
                     }).ToList(),
                     Comments = p.Comments.Select(c => new GetCommentDTO
                     {
@@ -213,7 +211,6 @@ namespace SocialNetwork.Repositories
                     Likes = p.Likes.Select(l => new GetLikeDTO
                     {
                         UserId = l.User.Id,
-                        PostId = l.PostId,
                     }).ToList(),
                     Comments = p.Comments.Select(c => new GetCommentDTO
                     {
@@ -276,7 +273,6 @@ namespace SocialNetwork.Repositories
                     Likes = p.Likes.Select(l => new GetLikeDTO
                     {
                         UserId = l.User.Id,
-                        PostId = l.PostId,
                     }).ToList(),
                     Comments = p.Comments.Select(c => new GetCommentDTO
                     {
@@ -342,7 +338,6 @@ namespace SocialNetwork.Repositories
                     Likes = p.Likes.Select(l => new GetLikeDTO
                     {
                         UserId = l.User.Id,
-                        PostId = l.PostId,
                     }).ToList(),
                     Comments = p.Comments.Select(c => new GetCommentDTO
                     {
@@ -412,7 +407,6 @@ namespace SocialNetwork.Repositories
                     Likes = p.Likes.Select(l => new GetLikeDTO
                     {
                         UserId = l.User.Id,
-                        PostId = l.PostId,
                     }).ToList(),
                     Comments = p.Comments.Select(c => new GetCommentDTO
                     {
@@ -474,7 +468,6 @@ namespace SocialNetwork.Repositories
                     Likes = p.Likes.Select(l => new GetLikeDTO
                     {
                         UserId = l.User.Id,
-                        PostId = l.PostId,
                     }).ToList(),
                     Comments = p.Comments.Select(c => new GetCommentDTO
                     {
@@ -556,7 +549,7 @@ namespace SocialNetwork.Repositories
             return true;
         }
 
-        public async Task<string> ChangeLike(GetLikeDTO likeDTO)
+        public async Task<string> ChangeLike(ChangeLikeDTO likeDTO)
         {
             var result = await _dbContext.Likes.SingleOrDefaultAsync(l => l.UserId == likeDTO.UserId && l.PostId == likeDTO.PostId);
             if (result != null)

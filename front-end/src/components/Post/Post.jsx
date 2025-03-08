@@ -21,38 +21,22 @@ import * as modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '~/context/Notification';
 import { AppContext } from '~/context/AppProvider';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
+import { setLike } from '~/features/post/postSlice';
 
 const cx = classNames.bind(styles);
 
-function Post({
-    data,
-    handlePostSubmit,
-    handleDeletePost,
-    handleLikeChange,
-    disableActionButton = false,
-    posts,
-    setPosts,
-}) {
-    // const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
-    //     useContext(AppContext);
-    const [checkLike, setCheckLike] = useState();
+function Post({ data, disableActionButton = false }) {
+    const dispath = useDispatch();
     const user = useSelector(userSelector);
     const [sharedPost, setSharedPost] = useState(null);
     const [sharedCount, setSharedCount] = useState(0);
-    const [showPostDetailModal, setShowPostDetailModal] = useState(null);
     const { success, error } = useNotification();
     const navigate = useNavigate();
-    let imageArray = [];
-    if (data.images) {
-        //imageArray = JSON.parse(data.images);
-    }
 
-    useEffect(() => {
-        const isLiked = data.likes.some((item) => item.userId === user.Id);
-        setCheckLike(isLiked);
-    }, [data.likes]);
+    const imageArray = data.images ? JSON.parse(data.images) : null;
+    const isLiked = data.likes.some((like) => like.userId === user.id);
 
     const ACTION_POST =
         data.userId === user.Id
@@ -152,14 +136,13 @@ function Post({
         return text.replace(/\n/g, '<br/>');
     };
 
-    const onLikeClick = async () => {
-        // const result = await postService.changeLike({ userId: user.Id, postId: data.id });
-        // if (result) {
-        //     handleLikeChange(data.id, user.Id);
-        //     setCheckLike(!checkLike);
-        // } else {
-        //     console.error('Failed to like post');
-        // }
+    const handeLikeClick = async () => {
+        const result = await postService.changeLike({ userId: user.id, postId: data.id });
+        if (result === 'Liked') {
+            dispath(setLike({ id: data.id, userId: user.id, type: 'add' }));
+        } else if (result === 'Unlike') {
+            dispath(setLike({ id: data.id, userId: user.id, type: 'delete' }));
+        }
     };
 
     const handleSharedPost = () => {
@@ -271,7 +254,6 @@ function Post({
                 </div>
 
                 <div className={cx('body')}>
-                    {/* <p className={cx('text')}>{data.content}</p> */}
                     <p
                         className={cx('text')}
                         dangerouslySetInnerHTML={{ __html: convertNewlinesToBreaks(data.content) }}
@@ -281,15 +263,12 @@ function Post({
                             onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
                         }}
                     >
-                        {/* {imageArray.map((imageUrl, index) => (
-                            <div key={index} className={cx('image')}>
-                                <Image
-                                    width={100}
-                                    height={100}
-                                    src={`${import.meta.env.REACT_APP_BASE_URL2}${imageUrl}`}
-                                />
-                            </div>
-                        ))} */}
+                        {imageArray &&
+                            imageArray.map((url, index) => (
+                                <div key={index} className={cx('image')}>
+                                    <Image width={100} height={100} src={url} />
+                                </div>
+                            ))}
                     </Image.PreviewGroup>
                 </div>
 
@@ -305,11 +284,11 @@ function Post({
 
                     <div className={cx('interact')}>
                         <Button
-                            className={checkLike ? cx('buttonLiked') : ''}
+                            className={isLiked ? cx('buttonLiked') : ''}
                             leftIcon={<FontAwesomeIcon icon={faThumbsUp} />}
                             onClick={() => {
                                 if (disableActionButton) return;
-                                onLikeClick();
+                                handeLikeClick();
                             }}
                         >
                             {data.likes.length || 0}

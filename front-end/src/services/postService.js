@@ -13,7 +13,7 @@ const postService = {
 
     add: (data) => apiClient.post('Posts/add', data),
 
-    update: (data) => apiClient.put('Posts/update', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    update: (data) => apiClient.put('Posts/update', data),
 
     delete: (id) => apiClient.delete('Posts/delete', { params: { Id: id } }),
 
