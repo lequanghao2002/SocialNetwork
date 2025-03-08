@@ -6,7 +6,7 @@ import { faCircle } from '@fortawesome/free-solid-svg-icons';
 import EllipsisText from '~/components/Text/EllipsisText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import messageService from '~/services/messageService';
-import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelectors';
+import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelector';
 import { useDispatch, useSelector } from 'react-redux';
 import { markMessageAsSeen, setSelectedFriendId } from '~/features/chat/chatSlice';
 import { userSelector } from '~/features/auth/authSelector';

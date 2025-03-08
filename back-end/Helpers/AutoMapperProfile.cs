@@ -8,6 +8,7 @@ using SocialNetwork.Models.DTO.PostDTO;
 using SocialNetwork.Models.DTO.TagDTO;
 using SocialNetwork.Models.DTO.UserDTO;
 using SocialNetwork.Models.Entities;
+using Newtonsoft.Json;
 
 namespace SocialNetwork.Helpers
 {
@@ -16,10 +17,13 @@ namespace SocialNetwork.Helpers
         public AutoMapperProfile()
         {
             CreateMap<AddPostDTO, Post>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Count > 0 ? JsonConvert.SerializeObject(src.Images) : null))
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => (DateTime?)null)) 
                 .ForMember(dest => dest.Deleted, opt => opt.MapFrom(src => false))
                 .ForMember(dest => dest.DeletedDate, opt => opt.MapFrom(src => (DateTime?)null));
+
             CreateMap<Post, GetPostDTO>().ReverseMap();
 
             CreateMap<Tag, GetTagDTO>().ReverseMap();

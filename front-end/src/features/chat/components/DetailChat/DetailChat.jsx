@@ -5,9 +5,9 @@ import Image from '../../../../components/Image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp, faDownload } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../../../components/Button';
-import { friendsSelector, selectedFriendIdSelector } from '../../chatSelectors';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
+import { friendsSelector, selectedFriendIdSelector } from '../../chatSelector';
 
 const cx = classNames.bind(styles);
 

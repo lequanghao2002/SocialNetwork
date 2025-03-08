@@ -1,8 +1,7 @@
 import apiClient from '~/utils/apiClient';
 
 const postService = {
-    getAll: (filter, userId, page, pageSize) =>
-        apiClient.get('Posts/get-all', { params: { filter, userId, page, pageSize } }),
+    get: (status, page, pageSize) => apiClient.get('Posts/get-all', { params: { status, page, pageSize } }),
 
     getAllByUser: (userId, page, pageSize) =>
         apiClient.get('Posts/get-all-by-user', { params: { userId, page, pageSize } }),
@@ -12,7 +11,7 @@ const postService = {
     getSavedByUser: (userId, page, pageSize) =>
         apiClient.get('Posts/get-all-post-save-by-user', { params: { userId, page, pageSize } }),
 
-    add: (data) => apiClient.post('Posts/add', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    add: (data) => apiClient.post('Posts/add', data),
 
     update: (data) => apiClient.put('Posts/update', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
 

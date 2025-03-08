@@ -13,6 +13,8 @@ import { loadingSelector, userSelector } from './features/auth/authSelector';
 import { fetchUserThunk } from './features/auth/authThunk';
 import { Spin } from 'antd';
 import config from './config';
+import Modals from './components/Modals/Modals';
+import NotificationProvider from './context/notification';
 
 function RenderRoutes({ routes }) {
     return (
@@ -88,11 +90,14 @@ function AppContent() {
 
 function App() {
     return (
-        <Provider store={store}>
-            <Router>
-                <AppContent />
-            </Router>
-        </Provider>
+        <NotificationProvider>
+            <Provider store={store}>
+                <Router>
+                    <Modals />
+                    <AppContent />
+                </Router>
+            </Provider>
+        </NotificationProvider>
     );
 }
 

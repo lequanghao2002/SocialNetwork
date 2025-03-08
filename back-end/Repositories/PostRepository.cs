@@ -506,19 +506,13 @@ namespace SocialNetwork.Repositories
         public async Task<GetPostDTO> Add(AddPostDTO postDTO)
         {
             var postNew = _mapper.Map<Post>(postDTO);
-            postNew.Id = Guid.NewGuid().ToString();
-
-            if (postDTO.FileList != null)
-            {
-                postNew.Images = await HandleUpload.UploadImages(postDTO.FileList);
-            }
 
             await _dbContext.Posts.AddAsync(postNew);
             await _dbContext.SaveChangesAsync();
 
-            if (postDTO.TagList != null)
+            if (postDTO.Tags.Count > 0)
             {
-                await _postTagRepository.Add(postDTO.TagList, postNew.Id);
+                await _postTagRepository.Add(postDTO.Tags, postNew.Id);
             }
 
             var postNewById = await GetById(postNew.Id);

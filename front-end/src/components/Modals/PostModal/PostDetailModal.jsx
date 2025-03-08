@@ -1,6 +1,6 @@
 import { Form, Input, Modal, message } from 'antd';
 import './PostDetailModal.scss';
-import Post from '../Post';
+
 import Image from '../Image';
 import Button from '../Button';
 import dayjs from 'dayjs';
@@ -15,6 +15,7 @@ import Comment from '../Comment/Comment';
 import { NotificationContext } from '~/context/Notification';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
+import Post from '../Post/Post';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);

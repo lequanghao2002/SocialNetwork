@@ -11,13 +11,9 @@ namespace SocialNetwork.Hubs
     [Authorize]
     public class ChatHub : Hub
     {
-        private readonly SocialNetworkDbContext _socialNetworkDbContext;
-        private readonly IMapper _mapper;
         private readonly IMessageRepository _messageRepository;
-        public ChatHub(SocialNetworkDbContext socialNetworkDbContext, IMapper mapper, IMessageRepository messageRepository)
+        public ChatHub(IMessageRepository messageRepository)
         {
-            _socialNetworkDbContext = socialNetworkDbContext;
-            _mapper = mapper;
             _messageRepository = messageRepository;
         }
 

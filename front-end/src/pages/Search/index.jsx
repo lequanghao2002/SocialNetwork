@@ -1,8 +1,8 @@
 import { useLocation, useParams } from 'react-router-dom';
 import styles from './Search.module.scss';
 import classNames from 'classnames/bind';
-import Post from '~/components/Post';
 import { Empty } from 'antd';
+import Post from '~/components/Post/Post';
 
 const cx = classNames.bind(styles);
 

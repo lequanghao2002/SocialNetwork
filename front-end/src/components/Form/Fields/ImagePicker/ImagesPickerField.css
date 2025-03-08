@@ -1,0 +1,35 @@
+.is-dragging a {
+    pointer-events: none;
+  }
+
+.custom-multi-image-picker .ant-upload-list-item-image {
+  object-fit: cover !important;
+}
+
+.custom-multi-image-picker .anticon.anticon-eye {
+  position: relative;
+    left: -15px;
+}
+
+.custom-multi-image-picker .item-image:hover .btn-remove-image {
+    display: block !important;
+}
+
+.item-image:hover .ant-upload-list-item-thumbnail {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.custom-multi-image-picker .btn-remove-image {
+  display: none;
+  font-size: 16px;
+  color: #fff;
+    position: absolute;
+    top: 49%;
+    right: 32px;
+    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    z-index: 10;
+}

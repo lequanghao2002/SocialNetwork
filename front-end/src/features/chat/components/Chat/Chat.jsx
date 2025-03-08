@@ -24,7 +24,7 @@ import messageService from '~/services/messageService';
 import { uploadChatImage } from '~/utils/uploadHelper';
 import { Dropdown, Flex } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelectors';
+import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelector';
 import { setChat, setMessage } from '~/features/chat/chatSlice';
 import { userSelector } from '~/features/auth/authSelector';
 

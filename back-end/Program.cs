@@ -12,13 +12,14 @@ using SocialNetwork.Hubs;
 using SocialNetwork.Models.Domain;
 using SocialNetwork.Repositories;
 using SocialNetwork.Repositories.MessageRepository;
+using SocialNetwork.Services;
 using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -50,6 +51,7 @@ builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddIdentityCore<User>()
     .AddRoles<IdentityRole>()

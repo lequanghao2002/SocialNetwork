@@ -1,19 +1,24 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.Models.DTO.LikeDTO;
 using SocialNetwork.Models.DTO.PostDTO;
 using SocialNetwork.Repositories;
+using SocialNetwork.Services;
 
 namespace SocialNetwork.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PostsController : ControllerBase
     {
         private readonly IPostRepository _postRepository;
+        private readonly IUserService _userService;
 
-        public PostsController(IPostRepository postRepository) {
+        public PostsController(IPostRepository postRepository, IUserService userService) {
             _postRepository = postRepository;
+            _userService = userService;
         }
 
         [HttpGet("search-post")]
@@ -32,11 +37,17 @@ namespace SocialNetwork.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAll(string filter, string? userId = null, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAll(string status, int page = 1, int pageSize = 10)
         {
             try
             {
-                var postList = await _postRepository.GetAll(filter, userId, page, pageSize);
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var postList = await _postRepository.GetAll(status, userId, page, pageSize);
 
                 return Ok(postList);
             }
@@ -94,10 +105,18 @@ namespace SocialNetwork.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> Add([FromForm]AddPostDTO postDTO)
+        public async Task<IActionResult> Add(AddPostDTO postDTO)
         {
             try
             {
+                var userId = _userService.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                postDTO.UserId = userId;
                 var result = await _postRepository.Add(postDTO);
 
                 if (result != null) {

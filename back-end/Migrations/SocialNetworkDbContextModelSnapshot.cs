@@ -286,11 +286,9 @@ namespace SocialNetwork.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Images")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SharedPostId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")

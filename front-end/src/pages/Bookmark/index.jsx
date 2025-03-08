@@ -14,15 +14,15 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Avatar from '~/components/Image';
 import Icon from '~/components/Icon';
-import Post from '~/components/Post';
 import { useContext, useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import postService from '~/services/postService';
-import PostModal from '~/components/Modals/PostModal';
+import PostModal from '~/components/Modals/PostModal/PostModal';
 import { Empty, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
+import Post from '~/components/Post/Post';
 
 const cx = classNames.bind(styles);
 

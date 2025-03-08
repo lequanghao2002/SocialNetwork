@@ -15,12 +15,11 @@ import {
 import AccountPopper from '~/components/AccountPopper';
 import { Image } from 'antd';
 import Menu from '~/components/Popper/Menu';
-import PostModal from '~/components/Modals/PostModal';
+import PostModal from '~/components/Modals/PostModal/PostModal';
 import postService from '~/services/postService';
 import * as modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
-import PostDetailModal from '../Modals/PostDetailModal';
-import { NotificationContext } from '~/context/Notification';
+import { useNotification } from '~/context/Notification';
 import { AppContext } from '~/context/AppProvider';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
@@ -36,18 +35,18 @@ function Post({
     posts,
     setPosts,
 }) {
-    const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
-        useContext(AppContext);
+    // const { isPostModalVisible, setIsPostModalVisible, postCurrent, setPostCurrent, modePost, setModePost } =
+    //     useContext(AppContext);
     const [checkLike, setCheckLike] = useState();
     const user = useSelector(userSelector);
     const [sharedPost, setSharedPost] = useState(null);
     const [sharedCount, setSharedCount] = useState(0);
     const [showPostDetailModal, setShowPostDetailModal] = useState(null);
-    const { success, error } = useContext(NotificationContext);
+    const { success, error } = useNotification();
     const navigate = useNavigate();
     let imageArray = [];
     if (data.images) {
-        imageArray = JSON.parse(data.images);
+        //imageArray = JSON.parse(data.images);
     }
 
     useEffect(() => {
@@ -128,26 +127,25 @@ function Post({
     };
 
     const handleSave = async (action) => {
-        const dataSave = {
-            userId: user.Id,
-            postId: data.id,
-        };
-        const result = await postService.savePost(dataSave);
-        if (result) {
-            console.log(posts);
-            const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
-            console.log(updatedPosts);
-
-            setPosts(updatedPosts);
-            success(`${action} success`);
-        } else {
-            error(`${action} error`);
-            console.error('comment error');
-        }
+        // const dataSave = {
+        //     userId: user.Id,
+        //     postId: data.id,
+        // };
+        // const result = await postService.savePost(dataSave);
+        // if (result) {
+        //     console.log(posts);
+        //     const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
+        //     console.log(updatedPosts);
+        //     setPosts(updatedPosts);
+        //     success(`${action} success`);
+        // } else {
+        //     error(`${action} error`);
+        //     console.error('comment error');
+        // }
     };
 
     const handleDelete = () => {
-        handleDeletePost(data.id);
+        //handleDeletePost(data.id);
     };
 
     const convertNewlinesToBreaks = (text) => {
@@ -155,13 +153,13 @@ function Post({
     };
 
     const onLikeClick = async () => {
-        const result = await postService.changeLike({ userId: user.Id, postId: data.id });
-        if (result) {
-            handleLikeChange(data.id, user.Id);
-            setCheckLike(!checkLike);
-        } else {
-            console.error('Failed to like post');
-        }
+        // const result = await postService.changeLike({ userId: user.Id, postId: data.id });
+        // if (result) {
+        //     handleLikeChange(data.id, user.Id);
+        //     setCheckLike(!checkLike);
+        // } else {
+        //     console.error('Failed to like post');
+        // }
     };
 
     const handleSharedPost = () => {
@@ -247,7 +245,7 @@ function Post({
     };
     return (
         <>
-            <PostDetailModal
+            {/* <PostDetailModal
                 visible={showPostDetailModal}
                 setVisible={setShowPostDetailModal}
                 onClose={() => setShowPostDetailModal(false)}
@@ -257,14 +255,14 @@ function Post({
                 handleLikeChange={handleLikeChange}
                 posts={posts}
                 setPosts={setPosts}
-            ></PostDetailModal>
+            ></PostDetailModal> */}
 
             <div className={cx('wrapper')}>
                 <div className={cx('header')}>
                     <AccountPopper data={data} />
 
                     {/* <PostModal data={data} /> */}
-                    <PostModal onSubmit={handlePostSubmit} />
+                    {/* <PostModal onSubmit={handlePostSubmit} /> */}
                     <Menu items={ACTION_POST} onChange={handleMenuChange}>
                         <span>
                             <FontAwesomeIcon className={cx('icon-ellipsis')} icon={faEllipsisVertical} />
@@ -283,7 +281,7 @@ function Post({
                             onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
                         }}
                     >
-                        {imageArray.map((imageUrl, index) => (
+                        {/* {imageArray.map((imageUrl, index) => (
                             <div key={index} className={cx('image')}>
                                 <Image
                                     width={100}
@@ -291,7 +289,7 @@ function Post({
                                     src={`${import.meta.env.REACT_APP_BASE_URL2}${imageUrl}`}
                                 />
                             </div>
-                        ))}
+                        ))} */}
                     </Image.PreviewGroup>
                 </div>
 
