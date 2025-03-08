@@ -29,8 +29,6 @@ const chatSlice = createSlice({
     reducers: {
         // IMMER
         setFriends: (state, action) => {
-            console.log('setFriends', state, action);
-
             state.friends = action.payload.map((friend) => ({
                 info: friend,
                 message: {
@@ -39,14 +37,13 @@ const chatSlice = createSlice({
                 },
                 chat: [],
             }));
-            state.selectedFriendId = action.payload[0].id || null;
+
+            state.selectedFriendId = action.payload.length > 0 ? action.payload[0].id : null;
         }, // action creators
         setSelectedFriendId: (state, action) => {
-            console.log('setSelectedFriendId', state, action);
             state.selectedFriendId = action.payload;
         },
         setMessage: (state, action) => {
-            console.log('setMessage', state, action);
             const friend = state.friends.find((friend) => friend.info.id === state.selectedFriendId);
             if (friend) {
                 friend.message = action.payload;
@@ -59,36 +56,29 @@ const chatSlice = createSlice({
             }
         },
         addMessageToChat: (state, action) => {
-            const friendIndex = state.friends.findIndex(
+            const friend = state.friends.find(
                 (friend) => friend.info.id === action.payload.senderId || friend.info.id === action.payload.receiverId,
             );
 
-            if (friendIndex !== -1) {
-                const updatedFriend = {
-                    ...state.friends[friendIndex],
-                    info: {
-                        ...state.friends[friendIndex].info,
-                        lastMessage: action.payload,
-                    },
-                    chat: [...state.friends[friendIndex].chat, action.payload],
-                };
+            if (friend) {
+                friend.info.lastMessage = action.payload;
+                friend.chat.push(action.payload);
 
-                state.friends.splice(friendIndex, 1);
-                state.friends.unshift(updatedFriend);
+                state.friends.sort((a, b) =>
+                    a.info.lastMessage?.createdDate < b.info.lastMessage?.createdDate ? 1 : -1,
+                );
             }
         },
         updateMessageInChat: (state, action) => {
-            // state.friends.forEach((friend) => {
-            //     if (friend.info.id === action.payload.senderId || friend.info.id === action.payload.receiverId) {
-            //         friend.chat = friend.chat.map((msg) => (msg.id === action.payload.id ? action.payload : msg));
-            //     }
-            // });
-
             const friend = state.friends.find(
                 (friend) => friend.info.id === action.payload.senderId || friend.info.id === action.payload.receiverId,
             );
             if (friend) {
-                friend.chat = friend.chat.map((msg) => (msg.id === action.payload.id ? action.payload : msg));
+                const message = friend.chat.find((msg) => msg.id === action.payload.id);
+
+                if (message) {
+                    Object.assign(message, action.payload);
+                }
             }
         },
         markMessageAsSeen: (state, action) => {
