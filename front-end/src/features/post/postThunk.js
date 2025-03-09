@@ -12,11 +12,33 @@ export const fetchPostsThunk = createAsyncThunk('post/fetchPosts', async ({ filt
     }
 });
 
-export const deletePostThunk = createAsyncThunk('post/deletePostThun', async (id, { rejectWithValue }) => {
+export const deletePostThunk = createAsyncThunk('post/deletePost', async (id, { rejectWithValue }) => {
     try {
         const result = await postService.delete(id);
 
         return result ? id : rejectWithValue('Failed to delete post');
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
+
+export const savePostThunk = createAsyncThunk('post/savePost', async (id, { rejectWithValue }) => {
+    try {
+        const result = await postService.save({ postId: id });
+
+        return { postId: id, userId: result };
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
+
+export const unSavePostThunk = createAsyncThunk('post/unSavePost', async (id, { rejectWithValue }) => {
+    try {
+        const result = await postService.unSave({ postId: id });
+
+        if (result) {
+            return { postId: id, userId: result };
+        }
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message);
     }

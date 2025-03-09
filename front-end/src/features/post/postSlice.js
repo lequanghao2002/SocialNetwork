@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { deletePostThunk, fetchPostsThunk } from './postThunk';
+import { deletePostThunk, fetchPostsThunk, savePostThunk, unSavePostThunk } from './postThunk';
 
 const initialState = {
     posts: [],
@@ -47,6 +47,7 @@ const postSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // fetchPostsThunk
             .addCase(fetchPostsThunk.pending, (state) => {
                 state.loading = true;
             })
@@ -60,6 +61,20 @@ const postSlice = createSlice({
 
             .addCase(deletePostThunk.fulfilled, (state, action) => {
                 state.posts = state.posts.filter((post) => post.id !== action.payload);
+            })
+
+            .addCase(savePostThunk.fulfilled, (state, action) => {
+                const { postId, userId } = action.payload;
+
+                const post = state.posts.find((post) => post.id === postId);
+                post.favourites.push({ userId });
+            })
+
+            .addCase(unSavePostThunk.fulfilled, (state, action) => {
+                const { postId, userId } = action.payload;
+
+                const post = state.posts.find((post) => post.id === postId);
+                post.favourites = post.favourites.filter((favourite) => favourite.userId !== userId);
             });
     },
 });

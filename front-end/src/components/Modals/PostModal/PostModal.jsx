@@ -55,7 +55,7 @@ function PostModal() {
                     images: postModal.data.images
                         ? JSON.parse(postModal.data.images).map((image) => ({ url: image }))
                         : [],
-                    tags: postModal.data.listTag ? postModal.data.listTag.map((tag) => tag.name) : [],
+                    tags: postModal.data.tags ? postModal.data.tags.map((tag) => tag.name) : [],
                 });
             }
 

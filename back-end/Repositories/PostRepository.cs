@@ -8,6 +8,7 @@ using SocialNetwork.Data;
 using SocialNetwork.Helpers;
 using SocialNetwork.Models.Domain;
 using SocialNetwork.Models.DTO.CommentDTO;
+using SocialNetwork.Models.DTO.FavouriteDTO;
 using SocialNetwork.Models.DTO.LikeDTO;
 using SocialNetwork.Models.DTO.PostDTO;
 using SocialNetwork.Models.DTO.TagDTO;
@@ -28,7 +29,8 @@ namespace SocialNetwork.Repositories
         public Task<bool> Delete(string id, string userId);
         public Task<string> ChangeLike(ChangeLikeDTO likeDTO);
         public Task<int> CountShared(string id);
-        public Task<GetPostDTO> Save(FavouritePostDTO favouriteDT0);
+        public Task<string> Save(FavouritePostDTO favouriteDT0);
+        public Task<string> UnSave(FavouritePostDTO favouriteDT0);
 
     }
     public class PostRepository : IPostRepository
@@ -68,7 +70,7 @@ namespace SocialNetwork.Repositories
                         Email = p.User.Email,
                         PhoneNumber = p.User.PhoneNumber,
                     },
-                    ListTag = p.PostTags.Select(t => new GetTagDTO
+                    Tags = p.PostTags.Select(t => new GetTagDTO
                     {
                         Id = t.Tag.Id,
                         Name = t.Tag.Name
@@ -98,7 +100,7 @@ namespace SocialNetwork.Repositories
                         Deleted = c.Deleted,
                         DeletedDate = c.DeletedDate
                     }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
-                    UsersFavourite = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
 
@@ -144,7 +146,7 @@ namespace SocialNetwork.Repositories
                         Email = p.User.Email,
                         PhoneNumber = p.User.PhoneNumber,
                     },
-                    ListTag = p.PostTags.Select(t => new GetTagDTO
+                    Tags = p.PostTags.Select(t => new GetTagDTO
                     {
                         Id = t.Tag.Id,
                         Name = t.Tag.Name
@@ -174,7 +176,7 @@ namespace SocialNetwork.Repositories
                         Deleted = c.Deleted,
                         DeletedDate = c.DeletedDate
                     }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
-                    UsersFavourite = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
 
@@ -205,7 +207,7 @@ namespace SocialNetwork.Repositories
                         Email = p.User.Email,
                         PhoneNumber = p.User.PhoneNumber,
                     },
-                    ListTag = p.PostTags.Select(t => new GetTagDTO
+                    Tags = p.PostTags.Select(t => new GetTagDTO
                     {
                         Id = t.Tag.Id,
                         Name = t.Tag.Name
@@ -235,7 +237,7 @@ namespace SocialNetwork.Repositories
                         Deleted = c.Deleted,
                         DeletedDate = c.DeletedDate
                     }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
-                    UsersFavourite = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
 
@@ -267,7 +269,7 @@ namespace SocialNetwork.Repositories
                         Email = p.User.Email,
                         PhoneNumber = p.User.PhoneNumber,
                     },
-                    ListTag = p.PostTags.Select(t => new GetTagDTO
+                    Tags = p.PostTags.Select(t => new GetTagDTO
                     {
                         Id = t.Tag.Id,
                         Name = t.Tag.Name
@@ -297,7 +299,7 @@ namespace SocialNetwork.Repositories
                         Deleted = c.Deleted,
                         DeletedDate = c.DeletedDate
                     }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
-                    UsersFavourite = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
 
@@ -332,7 +334,7 @@ namespace SocialNetwork.Repositories
                         Email = p.User.Email,
                         PhoneNumber = p.User.PhoneNumber,
                     },
-                    ListTag = p.PostTags.Select(t => new GetTagDTO
+                    Tags = p.PostTags.Select(t => new GetTagDTO
                     {
                         Id = t.Tag.Id,
                         Name = t.Tag.Name
@@ -362,7 +364,7 @@ namespace SocialNetwork.Repositories
                         Deleted = c.Deleted,
                         DeletedDate = c.DeletedDate
                     }).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
-                    UsersFavourite = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
 
@@ -401,7 +403,7 @@ namespace SocialNetwork.Repositories
                         Email = p.User.Email,
                         PhoneNumber = p.User.PhoneNumber,
                     },
-                    ListTag = p.PostTags.Select(t => new GetTagDTO
+                    Tags = p.PostTags.Select(t => new GetTagDTO
                     {
                         Id = t.Tag.Id,
                         Name = t.Tag.Name
@@ -431,7 +433,7 @@ namespace SocialNetwork.Repositories
                         Deleted = c.Deleted,
                         DeletedDate = c.DeletedDate
                     }).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
-                    UsersFavourite = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
 
@@ -462,7 +464,7 @@ namespace SocialNetwork.Repositories
                         Email = p.User.Email,
                         PhoneNumber = p.User.PhoneNumber,
                     },
-                    ListTag = p.PostTags.Select(t => new GetTagDTO
+                    Tags = p.PostTags.Select(t => new GetTagDTO
                     {
                         Id = t.Tag.Id,
                         Name = t.Tag.Name
@@ -594,31 +596,23 @@ namespace SocialNetwork.Repositories
             return count;
         }
 
-        public async Task<GetPostDTO> Save(FavouritePostDTO favouriteDT0)
+        public async Task<string> Save(FavouritePostDTO favouriteDT0)
         {
-            var findFavourite = await _dbContext.Favourites.SingleOrDefaultAsync(x => x.UserId == favouriteDT0.UserId && x.PostId == favouriteDT0.PostId);
+            var favouriteNew = _mapper.Map<Favourite>(favouriteDT0);
+            await _dbContext.AddAsync(favouriteNew);
+            await _dbContext.SaveChangesAsync();
 
-            if (findFavourite != null)
-            {
-                _dbContext.Remove(findFavourite);
-                await _dbContext.SaveChangesAsync();
+            return favouriteNew.UserId;
+        }
 
-                var postNewById = await GetById(findFavourite.PostId);
-                return postNewById;
-            }
-            else
-            {
-                var favouriteNew = _mapper.Map<Favourite>(favouriteDT0);
-                await _dbContext.AddAsync(favouriteNew);
-                await _dbContext.SaveChangesAsync();
+        public async Task<string> UnSave(FavouritePostDTO favouriteDT0)
+        {
+            var favourite = await _dbContext.Favourites.SingleOrDefaultAsync(x => x.UserId == favouriteDT0.UserId && x.PostId == favouriteDT0.PostId);
 
-                var postNewById = await GetById(favouriteNew.PostId);
-                return postNewById;
-            }
+            _dbContext.Favourites.Remove(favourite);
+            await _dbContext.SaveChangesAsync();
 
-
-
-
+            return favourite.UserId;
         }
     }
 }

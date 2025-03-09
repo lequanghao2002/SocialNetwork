@@ -13,7 +13,7 @@ import {
     faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import AccountPopper from '~/components/AccountPopper';
-import { Image, Modal } from 'antd';
+import { Dropdown, Image, Modal } from 'antd';
 import Menu from '~/components/Popper/Menu';
 import PostModal from '~/components/Modals/PostModal/PostModal';
 import postService from '~/services/postService';
@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { setLike } from '~/features/post/postSlice';
 import { openModal } from '~/features/modal/modalSlice';
-import { deletePostThunk } from '~/features/post/postThunk';
+import { deletePostThunk, savePostThunk, unSavePostThunk } from '~/features/post/postThunk';
 
 const cx = classNames.bind(styles);
 
@@ -38,39 +38,48 @@ function Post({ data, disableActionButton = false }) {
     const navigate = useNavigate();
 
     const isOwner = data.userId === user.id;
-    const isSaved = data?.usersFavourite?.some((item) => item.userId === user.id);
+    const isSaved = data?.favourites?.some((item) => item.userId === user.id);
 
     const imageArray = data.images ? JSON.parse(data.images) : null;
     const isLiked = data.likes.some((like) => like.userId === user.id);
-
-    console.log(data);
 
     const ACTION_POST = [
         ...(isOwner
             ? [
                   {
-                      icon: <FontAwesomeIcon icon={faPenToSquare} />,
-                      title: 'Update post',
+                      key: 'update',
+                      label: (
+                          <span>
+                              <FontAwesomeIcon icon={faPenToSquare} /> Update Post
+                          </span>
+                      ),
                   },
                   {
-                      icon: <FontAwesomeIcon icon={faTrash} />,
-                      title: 'Delete post',
+                      key: 'delete',
+                      label: (
+                          <span>
+                              <FontAwesomeIcon icon={faTrash} /> Delete Post
+                          </span>
+                      ),
                   },
               ]
             : []),
         {
-            icon: <FontAwesomeIcon icon={faBookmark} />,
-            title: isSaved ? 'UnSave post' : 'Save post',
+            key: isSaved ? 'unSave' : 'save',
+            label: (
+                <span>
+                    <FontAwesomeIcon icon={faBookmark} /> {isSaved ? 'UnSave Post' : 'Save Post'}
+                </span>
+            ),
         },
     ];
 
-    const handleMenuChange = (menuItem) => {
-        switch (menuItem.title) {
-            case 'Update post': {
+    const handleActionClick = ({ key }) => {
+        switch (key) {
+            case 'update':
                 dispatch(openModal({ name: 'post', type: 'update', data }));
                 break;
-            }
-            case 'Delete post': {
+            case 'delete':
                 Modal.confirm({
                     title: 'Are you sure you want to delete this post?',
                     content: 'This action cannot be undone.',
@@ -80,35 +89,15 @@ function Post({ data, disableActionButton = false }) {
                     onOk: () => dispatch(deletePostThunk(data.id)),
                 });
                 break;
-            }
-            case 'Save post': {
-                handleSave('Save post');
+            case 'save':
+                dispatch(savePostThunk(data.id));
                 break;
-            }
-            case 'UnSave post': {
-                handleSave('UnSave post');
+            case 'unSave':
+                dispatch(unSavePostThunk(data.id));
                 break;
-            }
             default:
+                break;
         }
-    };
-
-    const handleSave = async (action) => {
-        // const dataSave = {
-        //     userId: user.Id,
-        //     postId: data.id,
-        // };
-        // const result = await postService.savePost(dataSave);
-        // if (result) {
-        //     console.log(posts);
-        //     const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
-        //     console.log(updatedPosts);
-        //     setPosts(updatedPosts);
-        //     success(`${action} success`);
-        // } else {
-        //     error(`${action} error`);
-        //     console.error('comment error');
-        // }
     };
 
     const convertNewlinesToBreaks = (text) => {
@@ -223,11 +212,11 @@ function Post({ data, disableActionButton = false }) {
                 <div className={cx('header')}>
                     <AccountPopper data={data} />
 
-                    <Menu items={ACTION_POST} onChange={handleMenuChange}>
+                    <Dropdown menu={{ items: ACTION_POST, onClick: handleActionClick }}>
                         <span>
                             <FontAwesomeIcon className={cx('icon-ellipsis')} icon={faEllipsisVertical} />
                         </span>
-                    </Menu>
+                    </Dropdown>
                 </div>
 
                 <div className={cx('body')}>
@@ -250,8 +239,8 @@ function Post({ data, disableActionButton = false }) {
                 </div>
 
                 <div className={cx('footer')}>
-                    {data.listTag &&
-                        data.listTag.map((item, index) => (
+                    {data.tags &&
+                        data.tags.map((item, index) => (
                             <span key={index} className={cx('tag')}>
                                 #{item.name}
                             </span>

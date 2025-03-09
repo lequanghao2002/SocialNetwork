@@ -21,7 +21,9 @@ const postService = {
 
     countShared: (id) => apiClient.get('Posts/count-shared', { params: { id } }),
 
-    save: (data) => apiClient.post('Posts/save-post', data),
+    save: (data) => apiClient.post('Posts/save', data),
+
+    unSave: (data) => apiClient.post('Posts/unsave', data),
 };
 
 export default postService;

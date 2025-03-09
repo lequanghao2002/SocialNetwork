@@ -9,6 +9,7 @@ using SocialNetwork.Models.DTO.TagDTO;
 using SocialNetwork.Models.DTO.UserDTO;
 using SocialNetwork.Models.Entities;
 using Newtonsoft.Json;
+using SocialNetwork.Models.DTO.FavouriteDTO;
 
 namespace SocialNetwork.Helpers
 {

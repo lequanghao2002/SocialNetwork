@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.Models.DTO.FavouriteDTO;
 using SocialNetwork.Models.DTO.LikeDTO;
 using SocialNetwork.Models.DTO.PostDTO;
 using SocialNetwork.Repositories;
@@ -221,12 +222,43 @@ namespace SocialNetwork.Controllers
         }
 
 
-        [HttpPost("save-post")]
+        [HttpPost("save")]
         public async Task<IActionResult> SavePost(FavouritePostDTO favouritePostDTO)
         {
             try
             {
+                var userId = _userService.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                favouritePostDTO.UserId = userId;
                 var result = await _postRepository.Save(favouritePostDTO);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("unsave")]
+        public async Task<IActionResult> UnSavePost(FavouritePostDTO favouritePostDTO)
+        {
+            try
+            {
+                var userId = _userService.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                favouritePostDTO.UserId = userId;
+                var result = await _postRepository.UnSave(favouritePostDTO);
 
                 return Ok(result);
             }
