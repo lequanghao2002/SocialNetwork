@@ -21,7 +21,6 @@ import userServices from '~/services/userService';
 import { useParams } from 'react-router-dom';
 import ProfileModal from '~/components/Modals/ProfileModal';
 import InfoModal from '~/components/Modals/InfoModal';
-import AuthContext from '~/context/AuthContext/authContext';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { friendsSelector } from '~/features/chat/chatSelector';

@@ -2,8 +2,6 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 import { privateRoutes, publicRoutes } from '~/routes';
 import { DefaultLayout } from '~/layouts';
 import { Fragment, useContext, useEffect } from 'react';
-import AuthContext from './context/AuthContext/authContext';
-import AuthProvider from './context/AuthContext/authProvider';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from './features/store';
 import { fetchFriendsThunk } from './features/chat/chatThunks';

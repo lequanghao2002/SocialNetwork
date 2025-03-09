@@ -6,7 +6,6 @@ import GlobalStyles from '~/components/GlobalStyles';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AppProvider } from './context/AppProvider';
 import { NotificationProvider } from './context/Notification';
-import AuthProvider from './context/AuthContext/authProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 

@@ -22,7 +22,6 @@ import PostModal from '~/components/Modals/PostModal/PostModal';
 import { Empty, message } from 'antd';
 import * as modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
-import AuthContext from '~/context/AuthContext/authContext';
 import { AppContext } from '~/context/AppProvider';
 import { userSelector } from '~/features/auth/authSelector';
 import { useSelector } from 'react-redux';

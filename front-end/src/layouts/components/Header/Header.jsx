@@ -22,7 +22,6 @@ import Menu from '~/components/Popper/Menu';
 import Image from '~/components/Image';
 import Search from '../Search';
 import config from '~/config';
-import AuthContext from '~/context/AuthContext/authContext';
 import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { removeLocalStorage } from '~/utils/localStorage';

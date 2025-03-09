@@ -9,7 +9,6 @@ import EmojiPicker from 'emoji-picker-react';
 import Button from '../Button';
 import commentService from '~/services/commentService';
 import { message } from 'antd';
-import AuthContext from '~/context/AuthContext/authContext';
 import { NotificationContext } from '~/context/Notification';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
