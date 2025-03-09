@@ -127,3 +127,35 @@ body .tippy-box {
         transform: translateY(-50%) rotate(360deg);
     }
 }
+
+// Custom Modal Confirm
+.custom-dark-modal .ant-modal-content {
+    background-color: var(--bg-color-second) !important;
+}
+
+.custom-dark-modal .ant-modal-confirm-title {
+    color: var(--text-color) !important;
+}
+
+.custom-dark-modal .ant-modal-confirm-content {
+    color: var(--text-sub-color) !important;
+}
+
+.custom-dark-modal .ant-modal-confirm-btns .ant-btn-primary {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
+}
+
+.custom-dark-modal .ant-modal-confirm-btns .ant-btn-primary:hover,
+.custom-dark-modal .ant-modal-confirm-btns .ant-btn-primary:focus,
+.custom-dark-modal .ant-modal-confirm-btns .ant-btn-primary:active {
+    opacity: 0.8;
+}
+
+.custom-dark-modal .ant-modal-confirm-btns .ant-btn-default:hover,
+.custom-dark-modal .ant-modal-confirm-btns .ant-btn-default:focus,
+.custom-dark-modal .ant-modal-confirm-btns .ant-btn-default:active {
+    border-color: var(--primary);
+    color: var(--primary);
+}

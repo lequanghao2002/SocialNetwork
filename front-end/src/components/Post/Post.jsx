@@ -13,7 +13,7 @@ import {
     faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import AccountPopper from '~/components/AccountPopper';
-import { Image } from 'antd';
+import { Image, Modal } from 'antd';
 import Menu from '~/components/Popper/Menu';
 import PostModal from '~/components/Modals/PostModal/PostModal';
 import postService from '~/services/postService';
@@ -25,11 +25,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { setLike } from '~/features/post/postSlice';
 import { openModal } from '~/features/modal/modalSlice';
+import { deletePostThunk } from '~/features/post/postThunk';
 
 const cx = classNames.bind(styles);
 
 function Post({ data, disableActionButton = false }) {
-    const dispath = useDispatch();
+    const dispatch = useDispatch();
     const user = useSelector(userSelector);
     const [sharedPost, setSharedPost] = useState(null);
     const [sharedCount, setSharedCount] = useState(0);
@@ -66,11 +67,18 @@ function Post({ data, disableActionButton = false }) {
     const handleMenuChange = (menuItem) => {
         switch (menuItem.title) {
             case 'Update post': {
-                dispath(openModal({ name: 'post', type: 'update', data }));
+                dispatch(openModal({ name: 'post', type: 'update', data }));
                 break;
             }
             case 'Delete post': {
-                handleDelete();
+                Modal.confirm({
+                    title: 'Are you sure you want to delete this post?',
+                    content: 'This action cannot be undone.',
+                    className: 'custom-dark-modal',
+                    okText: 'Yes',
+                    cancelText: 'Cancel',
+                    onOk: () => dispatch(deletePostThunk(data.id)),
+                });
                 break;
             }
             case 'Save post': {
@@ -103,10 +111,6 @@ function Post({ data, disableActionButton = false }) {
         // }
     };
 
-    const handleDelete = () => {
-        //handleDeletePost(data.id);
-    };
-
     const convertNewlinesToBreaks = (text) => {
         return text.replace(/\n/g, '<br/>');
     };
@@ -114,9 +118,9 @@ function Post({ data, disableActionButton = false }) {
     const handeLikeClick = async () => {
         const result = await postService.changeLike({ userId: user.id, postId: data.id });
         if (result === 'Liked') {
-            dispath(setLike({ id: data.id, userId: user.id, type: 'add' }));
+            dispatch(setLike({ id: data.id, userId: user.id, type: 'add' }));
         } else if (result === 'Unlike') {
-            dispath(setLike({ id: data.id, userId: user.id, type: 'delete' }));
+            dispatch(setLike({ id: data.id, userId: user.id, type: 'delete' }));
         }
     };
 

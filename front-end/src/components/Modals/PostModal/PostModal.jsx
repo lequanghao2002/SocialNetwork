@@ -52,8 +52,10 @@ function PostModal() {
                 form.setFieldsValue({
                     content: postModal.data.content,
                     status: postModal.data.status,
-                    images: JSON.parse(postModal.data.images).map((image) => ({ url: image })),
-                    tags: postModal.data.listTag.map((tag) => tag.name),
+                    images: postModal.data.images
+                        ? JSON.parse(postModal.data.images).map((image) => ({ url: image }))
+                        : [],
+                    tags: postModal.data.listTag ? postModal.data.listTag.map((tag) => tag.name) : [],
                 });
             }
 

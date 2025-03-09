@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchPostsThunk } from './postThunk';
+import { deletePostThunk, fetchPostsThunk } from './postThunk';
 
 const initialState = {
     posts: [],
@@ -56,6 +56,10 @@ const postSlice = createSlice({
             })
             .addCase(fetchPostsThunk.rejected, (state) => {
                 state.loading = false;
+            })
+
+            .addCase(deletePostThunk.fulfilled, (state, action) => {
+                state.posts = state.posts.filter((post) => post.id !== action.payload);
             });
     },
 });

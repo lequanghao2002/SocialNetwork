@@ -163,11 +163,18 @@ namespace SocialNetwork.Controllers
         }
 
         [HttpDelete("delete")]
-        public async Task<IActionResult> Delete (string Id)
+        public async Task<IActionResult> Delete (string id)
         {
             try
             {
-                var result = await _postRepository.Delete(Id);
+                var userId = _userService.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _postRepository.Delete(id, userId);
 
                 if (result)
                 {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using SocialNetwork.Data;
 using SocialNetwork.Helpers;
@@ -24,7 +25,7 @@ namespace SocialNetwork.Repositories
         public Task<GetPostDTO> GetById(string Id);
         public Task<GetPostDTO> Add(AddPostDTO postDTO);
         public Task<GetPostDTO> Update(UpdatePostDTO postDTO);
-        public Task<bool> Delete(string Id);
+        public Task<bool> Delete(string id, string userId);
         public Task<string> ChangeLike(ChangeLikeDTO likeDTO);
         public Task<int> CountShared(string id);
         public Task<GetPostDTO> Save(FavouritePostDTO favouriteDT0);
@@ -542,12 +543,23 @@ namespace SocialNetwork.Repositories
             return postNewById;
         }
 
-        public async Task<bool> Delete(string Id)
+        public async Task<bool> Delete(string id, string userId)
         {
-            var postDelete = await _dbContext.Posts.SingleOrDefaultAsync(pt => pt.Id == Id);
+            var post = await _dbContext.Posts.SingleOrDefaultAsync(pt => pt.Id == id);
 
-            postDelete.Deleted = true;
-            postDelete.CreatedDate = DateTime.UtcNow;
+            if (post == null)
+            {
+                return false;
+            }
+
+            if (post.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("You are not allowed to update this post");
+            }
+
+
+            post.Deleted = true;
+            post.DeletedDate = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync();
 
             return true;
