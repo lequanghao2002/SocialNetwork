@@ -20,7 +20,7 @@ namespace SocialNetwork.Repositories
     public interface IPostRepository
     {
         public Task<List<GetPostDTO>> Search(string keyword);
-        public Task<List<GetPostDTO>> GetAll(string filter, string? userId, int page, int pageSize);
+        public Task<List<GetPostDTO>> GetAll(string filter, string userId, int page, int pageSize);
         public Task<List<GetPostDTO>> GetAllByUserId(string userId, int page, int pageSize);
         public Task<List<GetPostDTO>> GetAllPostSaveByUserId(string userId, int page, int pageSize);
         public Task<GetPostDTO> GetById(string Id);
@@ -58,7 +58,6 @@ namespace SocialNetwork.Repositories
                     Content = p.Content,
                     Images = p.Images,
                     Status = p.Status,
-                    SharedPostId = p.SharedPostId,
                     CreatedDate = p.CreatedDate,
                     User = new GetUserDTO
                     {
@@ -108,203 +107,119 @@ namespace SocialNetwork.Repositories
             return postList;
         }
 
-        public async Task<List<GetPostDTO>> GetAll(string filter, string? userId, int page, int pageSize)
+        // Hàm kiểm tra phải là bạn bè của nhau không
+        private bool IsFriend(string currentUserId, string userId)
         {
+            return _dbContext.Friendships.Any(f =>
+                f.Status == FriendshipStatus.Friends &&
+                ((f.RequesterId == currentUserId && f.AddresseeId == userId) ||
+                 (f.RequesterId == userId && f.AddresseeId == currentUserId))
+            );
+        }
+
+        // Hàm kiểm tra quyền truy cập bài viết được chia sẻ
+        private bool CanViewSharedPost(string userId, Post sharedPost)
+        {
+            if (sharedPost.Deleted) return false;
+            if (sharedPost.Status == PostStatus.Private) return false;
+            if (sharedPost.Status == PostStatus.Friend && !IsFriend(userId, sharedPost.UserId)) return false;
+            return true;
+        }
+
+        // Hàm lấy nội dung bài viết được chia sẻ
+        private string GetSharedPostContent(string userId, Post sharedPost)
+        {
+            if (sharedPost.Deleted) return "This post has been deleted.";
+            if (!CanViewSharedPost(userId, sharedPost)) return "This post is not available.";
+            return sharedPost.Content;
+        }
+
+        public async Task<List<GetPostDTO>> GetAll(string filter, string userId, int page, int pageSize)
+        {
+            IQueryable<Post> query = _dbContext.Posts
+                .Where(p => !p.Deleted && p.Status != PostStatus.Private)
+                .Include(p => p.User)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments.Where(c => !c.Deleted)) // Chỉ lấy comment chưa bị xóa
+                .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
+                .Include(p => p.Favourites)
+                .Include(p => p.SharedPost).ThenInclude(sp => sp.User)
+                .AsNoTracking(); // Không tracking nếu không cần cập nhật
 
             if (filter == "Friends" && userId != null)
             {
-                var lstFriendship = await _dbContext.Friendships
+                var friendUserIds = await _dbContext.Friendships
                     .Where(x => x.Status == FriendshipStatus.Friends && (x.RequesterId == userId || x.AddresseeId == userId))
+                    .Select(x => x.RequesterId == userId ? x.AddresseeId : x.RequesterId)
                     .ToListAsync();
 
-                var friendUserIds = lstFriendship
-                   .Select(x => x.RequesterId == userId ? x.AddresseeId : x.RequesterId)
-                   .Distinct()
-                   .ToList();
-
-                var postList = await _dbContext.Posts
-                .Where(p => friendUserIds.Contains(p.UserId) && p.Deleted == false && p.Status != PostStatus.Private)
-                .OrderByDescending(p => p.CreatedDate)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new GetPostDTO
-                {
-                    Id = p.Id,
-                    UserId = p.UserId,
-                    Content = p.Content,
-                    Images = p.Images,
-                    Status = p.Status,
-                    SharedPostId = p.SharedPostId,
-                    CreatedDate = p.CreatedDate,
-                    User = new GetUserDTO
-                    {
-                        FirstName = p.User.FirstName,
-                        LastName = p.User.LastName,
-                        AvatarUrl = p.User.AvatarUrl,
-                        DateOfBirth = p.User.DateOfBirth,
-                        UserName = p.User.UserName,
-                        Email = p.User.Email,
-                        PhoneNumber = p.User.PhoneNumber,
-                    },
-                    Tags = p.PostTags.Select(t => new GetTagDTO
-                    {
-                        Id = t.Tag.Id,
-                        Name = t.Tag.Name
-                    }).ToList(),
-                    Likes = p.Likes.Select(l => new GetLikeDTO
-                    {
-                        UserId = l.User.Id,
-                    }).ToList(),
-                    Comments = p.Comments.Select(c => new GetCommentDTO
-                    {
-                        Id = c.Id,
-                        User = new GetUserDTO
-                        {
-                            Id = c.User.Id,
-                            FirstName = c.User.FirstName,
-                            LastName = c.User.LastName,
-                            AvatarUrl = c.User.AvatarUrl,
-                            DateOfBirth = c.User.DateOfBirth,
-                            UserName = c.User.UserName,
-                            Email = c.User.Email,
-                            PhoneNumber = c.User.PhoneNumber,
-                        },
-                        ParentId = c.ParentId,
-                        Content = c.Content,
-                        CreatedDate = c.CreatedDate,
-                        UpdatedDate = c.UpdatedDate,
-                        Deleted = c.Deleted,
-                        DeletedDate = c.DeletedDate
-                    }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
-                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
-
-                }).ToListAsync();
-
-                return postList;
-            } else if (filter == "Popular")
-            {
-                var postList = await _dbContext.Posts
-                .Where(p => p.Deleted == false && p.Status != PostStatus.Private)
-                .OrderByDescending(p => p.Likes.Count + p.Comments.Count + _dbContext.Posts.Count(sp => sp.SharedPostId == p.Id))
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new GetPostDTO
-                {
-                    Id = p.Id,
-                    UserId = p.UserId,
-                    Content = p.Content,
-                    Images = p.Images,
-                    Status = p.Status,
-                    SharedPostId = p.SharedPostId,
-                    CreatedDate = p.CreatedDate,
-                    User = new GetUserDTO
-                    {
-                        FirstName = p.User.FirstName,
-                        LastName = p.User.LastName,
-                        AvatarUrl = p.User.AvatarUrl,
-                        DateOfBirth = p.User.DateOfBirth,
-                        UserName = p.User.UserName,
-                        Email = p.User.Email,
-                        PhoneNumber = p.User.PhoneNumber,
-                    },
-                    Tags = p.PostTags.Select(t => new GetTagDTO
-                    {
-                        Id = t.Tag.Id,
-                        Name = t.Tag.Name
-                    }).ToList(),
-                    Likes = p.Likes.Select(l => new GetLikeDTO
-                    {
-                        UserId = l.User.Id,
-                    }).ToList(),
-                    Comments = p.Comments.Select(c => new GetCommentDTO
-                    {
-                        Id = c.Id,
-                        User = new GetUserDTO
-                        {
-                            Id = c.User.Id,
-                            FirstName = c.User.FirstName,
-                            LastName = c.User.LastName,
-                            AvatarUrl = c.User.AvatarUrl,
-                            DateOfBirth = c.User.DateOfBirth,
-                            UserName = c.User.UserName,
-                            Email = c.User.Email,
-                            PhoneNumber = c.User.PhoneNumber,
-                        },
-                        ParentId = c.ParentId,
-                        Content = c.Content,
-                        CreatedDate = c.CreatedDate,
-                        UpdatedDate = c.UpdatedDate,
-                        Deleted = c.Deleted,
-                        DeletedDate = c.DeletedDate
-                    }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
-                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
-
-                }).ToListAsync();
-
-                return postList;
+                query = query.Where(p => friendUserIds.Contains(p.UserId));
             }
-            else 
+            else if (filter == "Popular")
             {
-                var postList = await _dbContext.Posts
-                .Where(p => p.Deleted == false && p.Status != PostStatus.Private)
-                .OrderByDescending(p => p.CreatedDate)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new GetPostDTO
+                query = query.OrderByDescending(p => p.Likes.Count + p.Comments.Count + _dbContext.Posts.Count(sp => sp.SharedPostId == p.Id));
+            }
+            else
+            {
+                query = query.OrderByDescending(p => p.CreatedDate);
+            }
+
+            Console.WriteLine(query.ToQueryString()); // ✅ Xem SQL nhưng chưa chạy DB
+
+            var result = await query.Select(p => new GetPostDTO
+            {
+                Id = p.Id,
+                UserId = p.UserId,
+                Content = p.Content,
+                Images = p.Images,
+                Status = p.Status,
+                CreatedDate = p.CreatedDate,
+                User = new GetUserDTO
                 {
                     Id = p.Id,
-                    UserId = p.UserId,
-                    Content = p.Content,
-                    Images = p.Images,
-                    Status = p.Status,
-                    SharedPostId = p.SharedPostId,
-                    CreatedDate = p.CreatedDate,
-                    User = new GetUserDTO
-                    {
-                        FirstName = p.User.FirstName,
-                        LastName = p.User.LastName,
-                        AvatarUrl = p.User.AvatarUrl,
-                        DateOfBirth = p.User.DateOfBirth,
-                        UserName = p.User.UserName,
-                        Email = p.User.Email,
-                        PhoneNumber = p.User.PhoneNumber,
-                    },
-                    Tags = p.PostTags.Select(t => new GetTagDTO
-                    {
-                        Id = t.Tag.Id,
-                        Name = t.Tag.Name
-                    }).ToList(),
-                    Likes = p.Likes.Select(l => new GetLikeDTO
-                    {
-                        UserId = l.User.Id,
-                    }).ToList(),
-                    Comments = p.Comments.Select(c => new GetCommentDTO
-                    {
-                        Id = c.Id,
-                        User = new GetUserDTO
+                    FirstName = p.User.FirstName,
+                    LastName = p.User.LastName,
+                    AvatarUrl = p.User.AvatarUrl,
+                },
+                Tags = p.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
+                Likes = p.Likes.Select(l => new GetLikeDTO { UserId = l.User.Id }).ToList(),
+                Comments = p.Comments
+                        .OrderByDescending(o => o.CreatedDate)
+                        .Select(c => new GetCommentDTO
                         {
-                            Id = c.User.Id,
-                            FirstName = c.User.FirstName,
-                            LastName = c.User.LastName,
-                            AvatarUrl = c.User.AvatarUrl,
-                            DateOfBirth = c.User.DateOfBirth,
-                            UserName = c.User.UserName,
-                            Email = c.User.Email,
-                            PhoneNumber = c.User.PhoneNumber,
-                        },
-                        ParentId = c.ParentId,
-                        Content = c.Content,
-                        CreatedDate = c.CreatedDate,
-                        UpdatedDate = c.UpdatedDate,
-                        Deleted = c.Deleted,
-                        DeletedDate = c.DeletedDate
-                    }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
-                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                            Id = c.Id,
+                            User = new GetUserDTO
+                            {
+                                Id = c.User.Id,
+                                FirstName = c.User.FirstName,
+                                LastName = c.User.LastName,
+                                AvatarUrl = c.User.AvatarUrl,
+                            },
+                            ParentId = c.ParentId,
+                            Content = c.Content,
+                            CreatedDate = c.CreatedDate
+                        }).ToList(),
+                SharedPost = p.SharedPost == null ? null : new GetSharedPostDTO
+                {
+                    Id = p.SharedPost.Id,
+                    Content = p.SharedPost.Deleted ? "This post has been deleted." :
+                                  (p.SharedPost.Status == PostStatus.Private ? "This post is not available." : p.SharedPost.Content),
+                    Images = p.SharedPost.Deleted || p.SharedPost.Status == PostStatus.Private ? null : p.SharedPost.Images,
+                    Status = p.SharedPost.Status,
+                    CreatedDate = p.SharedPost.CreatedDate,
+                    User = p.SharedPost.Deleted || p.SharedPost.Status == PostStatus.Private ? null : new GetUserDTO
+                    {
+                        Id = p.Id,
+                        FirstName = p.SharedPost.User.FirstName,
+                        LastName = p.SharedPost.User.LastName,
+                        AvatarUrl = p.SharedPost.User.AvatarUrl,
+                    },
+                    Tags = p.SharedPost.Deleted || p.SharedPost.Status == PostStatus.Private ? null :  p.SharedPost.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
+                }
+            })
+                .ToListAsync(); // ✅ Chỉ chạy SQL một lần và lấy đúng dữ liệu cần
 
-                }).ToListAsync();
-
-                return postList;
-            }
+            return result;
 
         }
 
@@ -322,7 +237,6 @@ namespace SocialNetwork.Repositories
                     Content = p.Content,
                     Images = p.Images,
                     Status = p.Status,
-                    SharedPostId = p.SharedPostId,
                     CreatedDate = p.CreatedDate,
                     User = new GetUserDTO
                     {
@@ -391,7 +305,6 @@ namespace SocialNetwork.Repositories
                     Content = p.Content,
                     Images = p.Images,
                     Status = p.Status,
-                    SharedPostId = p.SharedPostId,
                     CreatedDate = p.CreatedDate,
                     User = new GetUserDTO
                     {
@@ -452,7 +365,6 @@ namespace SocialNetwork.Repositories
                     Content = p.Content,
                     Images = p.Images,
                     Status = p.Status,
-                    SharedPostId = p.SharedPostId,
                     CreatedDate = p.CreatedDate,
                     User = new GetUserDTO
                     {

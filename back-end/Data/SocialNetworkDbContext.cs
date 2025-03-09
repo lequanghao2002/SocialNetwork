@@ -77,6 +77,11 @@ namespace SocialNetwork.Data
                     .WithMany(u => u.Posts)
                     .HasForeignKey(p => p.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(p => p.SharedPost)
+                   .WithMany() // Không cần danh sách bài viết chia sẻ
+                   .HasForeignKey(p => p.SharedPostId)
+                   .OnDelete(DeleteBehavior.NoAction); // Không tự động xóa bài chia sẻ
             });
 
             modelBuilder.Entity<Tag>(entity =>

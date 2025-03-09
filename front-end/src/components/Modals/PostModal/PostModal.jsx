@@ -41,7 +41,7 @@ function PostModal() {
 
     useEffect(() => {
         if (postModal.isOpen) {
-            if (postModal.type === 'add') {
+            if (postModal.type === 'add' || postModal.type === 'share') {
                 form.setFieldsValue({
                     content: '',
                     status: 1,
@@ -75,12 +75,25 @@ function PostModal() {
 
         try {
             let res = null;
-            if (postModal.type === 'add') {
-                res = await postService.add(data);
-                dispatch(addPost(res));
-            } else if (postModal.type === 'update') {
-                res = await postService.update({ ...data, id: postModal.data.id });
-                dispatch(updatePost(res));
+            switch (postModal.type) {
+                case 'add': {
+                    res = await postService.add(data);
+                    dispatch(addPost(res));
+                    break;
+                }
+                case 'share': {
+                    res = await postService.add({ ...data, sharedPostId: postModal.data.id });
+                    dispatch(addPost({ ...res, sharedPost: postModal.data }));
+                    break;
+                }
+                case 'update': {
+                    res = await postService.update({ ...data, id: postModal.data.id });
+                    dispatch(updatePost(res));
+                    break;
+                }
+                default: {
+                    console.log('Type post invalid ');
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -88,41 +101,6 @@ function PostModal() {
             dispatch(setLoading({ name: 'post', isLoading: false }));
             dispatch(closeModal('post'));
         }
-
-        console.log(data);
-
-        // const fetchApi = async () => {
-        //     try {
-        //         let result = null;
-
-        //         if (modePost === modePostConstant.modeAdd) {
-        //             result = await postService.addPost(formData);
-        //         } else if (modePost === modePostConstant.modeUpdate) {
-        //             formData.append('Id', postCurrent.id);
-        //             result = await postService.updatePost(formData);
-        //         } else if (modePost === modePostConstant.modeShare) {
-        //             formData.append('SharedPostId', postCurrent.id);
-        //             result = await postService.addPost(formData);
-        //         } else {
-        //             console.log('result is null');
-        //         }
-
-        //         if (result != null) {
-        //             setIsPostModalVisible(false);
-        //             //onSubmit(result);
-        //         }
-        //     } catch (error) {
-        //         console.error('Error:', error);
-        //     } finally {
-        //         form.resetFields();
-        //         //setFileList([]);
-        //         setSelectedTag([]);
-        //         setStatusPost([]);
-        //         setIsPostModalVisible(false);
-        //         //setLoading(false);
-        //     }
-        // };
-        // fetchApi();
     };
 
     return (
@@ -137,7 +115,9 @@ function PostModal() {
         >
             {loading && <LoadingModal title="Posting" />}
             {/* Loading overlay */}
-            <h2 className="title-post">{postModal.type === 'add' ? 'Add' : 'Update'} post</h2>
+            <h2 className="title-post">
+                {postModal.type === 'add' ? 'Add' : postModal.type === 'share' ? 'Share' : 'Update'} post
+            </h2>
 
             <Form form={form} onFinish={handleSubmit}>
                 {user && (
@@ -160,11 +140,11 @@ function PostModal() {
                     />
                 </Form.Item>
 
-                <Form.Item name="images">
+                <Form.Item name="images" hidden={postModal.type === 'share'}>
                     <ImagesPickerField />
                 </Form.Item>
 
-                <Form.Item name="tags">
+                <Form.Item name="tags" hidden={postModal.type === 'share'}>
                     <TagSelectField mode="tags" placeholder="Select tags" />
                 </Form.Item>
 
@@ -176,7 +156,7 @@ function PostModal() {
                         disabled={!content?.trim() || loading}
                         loading={loading}
                     >
-                        Post
+                        {postModal.type === 'add' ? 'Post' : postModal.type === 'share' ? 'Share' : 'Save'}
                     </Button>
                 </Form.Item>
             </Form>

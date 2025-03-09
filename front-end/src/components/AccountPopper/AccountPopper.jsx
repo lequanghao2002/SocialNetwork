@@ -50,33 +50,42 @@ function AccountPopper({ data }) {
     };
 
     return (
-        <div>
-            <Tippy interactive offset={[-150, -30]} delay={[300, 100]} placement="bottom-start" render={renderPreview}>
-                <div className={cx('account-item')}>
-                    <Image src={user.avatarUrl} alt={user.email} />
-                    <div
-                        className={cx('item-info')}
-                        onClick={() => {
-                            navigate(`${config.routes.profile.replace(':id', data.userId)}`);
-                        }}
-                    >
-                        <p className={cx('nickname')}>
-                            <span>{user.firstName + ' ' + user.lastName}</span>
-                        </p>
-                        <p className={cx('time')}>
-                            {data.status === 1 ? (
-                                <FontAwesomeIcon icon={faEarthAfrica} />
-                            ) : data.status === 2 ? (
-                                <FontAwesomeIcon icon={faUserGroup} />
-                            ) : data.status === 3 ? (
-                                <FontAwesomeIcon icon={faLock} />
-                            ) : null}
-                            <span>{timeAgo}</span>
-                        </p>
+        <>
+            {user && (
+                <Tippy
+                    interactive
+                    offset={[-150, -30]}
+                    delay={[300, 100]}
+                    placement="bottom-start"
+                    render={renderPreview}
+                >
+                    <div className={cx('account-item')}>
+                        <Image src={user.avatarUrl} alt={user.avatarUrl} />
+                        <div
+                            className={cx('item-info')}
+                            onClick={() => {
+                                navigate(`${config.routes.profile.replace(':id', data.userId)}`);
+                            }}
+                        >
+                            <p className={cx('nickname')}>
+                                <span>{user.firstName + ' ' + user.lastName}</span>
+                            </p>
+                            <p className={cx('time')}>
+                                {data.status === 1 ? (
+                                    <FontAwesomeIcon icon={faEarthAfrica} />
+                                ) : data.status === 2 ? (
+                                    <FontAwesomeIcon icon={faUserGroup} />
+                                ) : data.status === 3 ? (
+                                    <FontAwesomeIcon icon={faLock} />
+                                ) : null}
+
+                                <span>{timeAgo}</span>
+                            </p>
+                        </div>
                     </div>
-                </div>
-            </Tippy>
-        </div>
+                </Tippy>
+            )}
+        </>
     );
 }
 

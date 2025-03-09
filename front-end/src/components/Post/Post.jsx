@@ -113,12 +113,6 @@ function Post({ data, disableActionButton = false }) {
         }
     };
 
-    const handleSharedPost = () => {
-        setModePost(modePostConstant.modeShare);
-        setPostCurrent(data);
-        setIsPostModalVisible(true);
-    };
-
     useEffect(() => {
         if (data.sharedPostId) {
             fetchSharedPost(data.sharedPostId);
@@ -134,45 +128,37 @@ function Post({ data, disableActionButton = false }) {
         }
     };
 
-    const SharedPost = ({ sharedPost }) => {
-        if (!sharedPost) return null;
-
-        let sharedImageArray = [];
-        if (sharedPost.images) {
-            sharedImageArray = JSON.parse(sharedPost.images);
-        }
+    const SharedPost = ({ data }) => {
+        const imageArray = data.images ? JSON.parse(data.images) : null;
 
         return (
             <div className={cx('share-post')}>
                 <div className={cx('header')}>
-                    <AccountPopper data={sharedPost} />
+                    <AccountPopper data={data} />
                 </div>
 
                 <div className={cx('body')}>
                     <p
                         className={cx('text')}
-                        dangerouslySetInnerHTML={{ __html: convertNewlinesToBreaks(sharedPost.content) }}
+                        dangerouslySetInnerHTML={{ __html: convertNewlinesToBreaks(data.content) }}
                     ></p>
                     <Image.PreviewGroup
                         preview={{
                             onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
                         }}
                     >
-                        {sharedImageArray.map((imageUrl, index) => (
-                            <div className={cx('image')} key={index}>
-                                <Image
-                                    width={100}
-                                    height={100}
-                                    src={`${import.meta.env.REACT_APP_BASE_URL2}${imageUrl}`}
-                                />
-                            </div>
-                        ))}
+                        {imageArray &&
+                            imageArray.map((url, index) => (
+                                <div key={index} className={cx('image')}>
+                                    <Image width={100} height={100} src={url} />
+                                </div>
+                            ))}
                     </Image.PreviewGroup>
                 </div>
 
                 <div className={cx('footer')}>
-                    {sharedPost.listTag &&
-                        sharedPost.listTag.map((item, index) => (
+                    {data.tags &&
+                        data.tags.map((item, index) => (
                             <span key={index} className={cx('tag')}>
                                 #{item.name}
                             </span>
@@ -182,18 +168,6 @@ function Post({ data, disableActionButton = false }) {
         );
     };
 
-    useEffect(() => {
-        //fetchCountPostShared(data.id);
-    }, [data.id]);
-
-    const fetchCountPostShared = async (id) => {
-        const result = await postService.countSharedPost(id);
-        if (result) {
-            setSharedCount(result);
-        } else {
-            console.error('Failed to fetch shared post count');
-        }
-    };
     return (
         <>
             {/* <PostDetailModal
@@ -246,7 +220,7 @@ function Post({ data, disableActionButton = false }) {
                             </span>
                         ))}
 
-                    {data.sharedPostId !== '' && <SharedPost sharedPost={sharedPost} />}
+                    {data.sharedPost && <SharedPost data={data.sharedPost} />}
 
                     <div className={cx('interact')}>
                         <Button
@@ -272,7 +246,7 @@ function Post({ data, disableActionButton = false }) {
                             leftIcon={<FontAwesomeIcon icon={faShare} />}
                             onClick={() => {
                                 if (disableActionButton) return;
-                                handleSharedPost();
+                                dispatch(openModal({ name: 'post', type: 'share', data }));
                             }}
                         >
                             {sharedCount}
