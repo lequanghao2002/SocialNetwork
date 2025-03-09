@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Post.module.scss';
 import Button from '../Button';
@@ -14,13 +14,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import AccountPopper from '~/components/AccountPopper';
 import { Dropdown, Image, Modal } from 'antd';
-import Menu from '~/components/Popper/Menu';
-import PostModal from '~/components/Modals/PostModal/PostModal';
 import postService from '~/services/postService';
-import * as modePostConstant from '~/constant';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '~/context/Notification';
-import { AppContext } from '~/context/AppProvider';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { setLike } from '~/features/post/postSlice';
@@ -32,8 +28,6 @@ const cx = classNames.bind(styles);
 function Post({ data, disableActionButton = false }) {
     const dispatch = useDispatch();
     const user = useSelector(userSelector);
-    const [sharedPost, setSharedPost] = useState(null);
-    const [sharedCount, setSharedCount] = useState(0);
     const { success, error } = useNotification();
     const navigate = useNavigate();
 
@@ -113,21 +107,6 @@ function Post({ data, disableActionButton = false }) {
         }
     };
 
-    useEffect(() => {
-        if (data.sharedPostId) {
-            fetchSharedPost(data.sharedPostId);
-        }
-    }, [data.sharedPostId]);
-
-    const fetchSharedPost = async (sharedPostId) => {
-        const result = await postService.getPostById(sharedPostId);
-        if (result) {
-            setSharedPost(result);
-        } else {
-            console.error('Failed to fetch shared post');
-        }
-    };
-
     const SharedPost = ({ data }) => {
         const imageArray = data.images ? JSON.parse(data.images) : null;
 
@@ -170,18 +149,6 @@ function Post({ data, disableActionButton = false }) {
 
     return (
         <>
-            {/* <PostDetailModal
-                visible={showPostDetailModal}
-                setVisible={setShowPostDetailModal}
-                onClose={() => setShowPostDetailModal(false)}
-                post={data}
-                handlePostSubmit={handlePostSubmit}
-                handleDeletePost={handleDeletePost}
-                handleLikeChange={handleLikeChange}
-                posts={posts}
-                setPosts={setPosts}
-            ></PostDetailModal> */}
-
             <div className={cx('wrapper')}>
                 <div className={cx('header')}>
                     <AccountPopper data={data} />
@@ -227,7 +194,6 @@ function Post({ data, disableActionButton = false }) {
                             className={isLiked ? cx('buttonLiked') : ''}
                             leftIcon={<FontAwesomeIcon icon={faThumbsUp} />}
                             onClick={() => {
-                                if (disableActionButton) return;
                                 handeLikeClick();
                             }}
                         >
@@ -245,11 +211,10 @@ function Post({ data, disableActionButton = false }) {
                         <Button
                             leftIcon={<FontAwesomeIcon icon={faShare} />}
                             onClick={() => {
-                                if (disableActionButton) return;
                                 dispatch(openModal({ name: 'post', type: 'share', data }));
                             }}
                         >
-                            {sharedCount}
+                            {data.sharedCount}
                         </Button>
                     </div>
                 </div>

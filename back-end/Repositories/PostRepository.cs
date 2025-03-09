@@ -215,9 +215,10 @@ namespace SocialNetwork.Repositories
                         AvatarUrl = p.SharedPost.User.AvatarUrl,
                     },
                     Tags = p.SharedPost.Deleted || p.SharedPost.Status == PostStatus.Private ? null :  p.SharedPost.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
-                }
+                },
+                SharedCount = _dbContext.Posts.Count(sp => sp.SharedPostId == p.Id)
             })
-                .ToListAsync(); // ✅ Chỉ chạy SQL một lần và lấy đúng dữ liệu cần
+            .ToListAsync(); // ✅ Chỉ chạy SQL một lần và lấy đúng dữ liệu cần
 
             return result;
 
@@ -346,8 +347,7 @@ namespace SocialNetwork.Repositories
                         Deleted = c.Deleted,
                         DeletedDate = c.DeletedDate
                     }).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
-                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
-
+                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList(),
                 }).ToListAsync();
 
             return postList;
