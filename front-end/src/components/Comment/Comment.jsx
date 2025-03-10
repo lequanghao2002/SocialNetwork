@@ -9,9 +9,9 @@ import EmojiPicker from 'emoji-picker-react';
 import Button from '../Button';
 import commentService from '~/services/commentService';
 import { message } from 'antd';
-import { NotificationContext } from '~/context/Notification';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
+import { useNotification } from '~/context/notification';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
@@ -22,7 +22,7 @@ function Comment({ item, postId, posts, setPosts }) {
     const [editMode, setEditMode] = useState(false);
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
-    const { success, error } = useContext(NotificationContext);
+    const { success, error } = useNotification();
     const [loading, setLoading] = useState(false);
 
     const handleClickEmoji = (e) => {

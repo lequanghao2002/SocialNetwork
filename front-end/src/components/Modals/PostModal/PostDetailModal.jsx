@@ -1,8 +1,5 @@
-import { Form, Input, Modal, message } from 'antd';
+import { Button, Form, Input, Modal, message } from 'antd';
 import './PostDetailModal.scss';
-
-import Image from '../Image';
-import Button from '../Button';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
@@ -11,11 +8,13 @@ import { faCamera, faFaceSmile, faImage, faMicrophone, faSpinner } from '@fortaw
 import { useContext, useState } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import commentService from '~/services/commentService';
-import Comment from '../Comment/Comment';
-import { NotificationContext } from '~/context/Notification';
 import { useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
-import Post from '../Post/Post';
+import LoadingModal from '../LoadingModal/LoadingModal';
+import { postDetailModalSelector } from '~/features/modal/modalSelector';
+import Post from '~/components/Post/Post';
+import Comment from '~/components/Comment/Comment';
+import { useNotification } from '~/context/notification';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
@@ -31,11 +30,13 @@ function PostDetailModal({
     posts,
     setPosts,
 }) {
+    const postDetailModal = useSelector(postDetailModalSelector);
+
     const [form] = Form.useForm();
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
     const user = useSelector(userSelector);
-    const { success, error } = useContext(NotificationContext);
+    const { success, error } = useNotification();
     const [loading, setLoading] = useState(false);
 
     const handleClickEmoji = (e) => {
@@ -66,44 +67,35 @@ function PostDetailModal({
         }
     };
 
-    const renderComments = (comments, parentId = null) => {
-        return comments
-            .filter((comment) => comment.parentId === parentId)
-            .map((comment) => (
-                <div key={comment.id}>
-                    <div className="item-comment">
-                        <Comment item={comment} postId={post.id} posts={posts} setPosts={setPosts} />
-                    </div>
-                    <div style={{ marginLeft: '30px' }}>{renderComments(comments, comment.id)}</div>
-                </div>
-            ));
-    };
+    // const renderComments = (comments, parentId = null) => {
+    //     return comments
+    //         .filter((comment) => comment.parentId === parentId)
+    //         .map((comment) => (
+    //             <div key={comment.id}>
+    //                 <div className="item-comment">
+    //                     <Comment item={comment} postId={post.id} posts={posts} setPosts={setPosts} />
+    //                 </div>
+    //                 <div style={{ marginLeft: '30px' }}>{renderComments(comments, comment.id)}</div>
+    //             </div>
+    //         ));
+    // };
 
     return (
         <>
             <Modal
                 width={1000}
-                open={visible}
+                open={postDetailModal.isOpen}
                 footer={null}
-                onCancel={onClose}
+                onCancel={() => dispatch(closeModal('postModal'))}
                 maskClosable={false}
                 style={{ top: 20 }}
             >
                 <div className="wrapper">
-                    {loading && (
-                        <div className="loading-overlay">
-                            <FontAwesomeIcon icon={faSpinner} className="search-loading" />
-                        </div>
-                    )}
-                    <Post
-                        data={post}
-                        handlePostSubmit={handlePostSubmit}
-                        handleDeletePost={handleDeletePost}
-                        handleLikeChange={handleLikeChange}
-                        disableActionButton={true}
-                    />
+                    {loading && <LoadingModal title="" />}
 
-                    <div className="list-comment">{post?.comments?.length > 0 && renderComments(post.comments)}</div>
+                    <Post data={postDetailModal.data} commentDisabled={true} />
+
+                    {/* <div className="list-comment">{post?.comments?.length > 0 && renderComments(post.comments)}</div>
 
                     <div className="bottom">
                         <div className="icons">
@@ -127,7 +119,7 @@ function PostDetailModal({
                         <Button primary small onClick={handleSendComment}>
                             Send
                         </Button>
-                    </div>
+                    </div> */}
                 </div>
             </Modal>
         </>

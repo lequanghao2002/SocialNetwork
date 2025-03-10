@@ -25,7 +25,7 @@ import { deletePostThunk, savePostThunk, unSavePostThunk } from '~/features/post
 
 const cx = classNames.bind(styles);
 
-function Post({ data, disableActionButton = false }) {
+function Post({ data, commentDisabled = false }) {
     const dispatch = useDispatch();
     const user = useSelector(userSelector);
     const { success, error } = useNotification();
@@ -202,8 +202,8 @@ function Post({ data, disableActionButton = false }) {
                         <Button
                             leftIcon={<FontAwesomeIcon icon={faMessage} />}
                             onClick={() => {
-                                if (disableActionButton) return;
-                                setShowPostDetailModal(true);
+                                if (commentDisabled) return;
+                                dispatch(openModal({ name: 'postDetail', data }));
                             }}
                         >
                             {data.comments.length || 0}

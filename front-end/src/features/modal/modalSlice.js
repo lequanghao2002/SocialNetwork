@@ -3,9 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     modals: {
         post: { isOpen: false, type: null, data: null }, // type = add || update || share
+        postDetail: { isOpen: false, type: null, data: null }, // type = add || update || share
     },
     loading: {
         post: false,
+        postDetail: false,
     },
 };
 
