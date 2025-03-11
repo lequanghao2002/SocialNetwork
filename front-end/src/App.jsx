@@ -81,7 +81,7 @@ function AppContent() {
         }
     }, [user, location.pathname, loading, navigate]);
 
-    if (loading) return <Spin size="large" />;
+    if (loading) return <Spin size="large" fullscreen />;
 
     return <RenderRoutes routes={user ? privateRoutes : publicRoutes} />;
 }

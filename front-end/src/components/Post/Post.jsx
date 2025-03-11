@@ -196,15 +196,16 @@ function Post({ data, commentDisabled = false }) {
                             onClick={() => {
                                 handeLikeClick();
                             }}
+                            disabled={commentDisabled}
                         >
                             {data.likes.length || 0}
                         </Button>
                         <Button
                             leftIcon={<FontAwesomeIcon icon={faMessage} />}
                             onClick={() => {
-                                if (commentDisabled) return;
                                 dispatch(openModal({ name: 'postDetail', data }));
                             }}
+                            disabled={commentDisabled}
                         >
                             {data.comments.length || 0}
                         </Button>
@@ -213,6 +214,7 @@ function Post({ data, commentDisabled = false }) {
                             onClick={() => {
                                 dispatch(openModal({ name: 'post', type: 'share', data }));
                             }}
+                            disabled={commentDisabled}
                         >
                             {data.sharedCount}
                         </Button>
