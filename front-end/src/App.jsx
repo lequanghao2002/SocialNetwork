@@ -51,18 +51,6 @@ function AppContent() {
         if (!user) return;
 
         dispatch(fetchFriendsThunk(user.id));
-
-        chatHubService.startConnection();
-
-        chatHubService.onReceiveMessage((message) => {
-            dispatch(addMessageToChat(message));
-        });
-
-        chatHubService.onMessageUpdated((message) => {
-            dispatch(updateMessageInChat(message));
-        });
-
-        return () => chatHubService.stopConnection();
     }, [user, dispatch]);
 
     // Xử lý điều hướng

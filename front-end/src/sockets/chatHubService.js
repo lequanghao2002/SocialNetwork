@@ -18,15 +18,15 @@ class ChatHubService {
 
     async startConnection() {
         if (this.connection.state !== signalR.HubConnectionState.Disconnected) {
-            console.warn('⚠️ SignalR is already connected or connecting.');
+            console.warn('⚠️ Chat Hub is already connected or connecting.');
             return;
         }
 
         try {
             await this.connection.start();
-            console.log('✅ SignalR Connected.');
+            console.log('✅ Chat Hub Connected.');
         } catch (err) {
-            console.error('❌ SignalR Connection Error: ', err);
+            console.error('❌ Chat Hub Connection Error: ', err);
             //setTimeout(() => this.startConnection(), 5000); // Thử kết nối lại sau 5s
         }
     }
@@ -59,6 +59,7 @@ class ChatHubService {
 
     stopConnection() {
         if (this.connection.state === signalR.HubConnectionState.Connected) {
+            console.log('⚠️ Chat Hub Disconnected');
             this.connection.stop();
         }
     }
