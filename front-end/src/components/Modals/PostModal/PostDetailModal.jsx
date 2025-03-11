@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal, message } from 'antd';
+import { Form, Input, Modal, message } from 'antd';
 import './PostDetailModal.scss';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -15,6 +15,7 @@ import { postDetailModalSelector } from '~/features/modal/modalSelector';
 import Post from '~/components/Post/Post';
 import Comment from '~/components/Comment/Comment';
 import { useNotification } from '~/context/notification';
+import Button from '~/components/Button';
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
@@ -31,11 +32,9 @@ function PostDetailModal({
     setPosts,
 }) {
     const postDetailModal = useSelector(postDetailModalSelector);
-
-    const [form] = Form.useForm();
+    const user = useSelector(userSelector);
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
-    const user = useSelector(userSelector);
     const { success, error } = useNotification();
     const [loading, setLoading] = useState(false);
 
@@ -45,9 +44,10 @@ function PostDetailModal({
     };
 
     const handleSendComment = async () => {
+        if (!text) return;
+
         setLoading(true);
         const data = {
-            userId: user.Id,
             postId: post.id,
             content: text,
         };
@@ -67,18 +67,21 @@ function PostDetailModal({
         }
     };
 
-    // const renderComments = (comments, parentId = null) => {
-    //     return comments
-    //         .filter((comment) => comment.parentId === parentId)
-    //         .map((comment) => (
-    //             <div key={comment.id}>
-    //                 <div className="item-comment">
-    //                     <Comment item={comment} postId={post.id} posts={posts} setPosts={setPosts} />
-    //                 </div>
-    //                 <div style={{ marginLeft: '30px' }}>{renderComments(comments, comment.id)}</div>
-    //             </div>
-    //         ));
-    // };
+    const renderComments = (comments, parentId = null) => {
+        return comments
+            .filter((comment) => comment.parentId === parentId)
+            .map((comment) => (
+                <div key={comment.id}>
+                    <div className="item-comment">
+                        <Comment item={comment} postId={post.id} posts={posts} setPosts={setPosts} />
+                    </div>
+                    <div style={{ marginLeft: '30px' }}>{renderComments(comments, comment.id)}</div>
+                </div>
+            ));
+    };
+
+    console.log(postDetailModal.data);
+    if (!postDetailModal.data) return;
 
     return (
         <>
@@ -95,13 +98,15 @@ function PostDetailModal({
 
                     <Post data={postDetailModal.data} commentDisabled={true} />
 
-                    {/* <div className="list-comment">{post?.comments?.length > 0 && renderComments(post.comments)}</div>
+                    <div className="list-comment">
+                        {postDetailModal.data.comments?.length > 0 && renderComments(postDetailModal.data.comments)}
+                    </div>
 
                     <div className="bottom">
                         <div className="icons">
                             <FontAwesomeIcon icon={faImage} />
-                            <FontAwesomeIcon icon={faCamera} />
-                            <FontAwesomeIcon icon={faMicrophone} />
+                            <FontAwesomeIcon icon={faCamera} onClick={() => alert('Coming soon')} />
+                            <FontAwesomeIcon icon={faMicrophone} onClick={() => alert('Coming soon')} />
                         </div>
                         <input
                             className="input-send"
@@ -116,10 +121,10 @@ function PostDetailModal({
                                 <EmojiPicker open={open} onEmojiClick={handleClickEmoji} theme="dark" />
                             </div>
                         </div>
-                        <Button primary small onClick={handleSendComment}>
+                        <Button primary small onClick={handleSendComment} disabled={!text.trim()}>
                             Send
                         </Button>
-                    </div> */}
+                    </div>
                 </div>
             </Modal>
         </>

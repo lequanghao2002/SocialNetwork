@@ -159,3 +159,8 @@ body .tippy-box {
     border-color: var(--primary);
     color: var(--primary);
 }
+
+// Custom Spin
+.ant-spin-dot-holder {
+    color: var(--primary) !important;
+}
