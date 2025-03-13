@@ -19,6 +19,11 @@ function Message() {
         chatHubService.onUpdatedMessage((message) => {
             dispatch(updateMessageInChat(message));
         });
+
+        return () => {
+            chatHubService.offReceiveMessage();
+            chatHubService.offUpdatedMessage();
+        };
     }, []);
 
     return (
