@@ -5,24 +5,20 @@ import { addMessageToChat, updateMessageInChat } from '~/features/chat/chatSlice
 import Chat from '~/features/chat/components/Chat';
 import DetailChat from '~/features/chat/components/DetailChat';
 import ListChat from '~/features/chat/components/ListChat';
-import { chatHubService } from '~/sockets/chatHubService';
+import chatHubService from '~/sockets/chatHubService';
 
 function Message() {
     const dispatch = useDispatch();
     const selectedFriendId = useSelector(selectedFriendIdSelector);
 
     useEffect(() => {
-        chatHubService.startConnection();
-
         chatHubService.onReceiveMessage((message) => {
             dispatch(addMessageToChat(message));
         });
 
-        chatHubService.onMessageUpdated((message) => {
+        chatHubService.onUpdatedMessage((message) => {
             dispatch(updateMessageInChat(message));
         });
-
-        return () => chatHubService.stopConnection();
     }, []);
 
     return (

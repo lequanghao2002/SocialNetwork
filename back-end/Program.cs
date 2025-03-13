@@ -51,7 +51,10 @@ builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 builder.Services.AddIdentityCore<User>()
     .AddRoles<IdentityRole>()
@@ -84,7 +87,7 @@ builder.Services
                 var path = context.HttpContext.Request.Path;
 
                 // Nếu request đến Hub (ví dụ: /chatHub) thì lấy token từ query string
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/realtimeHub"))
                 {
                     context.Token = accessToken;
                 }
@@ -131,6 +134,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<RealtimeHub>("/realtimeHub");
 
 app.Run();

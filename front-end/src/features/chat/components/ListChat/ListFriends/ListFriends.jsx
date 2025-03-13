@@ -3,13 +3,13 @@ import classNames from 'classnames/bind';
 import styles from './ListFriends.module.scss';
 import Image from '~/components/Image';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
-import EllipsisText from '~/components/Text/EllipsisText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import messageService from '~/services/messageService';
 import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelector';
 import { useDispatch, useSelector } from 'react-redux';
 import { markMessageAsSeen, setSelectedFriendId } from '~/features/chat/chatSlice';
 import { userSelector } from '~/features/auth/authSelector';
+import TextEllipsis from '~/components/Text/TextEllipsis';
 
 const cx = classNames.bind(styles);
 
@@ -47,13 +47,13 @@ function ListFriends() {
                     >
                         <Image src={friend.info.avatarUrl} alt="" className={cx('img')} />
                         <div className={cx('info')}>
-                            <EllipsisText bold={isMesssageUnSeen}>
+                            <TextEllipsis bold={isMesssageUnSeen}>
                                 {friend.info.firstName} {friend.info.lastName}
-                            </EllipsisText>
-                            <EllipsisText small sub={isMesssageUnSeen} bold={isMesssageUnSeen}>
+                            </TextEllipsis>
+                            <TextEllipsis small sub={isMesssageUnSeen} bold={isMesssageUnSeen}>
                                 {lastMessage?.senderId === user.id && 'Bạn: '}
                                 {lastMessage?.content}
-                            </EllipsisText>
+                            </TextEllipsis>
                         </div>
 
                         {isMesssageUnSeen && <FontAwesomeIcon icon={faCircle} className={cx('seen-icon')} />}

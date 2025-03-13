@@ -46,7 +46,7 @@ namespace SocialNetwork.Repositories
             // Xác thực token và lấy thông tin user từ Google
             var payload = await GoogleJsonWebSignature.ValidateAsync(tokenId, settings);
 
-            if (payload == null || payload.Issuer != "accounts.google.com" || payload.ExpirationTimeSeconds < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+            if (payload == null || payload.Issuer != "https://accounts.google.com" || payload.ExpirationTimeSeconds < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
             {
                 return string.Empty;
             }

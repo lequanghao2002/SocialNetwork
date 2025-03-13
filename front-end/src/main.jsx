@@ -13,6 +13,7 @@ createRoot(document.getElementById('root')).render(
                 theme={{
                     token: {
                         colorPrimary: '#f18404', // Màu chính
+                        colorLink: '#f18404',
                     },
                     algorithm: theme.darkAlgorithm,
                 }}

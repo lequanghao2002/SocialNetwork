@@ -5,14 +5,13 @@ import { Fragment, useContext, useEffect } from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from './features/store';
 import { fetchFriendsThunk } from './features/chat/chatThunks';
-import { chatHubService } from './sockets/chatHubService';
-import { addMessageToChat, updateMessageInChat } from './features/chat/chatSlice';
 import { loadingSelector, userSelector } from './features/auth/authSelector';
 import { fetchUserThunk } from './features/auth/authThunk';
 import { Spin } from 'antd';
 import config from './config';
 import Modals from './components/Modals/Modals';
 import NotificationProvider from './context/notification';
+import { realtimeHubService } from './sockets/realtimeHubService';
 
 function RenderRoutes({ routes }) {
     return (
@@ -45,11 +44,15 @@ function AppContent() {
     // Gọi fetchUserThunk() chỉ khi app khởi động
     useEffect(() => {
         dispatch(fetchUserThunk());
-    }, [dispatch]);
+    }, []);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user) {
+            realtimeHubService.stopConnection();
+            return;
+        }
 
+        realtimeHubService.startConnection();
         dispatch(fetchFriendsThunk(user.id));
     }, [user, dispatch]);
 

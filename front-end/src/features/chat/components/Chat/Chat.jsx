@@ -15,11 +15,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Button from '../../../../components/Button';
 import EmojiPicker from 'emoji-picker-react';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import utc from 'dayjs/plugin/utc';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { chatHubService } from '~/sockets/chatHubService';
 import messageService from '~/services/messageService';
 import { uploadChatImage } from '~/utils/uploadHelper';
 import { Dropdown, Flex } from 'antd';
@@ -27,13 +22,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatSelector';
 import { setChat, setMessage } from '~/features/chat/chatSlice';
 import { userSelector } from '~/features/auth/authSelector';
+import { dateFormat } from '~/utils/dateFormat';
+import chatHubService from '~/sockets/chatHubService';
 
-dayjs.extend(customParseFormat);
-dayjs.extend(relativeTime);
-dayjs.extend(utc);
 const cx = classNames.bind(styles);
-
-const format = 'MMMM D, YYYY [at] h:mm:ss A [UTC]Z';
 
 function Chat() {
     //const { user, chatId, isReceiverBlocked, isCurrentUserBlocked } = useContext(ChatContext);
@@ -233,7 +225,7 @@ function Chat() {
                                         {/* Thực hiện logic của người nhận
                                         {message.receiverId === user.id} */}
                                     </Flex>
-                                    <span>{dayjs(message.createdDate).utc().utcOffset(7).fromNow()}</span>
+                                    <span>{dateFormat.timeFromNow(message.createdDate)}</span>
                                 </div>
                             </div>
                         ))}
