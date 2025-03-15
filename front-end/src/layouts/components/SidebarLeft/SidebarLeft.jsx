@@ -3,7 +3,6 @@ import styles from './SidebarLeft.module.scss';
 import Menu, { MenuItem } from './Menu';
 import config from '~/config';
 import { faBookmark, faCommentDots, faHome, faUserFriends } from '@fortawesome/free-solid-svg-icons';
-import SuggestedAccounts from '~/components/SuggestedAccounts';
 
 const cx = classNames.bind(styles);
 
@@ -16,8 +15,6 @@ function Sidebar() {
                 <MenuItem title="Friends" to={config.routes.friend} icon={faUserFriends}></MenuItem>
                 <MenuItem title="Bookmarks" to={config.routes.bookmark} icon={faBookmark}></MenuItem>
             </Menu>
-
-            {/* <SuggestedAccounts label="Suggested Accounts" /> */}
         </aside>
     );
 }

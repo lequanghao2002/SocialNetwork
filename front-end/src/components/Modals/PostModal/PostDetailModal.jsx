@@ -1,6 +1,6 @@
 import { Modal } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCamera, faFaceSmile, faImage, faMicrophone, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faCamera, faFaceSmile, faImage, faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { useCallback, useEffect, useState } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,8 +28,6 @@ function PostDetailModal() {
     const loading = useSelector(postDetailLoadingSelector);
 
     const post = posts.find((p) => p.id === postDetailModal.data);
-
-    console.log({ post });
 
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
@@ -124,24 +122,33 @@ function PostDetailModal() {
     const renderComments = useCallback(() => {
         if (!post?.comments?.length) return null;
 
+        // Lưu thông tin cha để có thể gán parentName
+        const commentUserMap = new Map();
+        post.comments.forEach((comment) => {
+            commentUserMap.set(comment.id, comment.user);
+        });
+
         const commentMap = new Map();
         post.comments.forEach((comment) => {
             const parentId = comment.parentId || 'root';
+
+            // Gán parentName nếu có cha
+            const parentUser = parentId !== 'root' ? commentUserMap.get(parentId) || null : null;
 
             if (!commentMap.has(parentId)) {
                 commentMap.set(parentId, []);
             }
 
-            commentMap.get(parentId).push(comment);
+            commentMap.get(parentId).push({ ...comment, parentUser });
         });
 
-        const renderCommentTree = (parentId = 'root') => {
+        const renderCommentTree = (parentId = 'root', depth = 0) => {
             if (!commentMap.has(parentId)) return null;
 
             return commentMap.get(parentId).map((comment) => (
-                <div key={comment.id} style={{ marginBottom: 24 }}>
+                <div key={comment.id}>
                     <Comment data={comment} postId={post.id} />
-                    <div style={{ marginLeft: '30px' }}>{renderCommentTree(comment.id)}</div>
+                    <div style={{ marginLeft: depth < 2 ? '45px' : 0 }}>{renderCommentTree(comment.id, depth + 1)}</div>
                 </div>
             ));
         };

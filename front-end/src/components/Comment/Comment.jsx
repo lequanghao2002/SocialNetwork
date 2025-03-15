@@ -1,16 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { memo, useContext, useState } from 'react';
-import {
-    faCamera,
-    faEllipsisVertical,
-    faFaceSmile,
-    faImage,
-    faMicrophone,
-    faSpinner,
-} from '@fortawesome/free-solid-svg-icons';
-import EmojiPicker from 'emoji-picker-react';
-import commentService from '~/services/commentService';
-import { Button, Dropdown, Flex, Image, message, Modal, Tooltip } from 'antd';
+import { useState } from 'react';
+import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { Button, Dropdown, Flex, Image, Modal, Tooltip } from 'antd';
 import Avatar from '../Image';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
@@ -128,17 +119,22 @@ function Comment({ data, postId }) {
     return (
         <>
             <Flex gap={12}>
-                {/* {loading && (
-                <div className="loading-overlay">
-                    <FontAwesomeIcon icon={faSpinner} className="search-loading" />
-                </div>
-            )} */}
                 <Avatar src={data.user?.avatarUrl} />
 
                 <Flex gap={12} align="center">
                     <div className={cx('user-info')}>
                         <span className={cx('full-name')}>{`${data.user?.firstName} ${data.user?.lastName}`}</span>
-                        {data.content && <TextEllipsis lines={2}>{data.content}</TextEllipsis>}
+                        <Flex>
+                            {data.parentId != null && data.user.id != data.parentUser.id && (
+                                <span style={{ color: 'yellow' }}>
+                                    {`${data.parentUser.firstName} ${data.parentUser.lastName}`}
+                                    <span>&nbsp;</span>
+                                </span>
+                            )}
+
+                            {data.content && <TextEllipsis lines={2}>{data.content}</TextEllipsis>}
+                        </Flex>
+
                         {data.imageUrl && <Image src={data.imageUrl} width={100} />}
                     </div>
 
