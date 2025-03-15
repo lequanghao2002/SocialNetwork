@@ -6,7 +6,7 @@ import Avatar from '../Image';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { dateFormat } from '~/utils/dateFormat';
-import TextEllipsis from '../Text/TextEllipsis';
+import EllipsisText from '../Text/EllipsisText/EllipsisText';
 import styles from './Comment.module.scss';
 import classNames from 'classnames/bind';
 import CommentInput from '../Input/CommentInput';
@@ -14,6 +14,7 @@ import commentHubService from '~/sockets/commentHubService';
 import { useMessage } from '~/context/MessageProvider';
 import { uploadCommentImage } from '~/utils/uploadHelper';
 import { setLoading } from '~/features/modal/modalSlice';
+import ReadMoreText from '../Text/ReadMoreText/ReadMoreText';
 
 const cx = classNames.bind(styles);
 
@@ -132,7 +133,7 @@ function Comment({ data, postId }) {
                                 </span>
                             )}
 
-                            {data.content && <TextEllipsis lines={2}>{data.content}</TextEllipsis>}
+                            {data.content && <ReadMoreText text={data.content} />}
                         </Flex>
 
                         {data.imageUrl && <Image src={data.imageUrl} width={100} />}

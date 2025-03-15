@@ -9,7 +9,7 @@ import { friendsSelector, selectedFriendIdSelector } from '~/features/chat/chatS
 import { useDispatch, useSelector } from 'react-redux';
 import { markMessageAsSeen, setSelectedFriendId } from '~/features/chat/chatSlice';
 import { userSelector } from '~/features/auth/authSelector';
-import TextEllipsis from '~/components/Text/TextEllipsis';
+import EllipsisText from '~/components/Text/EllipsisText/EllipsisText';
 
 const cx = classNames.bind(styles);
 
@@ -47,13 +47,13 @@ function ListFriends() {
                     >
                         <Image src={friend.info.avatarUrl} alt="" className={cx('img')} />
                         <div className={cx('info')}>
-                            <TextEllipsis bold={isMesssageUnSeen}>
+                            <EllipsisText bold={isMesssageUnSeen}>
                                 {friend.info.firstName} {friend.info.lastName}
-                            </TextEllipsis>
-                            <TextEllipsis small sub={isMesssageUnSeen} bold={isMesssageUnSeen}>
+                            </EllipsisText>
+                            <EllipsisText small sub={isMesssageUnSeen} bold={isMesssageUnSeen}>
                                 {lastMessage?.senderId === user.id && 'Bạn: '}
                                 {lastMessage?.content}
-                            </TextEllipsis>
+                            </EllipsisText>
                         </div>
 
                         {isMesssageUnSeen && <FontAwesomeIcon icon={faCircle} className={cx('seen-icon')} />}
