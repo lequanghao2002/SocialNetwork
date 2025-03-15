@@ -18,7 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import './ImagesPickerField.css';
 import { uploadPostImage } from '~/utils/uploadHelper';
-import { useNotification } from '~/context/notification/index';
+import { useNotification } from '~/context/NotificationProvider';
 
 const getBase64 = (file) =>
     new Promise((resolve, reject) => {

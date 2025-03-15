@@ -1,0 +1,15 @@
+.user-info {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-color-hover);
+    border-radius: 8px;
+    padding: 2px 6px;
+
+    .full-name {
+        font-weight: 500;
+    }
+}
+
+.hour {
+    margin-left: 54px;
+}

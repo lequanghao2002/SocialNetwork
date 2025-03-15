@@ -40,8 +40,25 @@ namespace SocialNetwork.Helpers
 
             CreateMap<User, GetUserByIdDTO>().ReverseMap();
             CreateMap<User, GetInfoUser>();
+            CreateMap<User, GetUserDTO>();
 
-            CreateMap<Comment, CreateCommentDTO>().ReverseMap();
+            CreateMap<GetCommentDTO, Comment>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => new GetUserDTO
+                {
+                    Id = src.User.Id,
+                    FirstName = src.User.FirstName,
+                    LastName = src.User.LastName,
+                    AvatarUrl = src.User.AvatarUrl,
+                })).ReverseMap();
+            CreateMap<AddCommentDTO, Comment>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
+                .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => (DateTime?)null))
+                .ForMember(dest => dest.Deleted, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.DeletedDate, opt => opt.MapFrom(src => (DateTime?)null))          
+                .ReverseMap();
+            CreateMap<UpdateCommentDTO, Comment>()
+              .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
 
             CreateMap<Favourite, FavouritePostDTO>().ReverseMap();
 

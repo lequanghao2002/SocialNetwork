@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import commentService from '~/services/commentService';
 import postService from '~/services/postService';
 
 export const fetchPostsThunk = createAsyncThunk('post/fetchPosts', async ({ filter, paging }, { rejectWithValue }) => {
@@ -38,6 +39,18 @@ export const unSavePostThunk = createAsyncThunk('post/unSavePost', async (id, { 
 
         if (result) {
             return { postId: id, userId: result };
+        }
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+});
+
+export const fetchCommentsThunk = createAsyncThunk('post/fetchComments', async (id, { rejectWithValue }) => {
+    try {
+        const result = await commentService.getByPostId(id);
+
+        if (result) {
+            return { postId: id, comments: result };
         }
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message);

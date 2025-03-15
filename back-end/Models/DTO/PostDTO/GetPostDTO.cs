@@ -16,9 +16,9 @@ namespace SocialNetwork.Models.DTO.PostDTO
         public PostStatus Status { get; set; }
         public GetSharedPostDTO? SharedPost { get; set; }
         public int SharedCount { get; set; } = 0;
+        public int CommentCount { get; set; } = 0;
         public ICollection<GetTagDTO> Tags { get; set; }
         public ICollection<GetLikeDTO> Likes { get; set; }
-        public ICollection<GetCommentDTO> Comments { get; set; }
         public ICollection<GetUserFavouritePostDTO> Favourites { get; set; }
     }
 }

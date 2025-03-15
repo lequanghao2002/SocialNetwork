@@ -1,52 +1,19 @@
 .wrapper {
     margin-top: 0px !important;
 
-    span,
-    p {
-        color: var(--text-color);
+    .content {
+        min-height: 66vh;
+        max-height: 66vh;
+        overflow-y: auto;
     }
 
     .list-comment {
-        overflow-y: scroll;
-        max-height: 500px;
+        //overflow-y: scroll;
+        //max-height: 500px;
         border-top: 1px solid var(--bg-color-hover);
         padding-top: 20px;
         padding-right: 14px;
         flex-direction: column;
-
-        .item-comment {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-
-            .user-info {
-                display: flex;
-                flex-direction: column;
-                background-color: var(--bg-color-hover);
-                border-radius: 10px;
-                padding: 4px 8px;
-
-                .full-name {
-                    font-weight: 700;
-                }
-
-                .comment {
-                    word-break: break-word;
-                }
-            }
-
-            .rely {
-                display: flex;
-                gap: 50px;
-
-                .btn-reply,
-                .btn-update,
-                .btn-remove {
-                    cursor: pointer;
-                    color: var(--text-sub-color) !important;
-                }
-            }
-        }
 
         .child-comment {
             // margin-left: 20px;

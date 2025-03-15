@@ -40,6 +40,8 @@ namespace SocialNetwork.Hubs
         public async Task JoinPostGroup(string postId) => await _commentService.JoinPostGroup(Context.ConnectionId, postId);
         public async Task LeavePostGroup(string postId) => await _commentService.LeavePostGroup(Context.ConnectionId, postId);
         public async Task AddComment(AddCommentDTO comment) => await _commentService.AddComment(Context.GetUserId(), comment);
+        public async Task UpdateComment(UpdateCommentDTO comment) => await _commentService.UpdateComment(Context.GetUserId(), comment);
+        public async Task DeleteComment(string commentId) => await _commentService.DeleteComment(Context.GetUserId(), commentId);
         #endregion
     }
 }

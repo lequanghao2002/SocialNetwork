@@ -10,8 +10,9 @@ import { fetchUserThunk } from './features/auth/authThunk';
 import { Spin } from 'antd';
 import config from './config';
 import Modals from './components/Modals/Modals';
-import NotificationProvider from './context/notification';
+import NotificationProvider from './context/NotificationProvider';
 import { realtimeHubService } from './sockets/realtimeHubService';
+import MessageProvider from './context/MessageProvider';
 
 function RenderRoutes({ routes }) {
     return (
@@ -80,12 +81,14 @@ function AppContent() {
 function App() {
     return (
         <NotificationProvider>
-            <Provider store={store}>
-                <Router>
-                    <Modals />
-                    <AppContent />
-                </Router>
-            </Provider>
+            <MessageProvider>
+                <Provider store={store}>
+                    <Router>
+                        <Modals />
+                        <AppContent />
+                    </Router>
+                </Provider>
+            </MessageProvider>
         </NotificationProvider>
     );
 }

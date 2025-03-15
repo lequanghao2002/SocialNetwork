@@ -1,18 +1,20 @@
 ﻿using AutoMapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SocialNetwork.Data;
 using SocialNetwork.Models.Domain;
 using SocialNetwork.Models.DTO.CommentDTO;
 using SocialNetwork.Models.DTO.PostDTO;
+using System.ComponentModel.Design;
 
 namespace SocialNetwork.Repositories
 {
     public interface ICommentRepository
     {
-        public Task<List<Comment>> GetListComment(string postId);
-        public Task<GetPostDTO> CreateComment(CreateCommentDTO comment);
-        public Task<GetPostDTO> UpdateComment(UpdateCommentDTO comment);
-        public Task<GetPostDTO> DeleteComment(string id);
+        public Task<List<GetCommentDTO>> GetByPostId(string postId);
+        public Task<GetCommentDTO> Add(AddCommentDTO comment);
+        public Task<GetCommentDTO> Update(string userId, UpdateCommentDTO comment);
+        public Task<DeleteCommentDTO> Delete(string userId, string id);
     }
     public class CommentRepository : ICommentRepository
     {
@@ -26,57 +28,70 @@ namespace SocialNetwork.Repositories
             _postRepository = postRepository;
         }
 
-        public async Task<List<Comment>> GetListComment(string postId)
+        public async Task<List<GetCommentDTO>> GetByPostId(string postId)
         {
-            var lstComment = await _dbContext.Comments.Where(x => x.PostId == postId).Select(c => new Comment
-            {
-                Id = c.Id,
-                Post = c.Post,
-                User = c.User,
-                Content = c.Content,
-                CreatedDate = c.CreatedDate
-            }).ToListAsync();
+            var comments = await _dbContext.Comments
+                .Where(c => c.PostId == postId && !c.Deleted)
+                .Include(c => c.User)
+                .OrderByDescending(c => c.CreatedDate)
+                .ToListAsync();
 
-            return lstComment;
+            return _mapper.Map<List<GetCommentDTO>>(comments);
         }
 
-        public async Task<GetPostDTO> CreateComment(CreateCommentDTO commentDTO)
+        public async Task<GetCommentDTO> Add(AddCommentDTO commentDTO)
         {
             var comment = _mapper.Map<Comment>(commentDTO);
-            comment.Id = Guid.NewGuid().ToString();
-            comment.CreatedDate = DateTime.Now;
 
             await _dbContext.Comments.AddAsync(comment);
             await _dbContext.SaveChangesAsync();
 
-            var postNewById = await _postRepository.GetById(comment.PostId);
+            var user = await _dbContext.Users.FindAsync(commentDTO.UserId);
+            comment.User = user;
 
-            return postNewById;
-
+            return _mapper.Map<GetCommentDTO>(comment);
         }
 
-        public async Task<GetPostDTO> UpdateComment(UpdateCommentDTO comment)
+        public async Task<GetCommentDTO> Update(string userId, UpdateCommentDTO commentDTO)
         {
-            var commentUpdate = await _dbContext.Comments.SingleOrDefaultAsync(x => x.Id == comment.Id);
-            commentUpdate.Content = comment.Content;
+            var comment = await _dbContext.Comments.Include(c => c.User).SingleOrDefaultAsync(x => x.Id == commentDTO.Id);
+
+            if (comment == null || comment.UserId != userId) return null;
+
+            _mapper.Map(commentDTO, comment);
 
             await _dbContext.SaveChangesAsync();
 
-            var postNewById = await _postRepository.GetById(commentUpdate.PostId);
-
-            return postNewById;
+            return _mapper.Map<GetCommentDTO>(comment);
         }
 
-        public async Task<GetPostDTO> DeleteComment(string id)
+        public async Task<DeleteCommentDTO> Delete(string userId, string commentId)
         {
-            var commentDelete = await _dbContext.Comments.SingleOrDefaultAsync(x => x.Id == id);
+            var userIdParam = new SqlParameter("@userId", System.Data.SqlDbType.NVarChar, 450) { Value = userId };
+            var commentIdParam = new SqlParameter("@commentId", System.Data.SqlDbType.NVarChar, 450) { Value = commentId };
+            var postIdParam = new SqlParameter("@postId", System.Data.SqlDbType.NVarChar, 450)
+            {
+                Direction = System.Data.ParameterDirection.Output
+            };
 
-            _dbContext.Comments.Remove(commentDelete);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Database.ExecuteSqlRawAsync(
+                "EXEC DeleteCommentWithChildren @userId, @commentId, @postId OUTPUT",
+                userIdParam, commentIdParam, postIdParam
+            );
 
-            var postNewById = await _postRepository.GetById(commentDelete.PostId);
+            // Lấy giá trị PostId từ OUTPUT parameter
+            // DBNull.Value trong C# đại diện có một giá trị null trong database khi làm việc với SQL Server
+            string postId = postIdParam.Value == DBNull.Value ? null : postIdParam.Value as string;
 
-            return postNewById;
+            if (postId == null) return null;
+
+            // Trả về kết quả
+            return new DeleteCommentDTO
+            {
+                PostId = postId,
+                CommentId = commentId
+            };
         }
+
     }
 }

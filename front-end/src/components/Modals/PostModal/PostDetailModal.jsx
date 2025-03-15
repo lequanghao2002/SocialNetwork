@@ -1,42 +1,96 @@
-import { Form, Input, Modal, message } from 'antd';
-import './PostDetailModal.scss';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import utc from 'dayjs/plugin/utc';
+import { Modal } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faFaceSmile, faImage, faMicrophone, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { useContext, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import EmojiPicker from 'emoji-picker-react';
-import commentService from '~/services/commentService';
-import { useSelector } from 'react-redux';
-import { userSelector } from '~/features/auth/authSelector';
+import { useDispatch, useSelector } from 'react-redux';
 import LoadingModal from '../LoadingModal/LoadingModal';
-import { postDetailModalSelector } from '~/features/modal/modalSelector';
+import { postDetailLoadingSelector, postDetailModalSelector } from '~/features/modal/modalSelector';
 import Post from '~/components/Post/Post';
 import Comment from '~/components/Comment/Comment';
-import { useNotification } from '~/context/notification';
 import Button from '~/components/Button';
+import { closeModal, setLoading } from '~/features/modal/modalSlice';
+import { postsSelector } from '~/features/post/postSelector';
+import { uploadCommentImage } from '~/utils/uploadHelper';
+import styles from './PostDetailModal.module.scss';
+import classNames from 'classnames/bind';
+import commentHubService from '~/sockets/commentHubService';
+import { fetchCommentsThunk } from '~/features/post/postThunk';
+import { addComment, deleteComment, updateComment } from '~/features/post/postSlice';
+import { useMessage } from '~/context/MessageProvider';
 
-dayjs.extend(relativeTime);
-dayjs.extend(utc);
+const cx = classNames.bind(styles);
 
-function PostDetailModal({
-    visible,
-    setVisible,
-    onClose,
-    post,
-    handlePostSubmit,
-    handleDeletePost,
-    handleLikeChange,
-    posts,
-    setPosts,
-}) {
+function PostDetailModal() {
+    const dispatch = useDispatch();
+    const posts = useSelector(postsSelector);
     const postDetailModal = useSelector(postDetailModalSelector);
-    const user = useSelector(userSelector);
+    const loading = useSelector(postDetailLoadingSelector);
+
+    const post = posts.find((p) => p.id === postDetailModal.data);
+
+    console.log({ post });
+
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
-    const { success, error } = useNotification();
-    const [loading, setLoading] = useState(false);
+    const { success, error } = useMessage();
+
+    useEffect(() => {
+        if (!postDetailModal.isOpen || !post) return;
+
+        dispatch(fetchCommentsThunk(post.id));
+
+        commentHubService.joinPostGroup(post.id);
+
+        commentHubService.onCommentChanged((payload) => {
+            const { eventType, data } = payload;
+            switch (eventType) {
+                case 'created':
+                    dispatch(addComment(data));
+                    break;
+                case 'updated':
+                    dispatch(updateComment(data));
+                    break;
+                case 'deleted':
+                    dispatch(deleteComment(data));
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        return () => {
+            commentHubService.leavePostGroup(post.id);
+            commentHubService.offCommentChanged();
+        };
+    }, [postDetailModal.isOpen, post?.id]);
+
+    const handleImg = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const downloadURL = await uploadCommentImage(file);
+
+            if (!downloadURL) {
+                error('Update image failed');
+                return;
+            }
+
+            const comment = {
+                postId: post.id,
+                content: '',
+                imageUrl: downloadURL,
+                parentId: null,
+            };
+
+            await commentHubService.addComment(comment);
+            success('Send comment successfully');
+        } catch (err) {
+            error('Send comment failed');
+            console.error('Lỗi upload ảnh hoặc gửi tin nhắn:', err);
+        }
+    };
 
     const handleClickEmoji = (e) => {
         setText((prev) => prev + e.emoji);
@@ -44,80 +98,113 @@ function PostDetailModal({
     };
 
     const handleSendComment = async () => {
-        if (!text) return;
+        if (!text.trim()) return;
 
-        setLoading(true);
-        const data = {
+        dispatch(setLoading({ name: 'postDetail', isLoading: true }));
+
+        const comment = {
             postId: post.id,
-            content: text,
+            content: text.trim(),
+            imageUrl: null,
+            parentId: null,
         };
-        const result = await commentService.add(data);
-        if (result != null) {
-            console.log(result);
+
+        try {
+            await commentHubService.addComment(comment);
+            success('Send comment successfully');
             setText('');
-            const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
-            console.log(updatedPosts);
-            setPosts(updatedPosts);
-            success('Comment success');
-            setLoading(false);
-        } else {
-            setLoading(false);
-            error('Comment error');
-            console.error('comment error');
+        } catch (err) {
+            error('Send comment failed');
+            console.error('error comment: ', err);
+        } finally {
+            dispatch(setLoading({ name: 'postDetail', isLoading: false }));
         }
     };
 
-    const renderComments = (comments, parentId = null) => {
-        return comments
-            .filter((comment) => comment.parentId === parentId)
-            .map((comment) => (
-                <div key={comment.id}>
-                    <div className="item-comment">
-                        <Comment item={comment} postId={post.id} posts={posts} setPosts={setPosts} />
-                    </div>
-                    <div style={{ marginLeft: '30px' }}>{renderComments(comments, comment.id)}</div>
+    const renderComments = useCallback(() => {
+        if (!post?.comments?.length) return null;
+
+        const commentMap = new Map();
+        post.comments.forEach((comment) => {
+            const parentId = comment.parentId || 'root';
+
+            if (!commentMap.has(parentId)) {
+                commentMap.set(parentId, []);
+            }
+
+            commentMap.get(parentId).push(comment);
+        });
+
+        const renderCommentTree = (parentId = 'root') => {
+            if (!commentMap.has(parentId)) return null;
+
+            return commentMap.get(parentId).map((comment) => (
+                <div key={comment.id} style={{ marginBottom: 24 }}>
+                    <Comment data={comment} postId={post.id} />
+                    <div style={{ marginLeft: '30px' }}>{renderCommentTree(comment.id)}</div>
                 </div>
             ));
-    };
+        };
 
-    console.log(postDetailModal.data);
-    if (!postDetailModal.data) return;
+        return renderCommentTree();
+    }, [post?.id, post?.comments]);
 
     return (
         <>
             <Modal
-                width={1000}
+                width={800}
                 open={postDetailModal.isOpen}
                 footer={null}
-                onCancel={() => dispatch(closeModal('postModal'))}
+                onCancel={() => {
+                    dispatch(closeModal('postDetail'));
+                }}
                 maskClosable={false}
                 style={{ top: 20 }}
+                closable={!loading}
             >
-                <div className="wrapper">
+                <div className={cx('wrapper')}>
+                    {post && (
+                        <h2 className="title-post">
+                            Bài viết của {post.user.firstName} {post.user.lastName}
+                        </h2>
+                    )}
+
                     {loading && <LoadingModal title="" />}
 
-                    <Post data={postDetailModal.data} commentDisabled={true} />
+                    <div className={cx('content')}>
+                        <div style={{ marginTop: '-18px' }}>
+                            <Post data={post} commentDisabled={true} />
+                        </div>
 
-                    <div className="list-comment">
-                        {postDetailModal.data.comments?.length > 0 && renderComments(postDetailModal.data.comments)}
+                        <div className={cx('list-comment')}>{renderComments()}</div>
                     </div>
 
-                    <div className="bottom">
-                        <div className="icons">
-                            <FontAwesomeIcon icon={faImage} />
+                    <div className={cx('bottom')}>
+                        <div className={cx('icons')}>
+                            <label htmlFor="file">
+                                <FontAwesomeIcon icon={faImage} />
+                            </label>
+                            <input
+                                className={cx('input-text')}
+                                type="file"
+                                accept="image/*"
+                                id="file"
+                                style={{ display: 'none' }}
+                                onChange={handleImg}
+                            />
                             <FontAwesomeIcon icon={faCamera} onClick={() => alert('Coming soon')} />
                             <FontAwesomeIcon icon={faMicrophone} onClick={() => alert('Coming soon')} />
                         </div>
                         <input
-                            className="input-send"
+                            className={cx('input-send')}
                             type="text"
                             placeholder="Type a message..."
                             value={text}
                             onChange={(e) => setText(e.target.value)}
                         />
-                        <div className="emoji">
+                        <div className={cx('"emoji"')}>
                             <FontAwesomeIcon icon={faFaceSmile} onClick={() => setOpen((prev) => !prev)} />
-                            <div className="picker">
+                            <div className={cx('picker')}>
                                 <EmojiPicker open={open} onEmojiClick={handleClickEmoji} theme="dark" />
                             </div>
                         </div>

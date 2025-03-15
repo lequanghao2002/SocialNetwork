@@ -78,27 +78,27 @@ namespace SocialNetwork.Repositories
                     {
                         UserId = l.User.Id,
                     }).ToList(),
-                    Comments = p.Comments.Select(c => new GetCommentDTO
-                    {
-                        Id = c.Id,
-                        User = new GetUserDTO
-                        {
-                            Id = c.User.Id,
-                            FirstName = c.User.FirstName,
-                            LastName = c.User.LastName,
-                            AvatarUrl = c.User.AvatarUrl,
-                            DateOfBirth = c.User.DateOfBirth,
-                            UserName = c.User.UserName,
-                            Email = c.User.Email,
-                            PhoneNumber = c.User.PhoneNumber,
-                        },
-                        ParentId = c.ParentId,
-                        Content = c.Content,
-                        CreatedDate = c.CreatedDate,
-                        UpdatedDate = c.UpdatedDate,
-                        Deleted = c.Deleted,
-                        DeletedDate = c.DeletedDate
-                    }).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
+                    //Comments = p.Comments.Select(c => new GetCommentDTO
+                    //{
+                    //    Id = c.Id,
+                    //    User = new GetUserDTO
+                    //    {
+                    //        Id = c.User.Id,
+                    //        FirstName = c.User.FirstName,
+                    //        LastName = c.User.LastName,
+                    //        AvatarUrl = c.User.AvatarUrl,
+                    //        DateOfBirth = c.User.DateOfBirth,
+                    //        UserName = c.User.UserName,
+                    //        Email = c.User.Email,
+                    //        PhoneNumber = c.User.PhoneNumber,
+                    //    },
+                    //    ParentId = c.ParentId,
+                    //    Content = c.Content,
+                    //    CreatedDate = c.CreatedDate,
+                    //    UpdatedDate = c.UpdatedDate,
+                    //    Deleted = c.Deleted,
+                    //    DeletedDate = c.DeletedDate
+                    //}).Where(x => x.Deleted == false).OrderByDescending(o => o.CreatedDate).ToList(),
                     Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
@@ -183,22 +183,25 @@ namespace SocialNetwork.Repositories
                 },
                 Tags = p.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
                 Likes = p.Likes.Select(l => new GetLikeDTO { UserId = l.User.Id }).ToList(),
-                Comments = p.Comments
-                        .OrderByDescending(o => o.CreatedDate)
-                        .Select(c => new GetCommentDTO
-                        {
-                            Id = c.Id,
-                            User = new GetUserDTO
-                            {
-                                Id = c.User.Id,
-                                FirstName = c.User.FirstName,
-                                LastName = c.User.LastName,
-                                AvatarUrl = c.User.AvatarUrl,
-                            },
-                            ParentId = c.ParentId,
-                            Content = c.Content,
-                            CreatedDate = c.CreatedDate
-                        }).ToList(),
+                //Comments = p.Comments
+                //        .Where(o => !o.Deleted)
+                //        .OrderByDescending(o => o.CreatedDate)
+                //        .Select(c => new GetCommentDTO
+                //        {
+                //            Id = c.Id,
+                //            User = new GetUserDTO
+                //            {
+                //                Id = c.User.Id,
+                //                FirstName = c.User.FirstName,
+                //                LastName = c.User.LastName,
+                //                AvatarUrl = c.User.AvatarUrl,
+                //            },
+                //            ParentId = c.ParentId,
+                //            Content = c.Content,
+                //            ImageUrl = c.ImageUrl,
+                //            CreatedDate = c.CreatedDate,
+                //            UpdatedDate = c.UpdatedDate
+                //        }).ToList(),
                 SharedPost = p.SharedPost == null ? null : new GetSharedPostDTO
                 {
                     Id = p.SharedPost.Id,
@@ -216,7 +219,8 @@ namespace SocialNetwork.Repositories
                     },
                     Tags = p.SharedPost.Deleted || p.SharedPost.Status == PostStatus.Private ? null :  p.SharedPost.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
                 },
-                SharedCount = _dbContext.Posts.Count(sp => sp.SharedPostId == p.Id)
+                SharedCount = _dbContext.Posts.Count(sp => sp.SharedPostId == p.Id),
+                CommentCount = _dbContext.Comments.Where(c => !c.Deleted).Count(c => c.PostId == p.Id),
             })
             .ToListAsync(); // ✅ Chỉ chạy SQL một lần và lấy đúng dữ liệu cần
 
@@ -258,27 +262,28 @@ namespace SocialNetwork.Repositories
                     {
                         UserId = l.User.Id,
                     }).ToList(),
-                    Comments = p.Comments.Select(c => new GetCommentDTO
-                    {
-                        Id = c.Id,
-                        User = new GetUserDTO
-                        {
-                            Id = c.User.Id,
-                            FirstName = c.User.FirstName,
-                            LastName = c.User.LastName,
-                            AvatarUrl = c.User.AvatarUrl,
-                            DateOfBirth = c.User.DateOfBirth,
-                            UserName = c.User.UserName,
-                            Email = c.User.Email,
-                            PhoneNumber = c.User.PhoneNumber,
-                        },
-                        ParentId = c.ParentId,
-                        Content = c.Content,
-                        CreatedDate = c.CreatedDate,
-                        UpdatedDate = c.UpdatedDate,
-                        Deleted = c.Deleted,
-                        DeletedDate = c.DeletedDate
-                    }).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
+                    //Comments = p.Comments.Select(c => new GetCommentDTO
+                    //{
+                    //    Id = c.Id,
+                    //    User = new GetUserDTO
+                    //    {
+                    //        Id = c.User.Id,
+                    //        FirstName = c.User.FirstName,
+                    //        LastName = c.User.LastName,
+                    //        AvatarUrl = c.User.AvatarUrl,
+                    //        DateOfBirth = c.User.DateOfBirth,
+                    //        UserName = c.User.UserName,
+                    //        Email = c.User.Email,
+                    //        PhoneNumber = c.User.PhoneNumber,
+                    //    },
+                    //    ParentId = c.ParentId,
+                    //    Content = c.Content,
+                    //    CreatedDate = c.CreatedDate,
+                    //    UpdatedDate = c.UpdatedDate,
+                    //    Deleted = c.Deleted,
+                    //    DeletedDate = c.DeletedDate
+                    //}).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
+                    CommentCount = _dbContext.Comments.Where(c => !c.Deleted).Count(c => c.PostId == p.Id),
                     Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
@@ -326,27 +331,28 @@ namespace SocialNetwork.Repositories
                     {
                         UserId = l.User.Id,
                     }).ToList(),
-                    Comments = p.Comments.Select(c => new GetCommentDTO
-                    {
-                        Id = c.Id,
-                        User = new GetUserDTO
-                        {
-                            Id = c.User.Id,
-                            FirstName = c.User.FirstName,
-                            LastName = c.User.LastName,
-                            AvatarUrl = c.User.AvatarUrl,
-                            DateOfBirth = c.User.DateOfBirth,
-                            UserName = c.User.UserName,
-                            Email = c.User.Email,
-                            PhoneNumber = c.User.PhoneNumber,
-                        },
-                        ParentId = c.ParentId,
-                        Content = c.Content,
-                        CreatedDate = c.CreatedDate,
-                        UpdatedDate = c.UpdatedDate,
-                        Deleted = c.Deleted,
-                        DeletedDate = c.DeletedDate
-                    }).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
+                    //Comments = p.Comments.Select(c => new GetCommentDTO
+                    //{
+                    //    Id = c.Id,
+                    //    User = new GetUserDTO
+                    //    {
+                    //        Id = c.User.Id,
+                    //        FirstName = c.User.FirstName,
+                    //        LastName = c.User.LastName,
+                    //        AvatarUrl = c.User.AvatarUrl,
+                    //        DateOfBirth = c.User.DateOfBirth,
+                    //        UserName = c.User.UserName,
+                    //        Email = c.User.Email,
+                    //        PhoneNumber = c.User.PhoneNumber,
+                    //    },
+                    //    ParentId = c.ParentId,
+                    //    Content = c.Content,
+                    //    CreatedDate = c.CreatedDate,
+                    //    UpdatedDate = c.UpdatedDate,
+                    //    Deleted = c.Deleted,
+                    //    DeletedDate = c.DeletedDate
+                    //}).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
+                    CommentCount = _dbContext.Comments.Where(c => !c.Deleted).Count(c => c.PostId == p.Id),
                     Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList(),
                 }).ToListAsync();
 
@@ -385,27 +391,28 @@ namespace SocialNetwork.Repositories
                     {
                         UserId = l.User.Id,
                     }).ToList(),
-                    Comments = p.Comments.Select(c => new GetCommentDTO
-                    {
-                        Id = c.Id,
-                        User = new GetUserDTO
-                        {
-                            Id = c.User.Id,
-                            FirstName = c.User.FirstName,
-                            LastName = c.User.LastName,
-                            AvatarUrl = c.User.AvatarUrl,
-                            DateOfBirth = c.User.DateOfBirth,
-                            UserName = c.User.UserName,
-                            Email = c.User.Email,
-                            PhoneNumber = c.User.PhoneNumber,
-                        },
-                        ParentId = c.ParentId,
-                        Content = c.Content,
-                        CreatedDate = c.CreatedDate,
-                        UpdatedDate = c.UpdatedDate,
-                        Deleted = c.Deleted,
-                        DeletedDate = c.DeletedDate
-                    }).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
+                    //Comments = p.Comments.Select(c => new GetCommentDTO
+                    //{
+                    //    Id = c.Id,
+                    //    User = new GetUserDTO
+                    //    {
+                    //        Id = c.User.Id,
+                    //        FirstName = c.User.FirstName,
+                    //        LastName = c.User.LastName,
+                    //        AvatarUrl = c.User.AvatarUrl,
+                    //        DateOfBirth = c.User.DateOfBirth,
+                    //        UserName = c.User.UserName,
+                    //        Email = c.User.Email,
+                    //        PhoneNumber = c.User.PhoneNumber,
+                    //    },
+                    //    ParentId = c.ParentId,
+                    //    Content = c.Content,
+                    //    CreatedDate = c.CreatedDate,
+                    //    UpdatedDate = c.UpdatedDate,
+                    //    Deleted = c.Deleted,
+                    //    DeletedDate = c.DeletedDate
+                    //}).Where(x => x.Deleted == false).OrderByDescending(x => x.CreatedDate).ToList(),
+                    CommentCount = _dbContext.Comments.Where(c => !c.Deleted).Count(c => c.PostId == p.Id),
                 }).SingleOrDefaultAsync();
 
 

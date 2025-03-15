@@ -16,7 +16,7 @@ import AccountPopper from '~/components/AccountPopper';
 import { Dropdown, Image, Modal } from 'antd';
 import postService from '~/services/postService';
 import { useNavigate } from 'react-router-dom';
-import { useNotification } from '~/context/Notification';
+import { useNotification } from '~/context/NotificationProvider';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { setLike } from '~/features/post/postSlice';
@@ -196,25 +196,23 @@ function Post({ data, commentDisabled = false }) {
                             onClick={() => {
                                 handeLikeClick();
                             }}
-                            disabled={commentDisabled}
                         >
                             {data.likes.length || 0}
                         </Button>
                         <Button
                             leftIcon={<FontAwesomeIcon icon={faMessage} />}
                             onClick={() => {
-                                dispatch(openModal({ name: 'postDetail', data }));
+                                dispatch(openModal({ name: 'postDetail', data: data.id }));
                             }}
                             disabled={commentDisabled}
                         >
-                            {data.comments.length || 0}
+                            {data.commentCount || 0}
                         </Button>
                         <Button
                             leftIcon={<FontAwesomeIcon icon={faShare} />}
                             onClick={() => {
                                 dispatch(openModal({ name: 'post', type: 'share', data }));
                             }}
-                            disabled={commentDisabled}
                         >
                             {data.sharedCount}
                         </Button>

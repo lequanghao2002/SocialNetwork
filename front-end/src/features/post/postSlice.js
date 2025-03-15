@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { deletePostThunk, fetchPostsThunk, savePostThunk, unSavePostThunk } from './postThunk';
+import { deletePostThunk, fetchCommentsThunk, fetchPostsThunk, savePostThunk, unSavePostThunk } from './postThunk';
 
 const initialState = {
     posts: [],
@@ -44,6 +44,82 @@ const postSlice = createSlice({
                 }
             }
         },
+        addComment: (state, action) => {
+            const comment = action.payload;
+            const post = state.posts.find((post) => post.id === comment.postId);
+
+            if (!post) return;
+
+            post.comments.unshift(comment);
+            post.commentCount += 1;
+        },
+        updateComment: (state, action) => {
+            const comment = action.payload;
+            const post = state.posts.find((post) => post.id === comment.postId);
+            const commentUpdate = post.comments.find((c) => c.id === comment.id);
+
+            if (!commentUpdate) return;
+
+            Object.assign(commentUpdate, comment);
+        },
+        deleteComment: (state, action) => {
+            const { postId, commentId } = action.payload;
+            const post = state.posts.find((post) => post.id === postId);
+
+            if (!post) return;
+
+            const initialCount = post.comments.length;
+
+            // -------------------- Dùng BFS (Queue) -------------------- //
+            // const deleteSet = new Set();
+            // const queue = [commentId];
+            // while (queue.length > 0) {
+            //     const currentId = queue.shift();
+            //     deleteSet.add(currentId);
+
+            //     post.comments.forEach((comment) => {
+            //         if (comment.parentId === currentId) queue.push(comment.id);
+            //     });
+            // }
+
+            // -------------------- Dùng DFS (Stack) -------------------- //
+            // const deleteSet = new Set();
+            // const stack = [commentId];
+            // while (stack.length > 0) {
+            //     const currentId = stack.pop();
+            //     deleteSet.add(currentId);
+
+            //     post.comments.forEach((comment) => {
+            //         if (comment.parentId === currentId) stack.push(comment.id);
+            //     });
+            // }
+
+            // -------------------- Dùng Map + Set để tìm con cháu -------------------- //
+            // Tạo Map để nhóm comment theo parentId
+            const commentMap = new Map();
+            post.comments.forEach((comment) => {
+                if (!commentMap.has(comment.parentId)) {
+                    commentMap.set(comment.parentId, []);
+                }
+                commentMap.get(comment.parentId).push(comment.id);
+            });
+
+            // Tìm tất cả con cháu của commentId (Dùng Set + BFS)
+            const deleteSet = new Set();
+            const queue = [commentId];
+
+            while (queue.length > 0) {
+                const currentId = queue.shift();
+                deleteSet.add(currentId);
+
+                if (commentMap.has(currentId)) {
+                    queue.push(...commentMap.get(currentId));
+                }
+            }
+
+            post.comments = post.comments.filter((comment) => !deleteSet.has(comment.id));
+            post.commentCount -= initialCount - post.comments.length;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -75,10 +151,21 @@ const postSlice = createSlice({
 
                 const post = state.posts.find((post) => post.id === postId);
                 post.favourites = post.favourites.filter((favourite) => favourite.userId !== userId);
+            })
+
+            .addCase(fetchCommentsThunk.fulfilled, (state, action) => {
+                const { postId, comments } = action.payload;
+
+                const post = state.posts.find((post) => post.id === postId);
+
+                if (post) {
+                    post.comments = comments;
+                }
             });
     },
 });
 
-export const { setPosts, setStatus, addPost, updatePost, setLike } = postSlice.actions;
+export const { setPosts, setStatus, addPost, updatePost, setLike, addComment, updateComment, deleteComment } =
+    postSlice.actions;
 
 export default postSlice;

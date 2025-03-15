@@ -243,6 +243,7 @@ function Chat() {
                     <input
                         className={cx('input-text')}
                         type="file"
+                        accept="image/*"
                         id="file"
                         style={{ display: 'none' }}
                         onChange={handleImg}

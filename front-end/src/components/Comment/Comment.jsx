@@ -1,200 +1,215 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Image from '../Image';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import utc from 'dayjs/plugin/utc';
-import { useContext, useState } from 'react';
-import { faCamera, faFaceSmile, faImage, faMicrophone, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { memo, useContext, useState } from 'react';
+import {
+    faCamera,
+    faEllipsisVertical,
+    faFaceSmile,
+    faImage,
+    faMicrophone,
+    faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 import EmojiPicker from 'emoji-picker-react';
-import Button from '../Button';
 import commentService from '~/services/commentService';
-import { message } from 'antd';
-import { useSelector } from 'react-redux';
+import { Button, Dropdown, Flex, Image, message, Modal, Tooltip } from 'antd';
+import Avatar from '../Image';
+import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
-import { useNotification } from '~/context/notification';
+import { dateFormat } from '~/utils/dateFormat';
+import TextEllipsis from '../Text/TextEllipsis';
+import styles from './Comment.module.scss';
+import classNames from 'classnames/bind';
+import CommentInput from '../Input/CommentInput';
+import commentHubService from '~/sockets/commentHubService';
+import { useMessage } from '~/context/MessageProvider';
+import { uploadCommentImage } from '~/utils/uploadHelper';
+import { setLoading } from '~/features/modal/modalSlice';
 
-dayjs.extend(relativeTime);
-dayjs.extend(utc);
+const cx = classNames.bind(styles);
 
-function Comment({ item, postId, posts, setPosts }) {
+function Comment({ data, postId }) {
+    const dispatch = useDispatch();
     const user = useSelector(userSelector);
-    const [relyMode, setRelyMode] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [text, setText] = useState('');
-    const { success, error } = useNotification();
-    const [loading, setLoading] = useState(false);
+    const { success, error } = useMessage();
 
-    const handleClickEmoji = (e) => {
-        setText((prev) => prev + e.emoji);
-        setOpen(false);
+    const [mode, setMode] = useState({});
+
+    const handleImg = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        dispatch(setLoading({ name: 'postDetail', isLoading: true }));
+        try {
+            const downloadURL = await uploadCommentImage(file);
+
+            if (!downloadURL) {
+                error('Update image failed');
+                return;
+            }
+
+            if (mode.type === 'update') {
+                const comment = {
+                    id: data.id,
+                    imageUrl: downloadURL,
+                };
+                await commentHubService.updateComment(comment);
+                success('Send comment successfully');
+            } else if (mode.type === 'reply') {
+                const comment = {
+                    postId: postId,
+                    imageUrl: downloadURL,
+                    parentId: data.id,
+                };
+                await commentHubService.addComment(comment);
+                success('Send comment successfully');
+            }
+        } catch (err) {
+            error(mode.type === 'update' ? 'Update comment failed' : 'Reply comment failed');
+            console.error('Lỗi upload ảnh hoặc gửi tin nhắn:', err);
+        } finally {
+            setMode({});
+            dispatch(setLoading({ name: 'postDetail', isLoading: false }));
+        }
     };
 
-    const handleRelyComment = async () => {
-        setLoading(true);
-        const data = {
-            userId: user.id,
+    const handleRelyComment = async (text) => {
+        if (!text.trim()) return;
+
+        dispatch(setLoading({ name: 'postDetail', isLoading: true }));
+        const comment = {
             postId: postId,
-            content: text,
-            parentId: item.id,
+            content: text.trim(),
+            imageUrl: null,
+            parentId: data.id,
         };
-        const result = await commentService.addComment(data);
-        if (result != null) {
-            setText('');
-            const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
-            setPosts(updatedPosts);
-            setLoading(false);
-            success('Rely comment success');
-        } else {
-            error('Rely comment error');
+
+        try {
+            await commentHubService.addComment(comment);
+            success('Rely comment successfully');
+        } catch (err) {
+            error('Rely comment failed');
+            console.error('error comment: ', err);
+        } finally {
+            setMode({});
+            dispatch(setLoading({ name: 'postDetail', isLoading: false }));
         }
     };
 
-    const handleUpdateComment = async () => {
-        setLoading(true);
-        const data = {
-            id: item.id,
-            content: text,
+    const handleUpdateComment = async (text) => {
+        if (!text.trim()) return;
+
+        dispatch(setLoading({ name: 'postDetail', isLoading: true }));
+        const comment = {
+            id: data.id,
+            content: text.trim(),
         };
-        const result = await commentService.updateComment(data);
-        if (result != null) {
-            setText('');
-            setEditMode(false);
-            const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
-            setPosts(updatedPosts);
-            setLoading(false);
-            success('Update comment success');
-        } else {
-            error('Update comment error');
+
+        try {
+            await commentHubService.updateComment(comment);
+            success('Update comment successfully');
+        } catch (err) {
+            error('Update comment failed');
+            console.error('error comment: ', err);
+        } finally {
+            setMode({});
+            dispatch(setLoading({ name: 'postDetail', isLoading: false }));
         }
     };
 
-    const handleDeleteComment = async (Id) => {
-        setLoading(true);
-        const result = await commentService.deleteComment(Id);
-        if (result != null) {
-            setText('');
-            const updatedPosts = posts.map((post) => (post.id === result.id ? result : post));
-            setPosts(updatedPosts);
-            setLoading(false);
-            success('Delete comment success');
-        } else {
-            error('Delete comment error');
+    const handleDeleteComment = async (commentId) => {
+        try {
+            await commentHubService.deleteComment(commentId);
+            success('Delete comment successfully');
+        } catch (err) {
+            error('Delete comment failed');
+            console.error('error comment: ', err);
         }
     };
 
     return (
         <>
-            {loading && (
+            <Flex gap={12}>
+                {/* {loading && (
                 <div className="loading-overlay">
                     <FontAwesomeIcon icon={faSpinner} className="search-loading" />
                 </div>
-            )}
-            <Image src={item.user?.avatarUrl} />
-            <div>
-                <div className="user-info">
-                    <span className="full-name">{`${item.user?.firstName} ${item.user?.lastName}`}</span>
-                    <span className="comment">{item.content}</span>
-                </div>
+            )} */}
+                <Avatar src={data.user?.avatarUrl} />
 
-                <div className="rely">
-                    <span className="hour">{dayjs(item.createdDate).local().fromNow()}</span>
-                    {item.user?.id !== user.id ? (
-                        relyMode ? (
-                            <div
-                                className="bottom"
-                                style={{
-                                    gap: 5,
-                                    marginTop: 0,
-                                    borderTop: 'none',
-                                    paddingTop: '5px',
-                                    height: '40px',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <input
-                                    style={{ minWidth: '300px' }}
-                                    className="input-send"
-                                    type="text"
-                                    placeholder="Type a message..."
-                                    value={text}
-                                    onChange={(e) => setText(e.target.value)}
-                                />
-                                <div className="emoji">
-                                    <FontAwesomeIcon icon={faFaceSmile} onClick={() => setOpen((prev) => !prev)} />
-                                    <div className="picker" style={{ bottom: 'auto', right: 0, left: 'auto' }}>
-                                        <EmojiPicker open={open} onEmojiClick={handleClickEmoji} theme="dark" />
-                                    </div>
-                                </div>
-                                <Button primary small onClick={() => handleRelyComment()}>
-                                    Rely
-                                </Button>
-                                <Button small onClick={() => setRelyMode(false)}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        ) : (
-                            <span className="btn-reply" onClick={() => setRelyMode(true)}>
-                                reply
-                            </span>
-                        )
-                    ) : (
-                        <>
-                            {editMode ? (
-                                <div
-                                    className="bottom"
-                                    style={{
-                                        gap: 5,
-                                        marginTop: 0,
-                                        borderTop: 'none',
-                                        paddingTop: '5px',
-                                        height: '40px',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <input
-                                        style={{ minWidth: '300px' }}
-                                        className="input-send"
-                                        type="text"
-                                        placeholder="Type a message..."
-                                        value={text}
-                                        onChange={(e) => setText(e.target.value)}
-                                    />
-                                    <div className="emoji">
-                                        <FontAwesomeIcon icon={faFaceSmile} onClick={() => setOpen((prev) => !prev)} />
-                                        <div className="picker" style={{ bottom: 'auto', right: 0, left: 'auto' }}>
-                                            <EmojiPicker open={open} onEmojiClick={handleClickEmoji} theme="dark" />
-                                        </div>
-                                    </div>
-                                    <Button primary small onClick={() => handleUpdateComment()}>
-                                        Update
-                                    </Button>
-                                    <Button small onClick={() => setEditMode(false)}>
-                                        Cancel
-                                    </Button>
-                                </div>
-                            ) : (
-                                <span
-                                    text
-                                    className="btn-update"
-                                    onClick={() => {
-                                        setEditMode(true);
-                                        setText(item.content);
-                                    }}
-                                >
-                                    update
-                                </span>
-                            )}
-                            <span
-                                text
-                                className="btn-remove"
-                                onClick={() => {
-                                    handleDeleteComment(item.id);
-                                }}
-                            >
-                                delete
-                            </span>
-                        </>
+                <Flex gap={12} align="center">
+                    <div className={cx('user-info')}>
+                        <span className={cx('full-name')}>{`${data.user?.firstName} ${data.user?.lastName}`}</span>
+                        {data.content && <TextEllipsis lines={2}>{data.content}</TextEllipsis>}
+                        {data.imageUrl && <Image src={data.imageUrl} width={100} />}
+                    </div>
+
+                    {user.id === data.user.id && (
+                        <Dropdown
+                            menu={{
+                                items: [
+                                    ...(!data.imageUrl
+                                        ? [
+                                              {
+                                                  key: 'update',
+                                                  label: 'Update',
+                                              },
+                                          ]
+                                        : []),
+                                    {
+                                        key: 'delete',
+                                        label: 'Delete',
+                                    },
+                                ],
+                                onClick: ({ key }) => {
+                                    if (key === 'update') {
+                                        setMode({ type: 'update' });
+                                    } else if (key === 'delete') {
+                                        Modal.confirm({
+                                            title: 'Are you sure you want to delete this comment?',
+                                            content: 'This action cannot be undone.',
+                                            className: 'custom-dark-modal',
+                                            okText: 'Yes',
+                                            cancelText: 'Cancel',
+                                            onOk: () => handleDeleteComment(data.id),
+                                        });
+                                    }
+                                },
+                            }}
+                            placement="top"
+                        >
+                            <FontAwesomeIcon style={{ cursor: 'pointer' }} icon={faEllipsisVertical} />
+                        </Dropdown>
+                    )}
+                </Flex>
+            </Flex>
+
+            <div className={cx('comment-footer')}>
+                <span className={cx('hour')}>
+                    <Tooltip title={dateFormat.fullDateTime(data.createdDate)} placement="bottom">
+                        {dateFormat.timeFromNow(data.createdDate)}
+                    </Tooltip>
+                </span>
+
+                <Button type="link" onClick={() => setMode({ type: 'reply' })}>
+                    reply
+                </Button>
+
+                <div>
+                    {mode.type === 'reply' && (
+                        <CommentInput
+                            onSubmit={handleRelyComment}
+                            onHandleImg={handleImg}
+                            onCancel={() => setMode({})}
+                            submitText="Reply"
+                        />
+                    )}
+                    {mode.type === 'update' && (
+                        <CommentInput
+                            initialText={data.content}
+                            onSubmit={handleUpdateComment}
+                            onHandleImg={handleImg}
+                            onCancel={() => setMode({})}
+                            submitText="Update"
+                        />
                     )}
                 </div>
             </div>

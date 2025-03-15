@@ -5,6 +5,11 @@ export const uploadPostImage = (file) => {
     return upload(file, 'posts', allowedImageTypes);
 };
 
+export const uploadCommentImage = (file) => {
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    return upload(file, 'comments', allowedImageTypes);
+};
+
 export const uploadChatImage = (file) => {
     const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     return upload(file, 'chats', allowedImageTypes);
