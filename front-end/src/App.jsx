@@ -13,6 +13,8 @@ import Modals from './components/Modals/Modals';
 import NotificationProvider from './context/NotificationProvider';
 import { realtimeHubService } from './sockets/realtimeHubService';
 import MessageProvider from './context/MessageProvider';
+import { filterSelector, pagingSelector } from './features/post/postSelector';
+import { fetchPostsThunk } from './features/post/postThunk';
 
 function RenderRoutes({ routes }) {
     return (
@@ -37,10 +39,16 @@ function RenderRoutes({ routes }) {
 
 function AppContent() {
     const dispatch = useDispatch();
+    const filter = useSelector(filterSelector);
+    const paging = useSelector(pagingSelector);
     const user = useSelector(userSelector);
     const loading = useSelector(loadingSelector);
     const location = useLocation();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        dispatch(fetchPostsThunk({ filter, paging }));
+    }, [filter.status]);
 
     // Gọi fetchUserThunk() chỉ khi app khởi động
     useEffect(() => {

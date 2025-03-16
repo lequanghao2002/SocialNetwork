@@ -3,7 +3,6 @@ import { HeaderOnly } from '~/layouts';
 import config from '~/config';
 
 import Home from '~/pages/Home';
-import Home2 from '~/pages/Home/Home2';
 import Friend from '~/pages/Friend';
 import Upload from '~/pages/Upload';
 import Search from '~/pages/Search';
@@ -18,10 +17,8 @@ const privateRoutes = [
     { path: config.routes.friend, component: Friend },
     //{ path: config.routes.upload, component: Upload, layout: HeaderOnly },
     { path: config.routes.search, component: Search },
-    //{ path: config.routes.message, component: Message },
     { path: config.routes.message, component: Message, layout: HeaderOnly },
-    { path: config.routes.bookmark, component: Home2 },
-
+    { path: config.routes.bookmark, component: Bookmark },
     { path: config.routes.profile, component: Profile, layout: HeaderOnly },
 ];
 

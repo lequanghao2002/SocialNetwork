@@ -20,10 +20,6 @@ function ListPost() {
     const posts = useSelector(postsSelector);
     const hasMore = useSelector(hasMoreSelector);
 
-    useEffect(() => {
-        dispatch(fetchPostsThunk({ filter, paging }));
-    }, [filter]);
-
     return (
         <InfiniteScroll
             dataLength={posts.length}

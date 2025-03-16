@@ -137,7 +137,7 @@ const postSlice = createSlice({
                 state.loading = true;
             })
             .addCase(fetchPostsThunk.fulfilled, (state, action) => {
-                const { data, page, pageSize, hasMore } = action.payload;
+                const { data, page, hasMore } = action.payload;
                 if (page === 1) {
                     state.posts = data;
                 } else {
