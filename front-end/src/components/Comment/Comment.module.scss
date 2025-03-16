@@ -5,8 +5,14 @@
     border-radius: 8px;
     padding: 2px 6px;
 
-    .full-name {
+    .full-name,
+    .full-name-parent {
         font-weight: 500;
+        cursor: pointer;
+    }
+
+    .full-name-parent {
+        color: var(--primary);
     }
 }
 

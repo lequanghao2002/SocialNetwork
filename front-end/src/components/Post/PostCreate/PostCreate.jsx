@@ -16,7 +16,6 @@ function PostCreate() {
 
     const handleShowPostModel = () => {
         dispatch(openModal({ name: 'post', type: 'add' }));
-        //dispatch(openModal({ name: "post", type: "update", data: post }));
     };
 
     return (
@@ -31,9 +30,9 @@ function PostCreate() {
                 </div>
             </div>
             <div className={cx('option')}>
-                <Icon icon={faFileCode} rightText={'Code'} />
-                <Icon icon={faFileImage} rightText={'Image'} />
-                <Icon icon={faFileLines} rightText={'File'} />
+                <Icon icon={faFileCode} rightText={'Code'} onClick={() => alert('comming soon')} />
+                <Icon icon={faFileImage} rightText={'Image'} onClick={() => alert('comming soon')} />
+                <Icon icon={faFileLines} rightText={'File'} onClick={() => alert('comming soon')} />
             </div>
         </div>
     );

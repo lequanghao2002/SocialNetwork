@@ -12,8 +12,8 @@ import {
     faThumbsUp,
     faTrash,
 } from '@fortawesome/free-solid-svg-icons';
-import AccountPopper from '~/components/AccountPopper';
-import { Dropdown, Image, Modal } from 'antd';
+import AccountPopper from '~/components/Post/AccountPopper';
+import { Dropdown, Flex, Image, Modal } from 'antd';
 import postService from '~/services/postService';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '~/context/NotificationProvider';
@@ -22,6 +22,8 @@ import { userSelector } from '~/features/auth/authSelector';
 import { setLike } from '~/features/post/postSlice';
 import { openModal } from '~/features/modal/modalSlice';
 import { deletePostThunk, savePostThunk, unSavePostThunk } from '~/features/post/postThunk';
+import PostStatusIcon from './PostStatusIcon/PostStatusIcon';
+import TimeAgoTooltip from '../Time/TimeAgoTooltip';
 
 const cx = classNames.bind(styles);
 
@@ -151,7 +153,9 @@ function Post({ data, commentDisabled = false }) {
         <>
             <div className={cx('wrapper')}>
                 <div className={cx('header')}>
-                    <AccountPopper data={data} />
+                    <Flex>
+                        <AccountPopper data={data} />
+                    </Flex>
 
                     <Dropdown menu={{ items: ACTION_POST, onClick: handleActionClick }}>
                         <span>

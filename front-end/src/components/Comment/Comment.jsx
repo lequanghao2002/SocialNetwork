@@ -6,7 +6,6 @@ import Avatar from '../Image';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { dateFormat } from '~/utils/dateFormat';
-import EllipsisText from '../Text/EllipsisText/EllipsisText';
 import styles from './Comment.module.scss';
 import classNames from 'classnames/bind';
 import CommentInput from '../Input/CommentInput';
@@ -15,6 +14,7 @@ import { useMessage } from '~/context/MessageProvider';
 import { uploadCommentImage } from '~/utils/uploadHelper';
 import { setLoading } from '~/features/modal/modalSlice';
 import ReadMoreText from '../Text/ReadMoreText/ReadMoreText';
+import AccountPopperComment from './AccountPopperComment';
 
 const cx = classNames.bind(styles);
 
@@ -124,13 +124,18 @@ function Comment({ data, postId }) {
 
                 <Flex gap={12} align="center">
                     <div className={cx('user-info')}>
-                        <span className={cx('full-name')}>{`${data.user?.firstName} ${data.user?.lastName}`}</span>
+                        <AccountPopperComment data={data.user}>
+                            <span className={cx('full-name')}>{`${data.user.firstName} ${data.user.lastName}`}</span>
+                        </AccountPopperComment>
+
                         <Flex>
                             {data.parentId != null && data.user.id != data.parentUser.id && (
-                                <span style={{ color: 'yellow' }}>
-                                    {`${data.parentUser.firstName} ${data.parentUser.lastName}`}
-                                    <span>&nbsp;</span>
-                                </span>
+                                <AccountPopperComment data={data.parentUser}>
+                                    <span className={cx('full-name-parent')}>
+                                        {`${data.parentUser.firstName} ${data.parentUser.lastName}`}
+                                        <span>&nbsp;</span>
+                                    </span>
+                                </AccountPopperComment>
                             )}
 
                             {data.content && <ReadMoreText text={data.content} />}

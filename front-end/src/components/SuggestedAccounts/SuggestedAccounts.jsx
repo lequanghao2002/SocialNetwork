@@ -13,8 +13,8 @@ function SuggestedAccounts({ label }) {
         <div className={cx('wrapper')}>
             <p className={cx('label')}>{label}</p>
 
-            {friends?.map((item, index) => (
-                <AccountItem key={index} data={item}></AccountItem>
+            {friends?.map((item) => (
+                <AccountItem key={item.id} data={item} />
             ))}
         </div>
     );
