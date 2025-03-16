@@ -11,6 +11,7 @@ const initialState = {
     filter: {
         status: 'Recent',
     },
+    hasMore: true,
 };
 
 const postSlice = createSlice({
@@ -31,6 +32,14 @@ const postSlice = createSlice({
         },
         setStatus: (state, action) => {
             state.filter.status = action.payload;
+
+            // Reset lại nếu thay đổi status
+            state.paging = {
+                page: 1,
+                pageSize: 10,
+            };
+            state.hasMore = true;
+            state.posts = [];
         },
         setLike: (state, action) => {
             const { id, userId, type } = action.payload;
@@ -128,7 +137,15 @@ const postSlice = createSlice({
                 state.loading = true;
             })
             .addCase(fetchPostsThunk.fulfilled, (state, action) => {
-                state.posts = action.payload;
+                const { data, page, pageSize, hasMore } = action.payload;
+                if (page === 1) {
+                    state.posts = data;
+                } else {
+                    state.posts = [...state.posts, ...data];
+                }
+
+                state.paging.page = page + 1;
+                state.hasMore = hasMore;
                 state.loading = false;
             })
             .addCase(fetchPostsThunk.rejected, (state) => {

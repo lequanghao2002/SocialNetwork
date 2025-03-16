@@ -144,6 +144,7 @@ namespace SocialNetwork.Repositories
                 .Include(p => p.PostTags).ThenInclude(pt => pt.Tag)
                 .Include(p => p.Favourites)
                 .Include(p => p.SharedPost).ThenInclude(sp => sp.User)
+                .Include(p => p.SharedPosts)
                 .AsNoTracking(); // Không tracking nếu không cần cập nhật
 
             if (filter == "Friends" && userId != null)
@@ -157,14 +158,17 @@ namespace SocialNetwork.Repositories
             }
             else if (filter == "Popular")
             {
-                query = query.OrderByDescending(p => p.Likes.Count + p.Comments.Count + _dbContext.Posts.Count(sp => sp.SharedPostId == p.Id));
+                query = query.OrderByDescending(p => p.Likes.Count + p.Comments.Count + p.SharedPosts.Count);
             }
             else
             {
                 query = query.OrderByDescending(p => p.CreatedDate);
             }
 
-            Console.WriteLine(query.ToQueryString()); // ✅ Xem SQL nhưng chưa chạy DB
+            Console.WriteLine(query.ToQueryString()); // Xem SQL nhưng chưa chạy DB
+
+            // Thêm phân trang
+            query = query.Skip((page - 1) * pageSize).Take(pageSize);
 
             var result = await query.Select(p => new GetPostDTO
             {
@@ -176,7 +180,7 @@ namespace SocialNetwork.Repositories
                 CreatedDate = p.CreatedDate,
                 User = new GetUserDTO
                 {
-                    Id = p.Id,
+                    Id = p.User.Id,
                     FirstName = p.User.FirstName,
                     LastName = p.User.LastName,
                     AvatarUrl = p.User.AvatarUrl,
@@ -219,13 +223,12 @@ namespace SocialNetwork.Repositories
                     },
                     Tags = p.SharedPost.Deleted || p.SharedPost.Status == PostStatus.Private ? null :  p.SharedPost.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
                 },
-                SharedCount = _dbContext.Posts.Count(sp => sp.SharedPostId == p.Id),
-                CommentCount = _dbContext.Comments.Where(c => !c.Deleted).Count(c => c.PostId == p.Id),
+                SharedCount = p.SharedPosts.Count,
+                CommentCount = p.Comments.Count,
             })
             .ToListAsync(); // ✅ Chỉ chạy SQL một lần và lấy đúng dữ liệu cần
 
             return result;
-
         }
 
         public async Task<List<GetPostDTO>> GetAllByUserId(string userId, int page, int pageSize)

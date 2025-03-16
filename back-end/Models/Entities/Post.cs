@@ -17,7 +17,8 @@ namespace SocialNetwork.Models.Domain
         public string? Images { get; set; }
         public PostStatus Status { get; set; }
         public string? SharedPostId { get; set; }
-        public Post? SharedPost { get; set; } 
+        public Post? SharedPost { get; set; }
+        public ICollection<Post> SharedPosts { get; set; }
         public ICollection<PostTag> PostTags { get; set; }
         public ICollection<Like> Likes { get; set; }
         public ICollection<Comment> Comments { get; set; }

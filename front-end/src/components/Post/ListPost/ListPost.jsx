@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Empty } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Post from '../Post';
-import { postsSelector } from '~/features/post/postSelector';
+import { hasMoreSelector, postsSelector } from '~/features/post/postSelector';
 import classNames from 'classnames/bind';
 import styles from './ListPost.module.scss';
 import { filterSelector, pagingSelector } from '~/features/post/postSelector';
@@ -18,20 +18,20 @@ function ListPost() {
     const filter = useSelector(filterSelector);
     const paging = useSelector(pagingSelector);
     const posts = useSelector(postsSelector);
+    const hasMore = useSelector(hasMoreSelector);
 
     useEffect(() => {
         dispatch(fetchPostsThunk({ filter, paging }));
-    }, [filter, paging]);
+    }, [filter]);
 
     return (
         <InfiniteScroll
             dataLength={posts.length}
-            // next={fetchPosts}
-            // hasMore={hasMore}
+            next={() => dispatch(fetchPostsThunk({ filter, paging }))}
+            hasMore={hasMore}
             loader={
                 <div className={cx('loading')}>
                     <FontAwesomeIcon icon={faSpinner} className="search-loading" />
-                    <span>Loading</span>
                 </div>
             }
             endMessage={

@@ -7,7 +7,11 @@ export const fetchPostsThunk = createAsyncThunk('post/fetchPosts', async ({ filt
         console.log({ filter, paging });
         const result = await postService.get(filter.status, paging.page, paging.pageSize);
 
-        return result;
+        return {
+            data: result,
+            page: paging.page,
+            hasMore: result.length >= paging.pageSize,
+        };
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message);
     }
