@@ -18,7 +18,7 @@ namespace SocialNetwork.Repositories
         public Task<GetUserByIdDTO> GetById(string id);
         public Task<bool> UpdateUserProfile(UpdateUserProfileDTO profileDTO);
         public Task<bool> UpdateUser(UpdateUserDTO userDTO);
-        public Task<Friendship> GetStatusFriend(string userId, string friendId);
+        public Task<FriendshipStatus> GetStatusFriend(string currentUserId, string userId);
         public Task<bool> ChangeStatusFriend(ChangeStatusFriendDTO changeStatusFriendDTO);
         public Task<List<GetFriendshipWithLastMsgDTO>> GetListFriendShip(string id);
     }
@@ -138,23 +138,16 @@ namespace SocialNetwork.Repositories
           
         }
 
-        public async Task<Friendship> GetStatusFriend(string userId, string friendId)
+        public async Task<FriendshipStatus> GetStatusFriend(string currentUserId, string userId)
         {
-            var friendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.RequesterId == userId && x.AddresseeId == friendId || x.RequesterId == friendId && x.AddresseeId == userId);
+            var friendShip = await _socialNetworkDbContext.Friendships.SingleOrDefaultAsync(x => x.RequesterId == currentUserId && x.AddresseeId == userId || x.RequesterId == userId && x.AddresseeId == currentUserId);
 
             if(friendShip != null)
             {
-                return friendShip;
-
+                return friendShip.Status;
             }
 
-            var not = new Friendship()
-            {
-                Status = 0,
-            };
-
-            return not;
-
+            return FriendshipStatus.NotFriends;
         }
 
         public async Task<bool> ChangeStatusFriend(ChangeStatusFriendDTO changeStatusFriendDTO)

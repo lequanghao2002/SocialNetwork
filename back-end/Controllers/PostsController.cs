@@ -15,10 +15,12 @@ namespace SocialNetwork.Controllers
     public class PostsController : ControllerBase
     {
         private readonly IPostRepository _postRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUserService _userService;
 
-        public PostsController(IPostRepository postRepository, IUserService userService) {
+        public PostsController(IPostRepository postRepository, IUserRepository userRepository, IUserService userService) {
             _postRepository = postRepository;
+            _userRepository = userRepository;
             _userService = userService;
         }
 
@@ -58,14 +60,34 @@ namespace SocialNetwork.Controllers
             }
         }
 
-        [HttpGet("get-all-by-user")]
+        [HttpGet("get-all-by-user-id")]
         public async Task<IActionResult> GetAllByUserId(string userId, int page = 1, int pageSize = 10)
         {
+            var currentUserId = _userService.GetUserId();
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized();
+            }
+
             try
             {
-                var postList = await _postRepository.GetAllByUserId(userId, page, pageSize);
-
-                return Ok(postList);
+                var posts = new List<GetPostDTO>();
+                if (userId == currentUserId)
+                {
+                    posts = await _postRepository.GetAllByUserId(userId, page, pageSize, "all");
+                    return Ok(posts);
+                }
+                
+                var statusFriend = await _userRepository.GetStatusFriend(currentUserId, userId);
+                if (statusFriend == Models.Domain.FriendshipStatus.Friends)
+                {
+                    posts = await _postRepository.GetAllByUserId(userId, page, pageSize, "friend");
+                } 
+                else
+                {
+                    posts = await _postRepository.GetAllByUserId(userId, page, pageSize, "public");
+                }
+                return Ok(posts);
             }
             catch (Exception ex)
             {
@@ -74,30 +96,20 @@ namespace SocialNetwork.Controllers
         }
 
 
-        [HttpGet("get-all-post-save-by-user")]
-        public async Task<IActionResult> GetAllPostSave(string userId, int page = 1, int pageSize = 10)
+        [HttpGet("get-all-saved-posts")]
+        public async Task<IActionResult> GetAllSavedPosts(int page = 1, int pageSize = 10)
         {
+            var currentUserId = _userService.GetUserId();
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized();
+            }
+
             try
             {
-                var postList = await _postRepository.GetAllPostSaveByUserId(userId, page, pageSize);
+                var postList = await _postRepository.GetAllSaved(currentUserId, page, pageSize);
 
                 return Ok(postList);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-
-        [HttpGet("get-by-id")]
-        public async Task<IActionResult> GetById(string id)
-        {
-            try
-            {
-                var postById = await _postRepository.GetById(id);
-
-                return Ok(postById);
             }
             catch (Exception ex)
             {
@@ -205,22 +217,6 @@ namespace SocialNetwork.Controllers
                 return BadRequest($"Error: {ex.Message}");
             }
         }
-
-        [HttpGet("count-shared")]
-        public async Task<IActionResult> CountShared(string id)
-        {
-            try
-            {
-                var result = await _postRepository.CountShared(id);
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error: {ex.Message}");
-            }
-        }
-
 
         [HttpPost("save")]
         public async Task<IActionResult> SavePost(FavouritePostDTO favouritePostDTO)

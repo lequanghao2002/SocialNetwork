@@ -2,8 +2,12 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import commentService from '~/services/commentService';
 import postService from '~/services/postService';
 
-export const fetchPostsThunk = createAsyncThunk('post/fetchPosts', async ({ filter, paging }, { rejectWithValue }) => {
+export const fetchPostsThunk = createAsyncThunk('post/fetchPosts', async (_, { rejectWithValue, getState }) => {
     try {
+        const state = getState();
+        const filter = state.post.filter;
+        const paging = state.post.paging;
+
         const result = await postService.get(filter.status, paging.page, paging.pageSize);
 
         return {
@@ -15,6 +19,26 @@ export const fetchPostsThunk = createAsyncThunk('post/fetchPosts', async ({ filt
         return rejectWithValue(error.response?.data || error.message);
     }
 });
+
+export const fetchSavedPostsThunk = createAsyncThunk(
+    'post/fetchSavedPosts',
+    async (_, { rejectWithValue, getState }) => {
+        try {
+            const state = getState();
+            const paging = state.post.paging;
+
+            const result = await postService.getAllSaved(paging.page, paging.pageSize);
+
+            return {
+                data: result,
+                page: paging.page,
+                hasMore: result.length >= paging.pageSize,
+            };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    },
+);
 
 export const deletePostThunk = createAsyncThunk('post/deletePost', async (id, { rejectWithValue }) => {
     try {

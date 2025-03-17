@@ -8,22 +8,37 @@ import classNames from 'classnames/bind';
 import styles from './ListPost.module.scss';
 import { filterSelector, pagingSelector } from '~/features/post/postSelector';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { fetchPostsThunk } from '~/features/post/postThunk';
+import { fetchPostsThunk, fetchSavedPostsThunk } from '~/features/post/postThunk';
+import { useLocation } from 'react-router-dom';
+import config from '~/config';
 
 const cx = classNames.bind(styles);
 
 function ListPost() {
     const dispatch = useDispatch();
-    const filter = useSelector(filterSelector);
-    const paging = useSelector(pagingSelector);
     const posts = useSelector(postsSelector);
     const hasMore = useSelector(hasMoreSelector);
+    const location = useLocation();
+
+    const handleNext = async () => {
+        if (posts.length === 0) return;
+
+        switch (location.pathname) {
+            case config.routes.home:
+                dispatch(fetchPostsThunk());
+                break;
+            case config.routes.bookmark:
+                dispatch(fetchSavedPostsThunk());
+                break;
+            default:
+                break;
+        }
+    };
 
     return (
         <InfiniteScroll
             dataLength={posts.length}
-            next={() => dispatch(fetchPostsThunk({ filter, paging }))}
+            next={handleNext}
             hasMore={hasMore}
             loader={
                 <div className={cx('loading')}>

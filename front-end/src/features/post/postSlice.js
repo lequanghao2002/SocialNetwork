@@ -1,9 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { deletePostThunk, fetchCommentsThunk, fetchPostsThunk, savePostThunk, unSavePostThunk } from './postThunk';
+import {
+    deletePostThunk,
+    fetchCommentsThunk,
+    fetchPostsThunk,
+    fetchSavedPostsThunk,
+    savePostThunk,
+    unSavePostThunk,
+} from './postThunk';
 
 const initialState = {
     posts: [],
-    loading: false,
     paging: {
         page: 1,
         pageSize: 10,
@@ -18,9 +24,15 @@ const postSlice = createSlice({
     name: 'post',
     initialState,
     reducers: {
-        // setPosts: (state, action) => {
-        //     state.posts = action.payload;
-        // },
+        resetPosts: (state, action) => {
+            console.log('reset');
+            state.paging = {
+                page: 1,
+                pageSize: 10,
+            };
+            state.hasMore = true;
+            state.posts = [];
+        },
         addPost: (state, action) => {
             state.posts.unshift(action.payload);
         },
@@ -132,10 +144,6 @@ const postSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // fetchPostsThunk
-            .addCase(fetchPostsThunk.pending, (state) => {
-                state.loading = true;
-            })
             .addCase(fetchPostsThunk.fulfilled, (state, action) => {
                 const { data, page, hasMore } = action.payload;
                 if (page === 1) {
@@ -146,10 +154,18 @@ const postSlice = createSlice({
 
                 state.paging.page = page + 1;
                 state.hasMore = hasMore;
-                state.loading = false;
             })
-            .addCase(fetchPostsThunk.rejected, (state) => {
-                state.loading = false;
+
+            .addCase(fetchSavedPostsThunk.fulfilled, (state, action) => {
+                const { data, page, hasMore } = action.payload;
+                if (page === 1) {
+                    state.posts = data;
+                } else {
+                    state.posts = [...state.posts, ...data];
+                }
+
+                state.paging.page = page + 1;
+                state.hasMore = hasMore;
             })
 
             .addCase(deletePostThunk.fulfilled, (state, action) => {
@@ -182,7 +198,16 @@ const postSlice = createSlice({
     },
 });
 
-export const { setPosts, setStatus, addPost, updatePost, setLike, addComment, updateComment, deleteComment } =
-    postSlice.actions;
+export const {
+    resetPosts,
+    setPosts,
+    setStatus,
+    addPost,
+    updatePost,
+    setLike,
+    addComment,
+    updateComment,
+    deleteComment,
+} = postSlice.actions;
 
 export default postSlice;

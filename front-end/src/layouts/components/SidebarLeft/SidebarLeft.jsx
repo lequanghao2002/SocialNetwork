@@ -6,7 +6,7 @@ import { faBookmark, faCommentDots, faHome, faUserFriends } from '@fortawesome/f
 
 const cx = classNames.bind(styles);
 
-function Sidebar() {
+function SidebarLeft() {
     return (
         <aside className={cx('wrapper')}>
             <Menu>
@@ -19,4 +19,4 @@ function Sidebar() {
     );
 }
 
-export default Sidebar;
+export default SidebarLeft;

@@ -14,7 +14,8 @@ import NotificationProvider from './context/NotificationProvider';
 import { realtimeHubService } from './sockets/realtimeHubService';
 import MessageProvider from './context/MessageProvider';
 import { filterSelector, pagingSelector } from './features/post/postSelector';
-import { fetchPostsThunk } from './features/post/postThunk';
+import { fetchPostsThunk, fetchSavedPostsThunk } from './features/post/postThunk';
+import { resetPosts } from './features/post/postSlice';
 
 function RenderRoutes({ routes }) {
     return (
@@ -40,15 +41,25 @@ function RenderRoutes({ routes }) {
 function AppContent() {
     const dispatch = useDispatch();
     const filter = useSelector(filterSelector);
-    const paging = useSelector(pagingSelector);
     const user = useSelector(userSelector);
     const loading = useSelector(loadingSelector);
     const location = useLocation();
     const navigate = useNavigate();
 
     useEffect(() => {
-        dispatch(fetchPostsThunk({ filter, paging }));
-    }, [filter.status]);
+        switch (location.pathname) {
+            case config.routes.home:
+                dispatch(resetPosts());
+                dispatch(fetchPostsThunk());
+                break;
+            case config.routes.bookmark:
+                dispatch(resetPosts());
+                dispatch(fetchSavedPostsThunk());
+                break;
+            default:
+                break;
+        }
+    }, [location.pathname, filter.status]);
 
     // Gọi fetchUserThunk() chỉ khi app khởi động
     useEffect(() => {
