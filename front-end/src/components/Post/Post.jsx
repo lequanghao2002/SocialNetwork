@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from './Post.module.scss';
 import Button from '../Button';
@@ -15,23 +14,19 @@ import {
 import AccountPopper from '~/components/Post/AccountPopper';
 import { Dropdown, Flex, Image, Modal } from 'antd';
 import postService from '~/services/postService';
-import { useNavigate } from 'react-router-dom';
-import { useNotification } from '~/context/NotificationProvider';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { setLike } from '~/features/post/postSlice';
 import { openModal } from '~/features/modal/modalSlice';
 import { deletePostThunk, savePostThunk, unSavePostThunk } from '~/features/post/postThunk';
-import PostStatusIcon from './PostStatusIcon/PostStatusIcon';
-import TimeAgoTooltip from '../Time/TimeAgoTooltip';
+import { useMessage } from '~/context/MessageProvider';
 
 const cx = classNames.bind(styles);
 
 function Post({ data, commentDisabled = false }) {
     const dispatch = useDispatch();
     const user = useSelector(userSelector);
-    const { success, error } = useNotification();
-    const navigate = useNavigate();
+    const { success, error } = useMessage();
 
     const isOwner = data.userId === user.id;
     const isSaved = data?.favourites?.some((item) => item.userId === user.id);
@@ -70,6 +65,36 @@ function Post({ data, commentDisabled = false }) {
         },
     ];
 
+    const handleSave = async () => {
+        try {
+            await dispatch(savePostThunk(data.id)).unwrap();
+
+            success('Save post successfully');
+        } catch (err) {
+            error('Save post failed');
+        }
+    };
+
+    const handleUnSave = async () => {
+        try {
+            await dispatch(unSavePostThunk(data.id)).unwrap();
+
+            success('Unsave post successfully');
+        } catch (err) {
+            error('Unsave post failed');
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            await dispatch(deletePostThunk(data.id)).unwrap();
+
+            success('Delete post successfully');
+        } catch (err) {
+            error('Delete post failed');
+        }
+    };
+
     const handleActionClick = ({ key }) => {
         switch (key) {
             case 'update':
@@ -82,14 +107,14 @@ function Post({ data, commentDisabled = false }) {
                     className: 'custom-dark-modal',
                     okText: 'Yes',
                     cancelText: 'Cancel',
-                    onOk: () => dispatch(deletePostThunk(data.id)),
+                    onOk: () => handleDelete(),
                 });
                 break;
             case 'save':
-                dispatch(savePostThunk(data.id));
+                handleSave();
                 break;
             case 'unSave':
-                dispatch(unSavePostThunk(data.id));
+                handleUnSave();
                 break;
             default:
                 break;

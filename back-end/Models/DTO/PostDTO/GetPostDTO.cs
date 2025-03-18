@@ -3,6 +3,7 @@ using SocialNetwork.Models.DTO.TagDTO;
 using SocialNetwork.Models.DTO.LikeDTO;
 using SocialNetwork.Models.DTO.UserDTO;
 using SocialNetwork.Models.DTO.CommentDTO;
+using SocialNetwork.Models.DTO.FavouriteDTO;
 
 namespace SocialNetwork.Models.DTO.PostDTO
 {
@@ -19,6 +20,6 @@ namespace SocialNetwork.Models.DTO.PostDTO
         public int CommentCount { get; set; } = 0;
         public ICollection<GetTagDTO> Tags { get; set; }
         public ICollection<GetLikeDTO> Likes { get; set; }
-        public ICollection<GetUserFavouritePostDTO> Favourites { get; set; }
+        public ICollection<GetFavouriteDTO> Favourites { get; set; }
     }
 }

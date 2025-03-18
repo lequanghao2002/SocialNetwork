@@ -1,21 +1,8 @@
-import React, { useContext, useEffect, useRef, useState, Spin } from 'react';
-import { Form, Input, Modal, Button, Dropdown, Space, Select, Image, Upload } from 'antd';
+import React, { useEffect, useRef } from 'react';
+import { Form, Modal, Button } from 'antd';
 import Avatar from '~/components/Image';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-    faChevronDown,
-    faEarthAsia,
-    faFileImage,
-    faLock,
-    faSpinner,
-    faUserGroup,
-} from '@fortawesome/free-solid-svg-icons';
-
 import postService from '~/services/postService';
-import tagService from '~/services/tagService';
-import { AppContext } from '~/context/AppProvider';
 import './PostModal.css';
-import * as modePostConstant from '~/constant';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { postLoadingSelector, postModalSelector } from '~/features/modal/modalSelector';
@@ -27,6 +14,7 @@ import PostStatusField from '~/components/Form/Fields/PostStatus/PostStatusField
 import { useWatch } from 'antd/es/form/Form';
 import LoadingModal from '../LoadingModal/LoadingModal';
 import { addPost, updatePost } from '~/features/post/postSlice';
+import { useMessage } from '~/context/MessageProvider';
 
 function PostModal() {
     const dispatch = useDispatch();
@@ -34,6 +22,7 @@ function PostModal() {
     const postModal = useSelector(postModalSelector);
     const loading = useSelector(postLoadingSelector);
 
+    const { success, error } = useMessage();
     const inputAreaRef = useRef();
 
     const [form] = Form.useForm();
@@ -78,16 +67,19 @@ function PostModal() {
             switch (postModal.type) {
                 case 'add': {
                     res = await postService.add(data);
+                    success('Add post successfully');
                     dispatch(addPost(res));
                     break;
                 }
                 case 'share': {
                     res = await postService.add({ ...data, sharedPostId: postModal.data.id });
                     dispatch(addPost({ ...res, sharedPost: postModal.data }));
+                    success('Share post successfully');
                     break;
                 }
                 case 'update': {
                     res = await postService.update({ ...data, id: postModal.data.id });
+                    success('Update post successfully');
                     dispatch(updatePost(res));
                     break;
                 }
@@ -95,8 +87,21 @@ function PostModal() {
                     console.log('Type post invalid ');
                 }
             }
-        } catch (error) {
-            console.error('Error:', error);
+        } catch (err) {
+            console.error('Error:', err);
+            switch (postModal.type) {
+                case 'add':
+                    error('Add post failed');
+                    break;
+                case 'share':
+                    error('Share post failed');
+                    break;
+                case 'update':
+                    error('Update post failed');
+                    break;
+                default:
+                    break;
+            }
         } finally {
             dispatch(setLoading({ name: 'post', isLoading: false }));
             dispatch(closeModal('post'));

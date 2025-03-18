@@ -77,7 +77,7 @@ namespace SocialNetwork.Repositories
                     {
                         UserId = l.User.Id,
                     }).ToList(),
-                    Favourites = p.Favourites.Select(x => new GetUserFavouritePostDTO { UserId = x.UserId }).ToList()
+                    Favourites = p.Favourites.Select(x => new GetFavouriteDTO { UserId = x.UserId }).ToList()
 
                 }).ToListAsync();
 
@@ -138,6 +138,7 @@ namespace SocialNetwork.Repositories
                 },
                 Tags = p.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
                 Likes = p.Likes.Select(l => new GetLikeDTO { UserId = l.User.Id }).ToList(),
+                Favourites = p.Favourites.Select(f => new GetFavouriteDTO { UserId = f.UserId }).ToList(),
                 SharedPost = p.SharedPost == null ? null : new GetSharedPostDTO
                 {
                     Id = p.SharedPost.Id,
@@ -212,6 +213,7 @@ namespace SocialNetwork.Repositories
                     },
                     Tags = p.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
                     Likes = p.Likes.Select(l => new GetLikeDTO { UserId = l.User.Id }).ToList(),
+                    Favourites = p.Favourites.Select(f => new GetFavouriteDTO { UserId = f.UserId }).ToList(),
                     SharedPost = p.SharedPost == null ? null : new GetSharedPostDTO
                     {
                         Id = p.SharedPost.Id,
@@ -268,6 +270,7 @@ namespace SocialNetwork.Repositories
                     {
                         UserId = l.User.Id,
                     }).ToList(),
+                    Favourites = p.Favourites.Select(f => new GetFavouriteDTO { UserId = f.UserId }).ToList(),
                     SharedPost = p.SharedPost == null ? null : new GetSharedPostDTO
                     {
                         Id = p.SharedPost.Id,

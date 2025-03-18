@@ -7,8 +7,10 @@ import {
     savePostThunk,
     unSavePostThunk,
 } from './postThunk';
+import config from '~/config';
 
 const initialState = {
+    currentPage: config.routes.home,
     posts: [],
     paging: {
         page: 1,
@@ -24,8 +26,10 @@ const postSlice = createSlice({
     name: 'post',
     initialState,
     reducers: {
+        setCurrentPage: (state, action) => {
+            state.currentPage = action.payload;
+        },
         resetPosts: (state, action) => {
-            console.log('reset');
             state.paging = {
                 page: 1,
                 pageSize: 10,
@@ -44,14 +48,6 @@ const postSlice = createSlice({
         },
         setStatus: (state, action) => {
             state.filter.status = action.payload;
-
-            // Reset lại nếu thay đổi status
-            state.paging = {
-                page: 1,
-                pageSize: 10,
-            };
-            state.hasMore = true;
-            state.posts = [];
         },
         setLike: (state, action) => {
             const { id, userId, type } = action.payload;
@@ -184,6 +180,10 @@ const postSlice = createSlice({
 
                 const post = state.posts.find((post) => post.id === postId);
                 post.favourites = post.favourites.filter((favourite) => favourite.userId !== userId);
+
+                if (state.currentPage === config.routes.bookmark) {
+                    state.posts = state.posts.filter((post) => post.id !== postId);
+                }
             })
 
             .addCase(fetchCommentsThunk.fulfilled, (state, action) => {
@@ -199,6 +199,7 @@ const postSlice = createSlice({
 });
 
 export const {
+    setCurrentPage,
     resetPosts,
     setPosts,
     setStatus,

@@ -56,6 +56,7 @@ export const savePostThunk = createAsyncThunk('post/savePost', async (id, { reje
 
         return { postId: id, userId: result };
     } catch (error) {
+        console.log(error);
         return rejectWithValue(error.response?.data || error.message);
     }
 });

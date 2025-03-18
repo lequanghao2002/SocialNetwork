@@ -3,13 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Empty } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Post from '../Post';
-import { hasMoreSelector, postsSelector } from '~/features/post/postSelector';
+import { currentPageSelector, hasMoreSelector, postsSelector } from '~/features/post/postSelector';
 import classNames from 'classnames/bind';
 import styles from './ListPost.module.scss';
-import { filterSelector, pagingSelector } from '~/features/post/postSelector';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPostsThunk, fetchSavedPostsThunk } from '~/features/post/postThunk';
-import { useLocation } from 'react-router-dom';
 import config from '~/config';
 
 const cx = classNames.bind(styles);
@@ -18,12 +16,12 @@ function ListPost() {
     const dispatch = useDispatch();
     const posts = useSelector(postsSelector);
     const hasMore = useSelector(hasMoreSelector);
-    const location = useLocation();
+    const currentPage = useSelector(currentPageSelector);
 
     const handleNext = async () => {
         if (posts.length === 0) return;
 
-        switch (location.pathname) {
+        switch (currentPage) {
             case config.routes.home:
                 dispatch(fetchPostsThunk());
                 break;
