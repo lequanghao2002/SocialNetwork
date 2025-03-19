@@ -4,10 +4,14 @@ const initialState = {
     modals: {
         post: { isOpen: false, type: null, data: null }, // type = add || update || share
         postDetail: { isOpen: false, type: null, data: null }, // type = add || update || share
+        profileInfo: { isOpen: false, data: null },
+        profileDetail: { isOpen: false, data: null },
     },
     loading: {
         post: false,
         postDetail: false,
+        profileInfo: false,
+        profileDetail: false,
     },
 };
 

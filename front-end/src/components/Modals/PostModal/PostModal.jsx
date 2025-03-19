@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { userSelector } from '~/features/auth/authSelector';
 import { postLoadingSelector, postModalSelector } from '~/features/modal/modalSelector';
 import { closeModal, setLoading } from '~/features/modal/modalSlice';
-import TextAreaField from '~/components/Form/Fields/TextAreaField';
+import TextAreaField from '~/components/Form/Fields/Input/TextAreaField';
 import ImagesPickerField from '~/components/Form/Fields/ImagePicker/ImagesPickerField2';
 import TagSelectField from '~/components/Form/Fields/Tag/TagSelectField';
 import PostStatusField from '~/components/Form/Fields/PostStatus/PostStatusField';

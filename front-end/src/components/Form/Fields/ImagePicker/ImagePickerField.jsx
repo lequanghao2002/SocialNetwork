@@ -1,10 +1,11 @@
 import { faFileImage } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Form, Image, Upload } from 'antd';
+import { Image, Upload } from 'antd';
 import { useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
-import { uploadPostImage } from '~/utils/uploadHelper';
 import { useMessage } from '~/context/MessageProvider';
+import upload from '~/firebase/upload';
+import './ImagePickerField.css';
 
 const getBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -14,7 +15,7 @@ const getBase64 = (file) =>
         reader.onerror = (error) => reject(error);
     });
 
-function ImagesPickerField({ value = [], onChange }) {
+function ImagePickerField({ value = [], onChange, folder, listType = 'picture-card', placeholder = 'Upload' }) {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -38,7 +39,25 @@ function ImagesPickerField({ value = [], onChange }) {
         try {
             setLoading(true);
 
-            const result = await uploadPostImage(file);
+            let result = null;
+            switch (folder) {
+                case 'users':
+                    result = await upload(file, folder);
+                    break;
+                case 'posts':
+                    result = await upload(file, folder);
+                    break;
+                case 'chats':
+                    result = await upload(file, folder);
+                    break;
+                case 'comments':
+                    result = await upload(file, folder);
+                    break;
+                default:
+                    error('Folder upload invalid');
+                    break;
+            }
+
             const newFile = {
                 uid: file.uid, // Dùng uid để đồng bộ với AntD
                 url: result,
@@ -65,13 +84,13 @@ function ImagesPickerField({ value = [], onChange }) {
             }}
             type="button"
         >
-            {loading ? <LoadingOutlined /> : <FontAwesomeIcon icon={faFileImage} />}
+            {loading ? <LoadingOutlined /> : <FontAwesomeIcon icon={faFileImage} className="icon-upload" />}
             <div
                 style={{
                     marginTop: 8,
                 }}
             >
-                Upload
+                {placeholder}
             </div>
         </button>
     );
@@ -79,16 +98,15 @@ function ImagesPickerField({ value = [], onChange }) {
     return (
         <>
             <Upload
-                listType="picture-card"
+                listType={listType}
                 fileList={value}
                 onPreview={handlePreview}
                 onRemove={handleRemove}
                 beforeUpload={handleBeforeUpload}
                 accept="image/*"
-                multiple
                 disabled={loading}
             >
-                {value.length >= 2 ? null : uploadButton}
+                {value.length >= 1 ? null : uploadButton}
             </Upload>
 
             {previewImage && (
@@ -108,4 +126,4 @@ function ImagesPickerField({ value = [], onChange }) {
     );
 }
 
-export default ImagesPickerField;
+export default ImagePickerField;

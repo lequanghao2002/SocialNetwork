@@ -4,20 +4,22 @@ using Microsoft.EntityFrameworkCore;
 using SocialNetwork.Data;
 using SocialNetwork.Helpers;
 using SocialNetwork.Models.Domain;
+using SocialNetwork.Models.DTO.FriendshipDTO;
 using SocialNetwork.Models.DTO.LikeDTO;
 using SocialNetwork.Models.DTO.MessageDTO;
 using SocialNetwork.Models.DTO.PostDTO;
 using SocialNetwork.Models.DTO.TagDTO;
 using SocialNetwork.Models.DTO.UserDTO;
+using System.Linq;
 using System.Net.WebSockets;
 
 namespace SocialNetwork.Repositories
 {
     public interface IUserRepository
     {
-        public Task<GetUserByIdDTO> GetById(string id);
-        public Task<bool> UpdateUserProfile(UpdateUserProfileDTO profileDTO);
-        public Task<bool> UpdateUser(UpdateUserDTO userDTO);
+        public Task<GetUserWithFriendByIdDTO> GetById(string userId, string id);
+        public Task<UpdateProfileInfoDTO> UpdateProfileInfo(string userId, UpdateProfileInfoDTO userDTO);
+        public Task<UpdateProfileDetailDTO> UpdateProfileDetail(string userId, UpdateProfileDetailDTO profileDTO);
         public Task<FriendshipStatus> GetStatusFriend(string currentUserId, string userId);
         public Task<bool> ChangeStatusFriend(ChangeStatusFriendDTO changeStatusFriendDTO);
         public Task<List<GetFriendshipWithLastMsgDTO>> GetListFriendShip(string id);
@@ -34,19 +36,22 @@ namespace SocialNetwork.Repositories
             _mapper = mapper;
         }
 
-        public async Task<GetUserByIdDTO> GetById(string id)
+        public async Task<GetUserWithFriendByIdDTO> GetById(string userId, string id)
         {
             var userById = await _socialNetworkDbContext.Users
                 .Where(u => u.Id == id)
-                .Select(u => new GetUserByIdDTO
+                .Select(u => new GetUserWithFriendByIdDTO
                 {
                     Id = u.Id,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     AvatarUrl = u.AvatarUrl,
-                    DateOfBirth = u.DateOfBirth,
-                    CreatedDate = u.CreatedDate,
-                    UserProfile = u.UserProfile != null ? new GetUserProfileDTO
+                    Status = userId != id ? _socialNetworkDbContext.Friendships
+                         .AsQueryable()
+                         .Where(f => (f.AddresseeId == userId && f.RequesterId == id) ||
+                                     (f.AddresseeId == id && f.RequesterId == userId))
+                         .Select(f => f.Status).FirstOrDefault() : null,
+                    UserProfile = new GetUserProfileDTO
                     {
                         CoverPhotoUrl = u.UserProfile.CoverPhotoUrl,
                         Introduce = u.UserProfile.Introduce,
@@ -58,84 +63,56 @@ namespace SocialNetwork.Repositories
                         Facebook = u.UserProfile.Facebook,
                         LinkedIn = u.UserProfile.LinkedIn,
 
-                    }
-                    : null,
+                    },
+                    Friends =  _socialNetworkDbContext.Friendships
+                        .Where(f => f.Status == FriendshipStatus.Friends && (f.RequesterId == id || f.AddresseeId == id))
+                        .Select(f => f.RequesterId == id
+                            ? new GetFriendDTO
+                            {
+                                Id = f.Addressee.Id,
+                                FirstName = f.Addressee.FirstName,
+                                LastName = f.Addressee.LastName,
+                                AvatarUrl = f.Addressee.AvatarUrl
+                            }
+                            : new GetFriendDTO
+                            {
+                                Id = f.Requester.Id,
+                                FirstName = f.Requester.FirstName,
+                                LastName = f.Requester.LastName,
+                                AvatarUrl = f.Requester.AvatarUrl
+                            })
+                        .ToList()
                 }).SingleOrDefaultAsync();
 
             return userById;
         }
 
-        public async Task<bool> UpdateUserProfile(UpdateUserProfileDTO profileDTO)
+        public async Task<UpdateProfileDetailDTO> UpdateProfileDetail(string userId, UpdateProfileDetailDTO profileDTO)
         {
-            var userProfileUpdate = await _socialNetworkDbContext.UserProfiles.SingleOrDefaultAsync(up => up.UserId == profileDTO.UserId);
+            var profile = await _socialNetworkDbContext.UserProfiles.SingleOrDefaultAsync(up => up.UserId == userId);
 
-            if (userProfileUpdate != null)
-            {
-                userProfileUpdate.Introduce = profileDTO.Introduce;
-                userProfileUpdate.LiveAt = profileDTO.LiveAt;
-                userProfileUpdate.StudyAt = profileDTO.StudyAt;
-                userProfileUpdate.WorkingAt = profileDTO.WorkingAt;
-                userProfileUpdate.Github = profileDTO.Github;
-                userProfileUpdate.Facebook = profileDTO.Facebook;
-                userProfileUpdate.LinkedIn = profileDTO.LinkedIn;
-            }
-            else
-            {
-                var UserProfilesNew = _mapper.Map<UserProfile>(profileDTO);
+            if (profile == null) return null;
 
-                await _socialNetworkDbContext.AddAsync(UserProfilesNew);
-            }
-
-
-
+            _mapper.Map(profileDTO, profile);
+          
             await _socialNetworkDbContext.SaveChangesAsync();
-            return true;
+            return profileDTO;
         }
 
-        public async Task<bool> UpdateUser(UpdateUserDTO userDTO)
+        public async Task<UpdateProfileInfoDTO> UpdateProfileInfo(string userId, UpdateProfileInfoDTO userDTO)
         {
-            var user = await _socialNetworkDbContext.Users.SingleOrDefaultAsync(u => u.Id == userDTO.Id);
-            var userProfile = await _socialNetworkDbContext.UserProfiles.SingleOrDefaultAsync(u => u.UserId == userDTO.Id);
+            var user = await _socialNetworkDbContext.Users.Include(u => u.UserProfile).SingleOrDefaultAsync(u => u.Id == userId);
 
-            if (user != null)
-            {
-                user.FirstName = userDTO.FirstName;
-                user.LastName = userDTO.LastName;
+            if (user == null || user.UserProfile == null)
+                return null;
 
-                if(userDTO.AvatarUrl != null) {
-                    var avatarUrl = await HandleUpload.UploadImage(userDTO.AvatarUrl);
-                    user.AvatarUrl = avatarUrl;
-                }
-                
-                if(userDTO.CoverPhotoUrl != null)
-                {
-                        var coverPhotoUrl = await HandleUpload.UploadImage(userDTO.CoverPhotoUrl);
-                    if (userProfile != null)
-                    {
-                        userProfile.CoverPhotoUrl = coverPhotoUrl;
-                    }
-                    else {
-                        var userProfileNew = new UserProfile
-                        {
-                            UserId = userDTO.Id,
-                            CoverPhotoUrl = coverPhotoUrl,
-                        };
+            user.FirstName = userDTO.FirstName;
+            user.LastName = userDTO.LastName;
+            user.AvatarUrl = userDTO.AvatarUrl;
+            user.UserProfile.CoverPhotoUrl = userDTO.CoverPhotoUrl;
 
-                        await _socialNetworkDbContext.AddAsync(userProfileNew);
-                    }
-
-                    
-                }
-
-                await _socialNetworkDbContext.SaveChangesAsync();
-                return true;
-            }
-           else
-            {
-                return false;
-            }
-
-          
+            await _socialNetworkDbContext.SaveChangesAsync();
+            return userDTO;
         }
 
         public async Task<FriendshipStatus> GetStatusFriend(string currentUserId, string userId)

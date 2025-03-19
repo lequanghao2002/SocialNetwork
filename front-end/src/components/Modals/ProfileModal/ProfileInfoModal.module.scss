@@ -1,0 +1,11 @@
+.wrapper {
+    padding-top: 10px;
+}
+
+.customCoverPhoto {
+    :global(.ant-upload),
+    :global(.ant-upload-list-item-container) {
+        width: 100% !important;
+        height: 150px !important;
+    }
+}

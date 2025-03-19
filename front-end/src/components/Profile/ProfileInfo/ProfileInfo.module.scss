@@ -1,0 +1,33 @@
+.your-self {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-color-primary);
+    padding: 18px;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+
+    .introduce {
+        margin: 6px 0 10px 0;
+        text-align: center;
+    }
+
+    .info-detail {
+        display: flex;
+        flex-direction: column;
+        margin: 10px 0;
+
+        .icon-intro {
+            height: 16px;
+            width: 16px;
+            margin-right: 8px;
+        }
+
+        .label {
+            display: inline-block;
+            min-width: 65px;
+        }
+    }
+}

@@ -232,7 +232,7 @@ namespace SocialNetwork.Repositories
                         Tags = p.SharedPost.Deleted || p.SharedPost.Status == PostStatus.Private ? null : p.SharedPost.PostTags.Select(t => new GetTagDTO { Id = t.Tag.Id, Name = t.Tag.Name }).ToList(),
                     },
                     SharedCount = p.SharedPosts.Count(), 
-                    CommentCount = _dbContext.Comments.Count(c => c.PostId == p.Id && !c.Deleted), // Đếm số comment mà không Include toàn bộ comments
+                    CommentCount = _dbContext.Comments.Count(c => c.PostId == p.Id && !c.Deleted),
                 })
                 .ToListAsync();
 

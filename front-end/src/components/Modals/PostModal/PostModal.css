@@ -180,7 +180,3 @@
 .icon-file-image {
     font-size: 5rem;
 }
-
-.ant-upload:hover {
-    background-color: var(--bg-color-hover);
-}

@@ -3,6 +3,7 @@ import {
     deletePostThunk,
     fetchCommentsThunk,
     fetchPostsThunk,
+    fetchProfilePostsThunk,
     fetchSavedPostsThunk,
     savePostThunk,
     unSavePostThunk,
@@ -153,6 +154,18 @@ const postSlice = createSlice({
             })
 
             .addCase(fetchSavedPostsThunk.fulfilled, (state, action) => {
+                const { data, page, hasMore } = action.payload;
+                if (page === 1) {
+                    state.posts = data;
+                } else {
+                    state.posts = [...state.posts, ...data];
+                }
+
+                state.paging.page = page + 1;
+                state.hasMore = hasMore;
+            })
+
+            .addCase(fetchProfilePostsThunk.fulfilled, (state, action) => {
                 const { data, page, hasMore } = action.payload;
                 if (page === 1) {
                     state.posts = data;

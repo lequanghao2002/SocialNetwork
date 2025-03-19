@@ -1,5 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import userService from '~/services/userService';
+import { createSlice } from '@reduxjs/toolkit';
 import { fetchFriendsThunk } from './chatThunks';
 
 const initialState = {

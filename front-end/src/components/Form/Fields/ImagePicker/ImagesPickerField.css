@@ -1,13 +1,13 @@
 .is-dragging a {
     pointer-events: none;
-  }
+}
 
 .custom-multi-image-picker .ant-upload-list-item-image {
-  object-fit: cover !important;
+    object-fit: cover !important;
 }
 
 .custom-multi-image-picker .anticon.anticon-eye {
-  position: relative;
+    position: relative;
     left: -15px;
 }
 
@@ -16,13 +16,13 @@
 }
 
 .item-image:hover .ant-upload-list-item-thumbnail {
-  background-color: rgba(0, 0, 0, 0.45) !important;
+    background-color: rgba(0, 0, 0, 0.45) !important;
 }
 
 .custom-multi-image-picker .btn-remove-image {
-  display: none;
-  font-size: 16px;
-  color: #fff;
+    display: none;
+    font-size: 16px;
+    color: #fff;
     position: absolute;
     top: 49%;
     right: 32px;

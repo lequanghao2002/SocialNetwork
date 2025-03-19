@@ -1,0 +1,32 @@
+.friends {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-color-primary);
+    padding: 18px;
+    margin-top: 20px;
+    border-radius: 8px;
+
+    .list-friends {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 12px;
+        justify-items: center;
+
+        .item-friends {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            font-weight: 500;
+            width: 100%;
+
+            .img-friend {
+                width: 100%;
+                border-radius: 8px;
+                object-fit: cover;
+            }
+        }
+    }
+}

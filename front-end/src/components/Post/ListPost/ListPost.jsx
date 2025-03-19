@@ -7,12 +7,13 @@ import { currentPageSelector, hasMoreSelector, postsSelector } from '~/features/
 import classNames from 'classnames/bind';
 import styles from './ListPost.module.scss';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchPostsThunk, fetchSavedPostsThunk } from '~/features/post/postThunk';
+import { fetchPostsThunk, fetchProfilePostsThunk, fetchSavedPostsThunk } from '~/features/post/postThunk';
 import config from '~/config';
+import { useParams } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
-function ListPost() {
+function ListPost({ userId = null }) {
     const dispatch = useDispatch();
     const posts = useSelector(postsSelector);
     const hasMore = useSelector(hasMoreSelector);
@@ -27,6 +28,9 @@ function ListPost() {
                 break;
             case config.routes.bookmark:
                 dispatch(fetchSavedPostsThunk());
+                break;
+            case config.routes.profile:
+                dispatch(fetchProfilePostsThunk(userId));
                 break;
             default:
                 break;

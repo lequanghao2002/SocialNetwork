@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.Models.DTO.UserDTO;
 using SocialNetwork.Repositories;
+using SocialNetwork.Services;
 
 namespace SocialNetwork.Controllers
 {
@@ -12,8 +13,10 @@ namespace SocialNetwork.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
-        public UsersController(IUserRepository userRepository) {
+        private readonly IUserService _userService;
+        public UsersController(IUserRepository userRepository, IUserService userService) {
             _userRepository = userRepository;
+            _userService = userService;
         }
 
         [HttpGet("get-by-id")]
@@ -21,7 +24,8 @@ namespace SocialNetwork.Controllers
         {
             try
             {
-                var userById = await _userRepository.GetById(id);
+                var userId = _userService.GetUserId();
+                var userById = await _userRepository.GetById(userId, id);
 
                 return Ok(userById);
             }
@@ -31,16 +35,22 @@ namespace SocialNetwork.Controllers
             }
         }
 
-        [HttpPost("update-user-profile")]
-        public async Task<IActionResult> UpdateUserProfile(UpdateUserProfileDTO updateUserProfileDTO)
+        [HttpPut("update-profile-info")]
+        public async Task<IActionResult> UpdateProfileInfo(UpdateProfileInfoDTO updateProfileInfoDTO)
         {
             try
             {
-                var result = await _userRepository.UpdateUserProfile(updateUserProfileDTO);
-
-                if(result)
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return Ok("Update user profile success");
+                    return Unauthorized();
+                }
+
+                var result = await _userRepository.UpdateProfileInfo(userId, updateProfileInfoDTO);
+
+                if (result != null)
+                {
+                    return Ok(result);
                 }
                 else
                 {
@@ -53,20 +63,27 @@ namespace SocialNetwork.Controllers
             }
         }
 
-        [HttpPost("update-user")]
-        public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDTO updateUserDTO)
+
+        [HttpPut("update-profile-detail")]
+        public async Task<IActionResult> UpdateProfileDetail(UpdateProfileDetailDTO updateProfileDetailDTO)
         {
             try
             {
-                var result = await _userRepository.UpdateUser(updateUserDTO);
-
-                if (result)
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return Ok("Update user profile success");
+                    return Unauthorized();
+                }
+
+                var result = await _userRepository.UpdateProfileDetail(userId, updateProfileDetailDTO);
+
+                if (result != null)
+                {
+                    return Ok(result);
                 }
                 else
                 {
-                    return BadRequest("Update user profile error");
+                    return NotFound("User profile not found");
                 }
             }
             catch (Exception ex)
@@ -74,6 +91,7 @@ namespace SocialNetwork.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
 
         [HttpGet("get-status-friend")]

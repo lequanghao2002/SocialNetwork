@@ -1,4 +1,12 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    useNavigate,
+    useLocation,
+    matchPath,
+    useParams,
+} from 'react-router-dom';
 import { privateRoutes, publicRoutes } from '~/routes';
 import { DefaultLayout } from '~/layouts';
 import { Fragment, useContext, useEffect } from 'react';
@@ -14,7 +22,7 @@ import NotificationProvider from './context/NotificationProvider';
 import { realtimeHubService } from './sockets/realtimeHubService';
 import MessageProvider from './context/MessageProvider';
 import { filterSelector, pagingSelector } from './features/post/postSelector';
-import { fetchPostsThunk, fetchSavedPostsThunk } from './features/post/postThunk';
+import { fetchPostsThunk, fetchProfilePostsThunk, fetchSavedPostsThunk } from './features/post/postThunk';
 import { resetPosts, setCurrentPage } from './features/post/postSlice';
 
 function RenderRoutes({ routes }) {
@@ -45,21 +53,30 @@ function AppContent() {
     const loading = useSelector(loadingSelector);
     const location = useLocation();
     const navigate = useNavigate();
+    const { id } = useParams();
+    console.log({ id });
 
     useEffect(() => {
-        switch (location.pathname) {
-            case config.routes.home:
-                dispatch(setCurrentPage(config.routes.home));
-                dispatch(resetPosts());
-                dispatch(fetchPostsThunk());
-                break;
-            case config.routes.bookmark:
-                dispatch(setCurrentPage(config.routes.bookmark));
-                dispatch(resetPosts());
-                dispatch(fetchSavedPostsThunk());
-                break;
-            default:
-                break;
+        const isProfilePage = matchPath(config.routes.profile, location.pathname);
+        if (isProfilePage) {
+            dispatch(setCurrentPage(config.routes.profile));
+            dispatch(resetPosts());
+            dispatch(fetchProfilePostsThunk(isProfilePage.params.id));
+        } else {
+            switch (location.pathname) {
+                case config.routes.home:
+                    dispatch(setCurrentPage(config.routes.home));
+                    dispatch(resetPosts());
+                    dispatch(fetchPostsThunk());
+                    break;
+                case config.routes.bookmark:
+                    dispatch(setCurrentPage(config.routes.bookmark));
+                    dispatch(resetPosts());
+                    dispatch(fetchSavedPostsThunk());
+                    break;
+                default:
+                    break;
+            }
         }
     }, [location.pathname, filter.status]);
 
@@ -83,7 +100,8 @@ function AppContent() {
         if (loading) return;
 
         const isOnLoginPage = location.pathname === config.routes.login;
-        const isValidRoute = Object.values(config.routes).includes(location.pathname);
+        const isProfilePage = matchPath(config.routes.profile, location.pathname);
+        const isValidRoute = Object.values(config.routes).includes(location.pathname) || isProfilePage;
 
         if (!user) {
             !isOnLoginPage && navigate(config.routes.login);
