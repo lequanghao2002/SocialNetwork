@@ -1,31 +1,85 @@
 import classNames from 'classnames/bind';
 import styles from './ProfileHeader.module.scss';
 import { useDispatch, useSelector } from 'react-redux';
-import { profileSelector } from '~/features/user/userSelector';
+import { loadingProfileSelector, profileSelector } from '~/features/user/userSelector';
 import { userSelector } from '~/features/auth/authSelector';
-import Button from '~/components/Button';
+import Button2 from '~/components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-    faBriefcase,
-    faCommentDots,
-    faHouse,
-    faSchool,
-    faUserCheck,
-    faUserPlus,
-    faUserXmark,
-} from '@fortawesome/free-solid-svg-icons';
-import { Avatar, Image } from 'antd';
+import { faCommentDots, faUserCheck, faUserPlus, faUserXmark } from '@fortawesome/free-solid-svg-icons';
+import { Avatar, Button, Flex, Image, Modal } from 'antd';
 import { openModal } from '~/features/modal/modalSlice';
+import { useNavigate, useParams } from 'react-router-dom';
+import config from '~/config';
+import { setSelectedFriendId } from '~/features/chat/chatSlice';
+import {
+    acceptFriendRequestThunk,
+    cancelFriendRequestThunk,
+    declineFriendRequestThunk,
+    sendFriendRequestThunk,
+    sendUnfriendRequestThunk,
+} from '~/features/user/userThunk';
+import { useMessage } from '~/context/MessageProvider';
+import FriendShipStatus from '~/constants/friendshipStatus';
 
 const cx = classNames.bind(styles);
 
 function ProfileHeader() {
+    const { id } = useParams();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector(userSelector);
     const profile = useSelector(profileSelector);
-    const friendShip = '';
+    const loadings = useSelector(loadingProfileSelector);
 
-    console.log(profile);
+    const { error } = useMessage();
+
+    const handleMessageClick = () => {
+        dispatch(setSelectedFriendId(profile.id));
+        navigate(config.routes.message);
+    };
+
+    const handleAddFriend = async () => {
+        try {
+            await dispatch(sendFriendRequestThunk(profile.id)).unwrap();
+        } catch (err) {
+            error('Please try again');
+        }
+    };
+
+    const handleCancelFriend = async () => {
+        try {
+            await dispatch(cancelFriendRequestThunk(profile.id)).unwrap();
+        } catch (err) {
+            error('Please try again');
+        }
+    };
+
+    const handleDeclineFriend = async () => {
+        try {
+            await dispatch(declineFriendRequestThunk(profile.id)).unwrap();
+        } catch (err) {
+            error('Please try again');
+        }
+    };
+
+    const handleAcceptFriend = async () => {
+        try {
+            await dispatch(acceptFriendRequestThunk(profile.id)).unwrap();
+        } catch (err) {
+            error('Please try again');
+        }
+    };
+
+    const handleSendUnfriend = async () => {
+        try {
+            await dispatch(sendUnfriendRequestThunk(profile.id)).unwrap();
+        } catch (err) {
+            error('Please try again');
+        }
+    };
+
+    //console.log({ profile });
+
     return (
         <>
             <div className={cx('cover-image')}>
@@ -43,69 +97,90 @@ function ProfileHeader() {
                     <span className={cx('num-friends')}>{`${profile.friends.length || 0} friends`}</span>
                 </div>
 
-                {profile.id === user.id && (
-                    <Button
+                {profile.id === user.id ? (
+                    <Button2
                         className={cx('edit-info')}
                         onClick={() => dispatch(openModal({ name: 'profileInfo', type: null, data: profile }))}
                     >
                         Edit info
-                    </Button>
-                )}
-
-                {profile.id !== user.id && (
+                    </Button2>
+                ) : (
                     <div className={cx('action-btn')}>
-                        {friendShip.status === 0 && (
+                        {(!profile.friendShip || profile.friendShip.status === FriendShipStatus.NOT_FRIENDS) && (
                             <Button
-                                primary
-                                leftIcon={<FontAwesomeIcon icon={faUserPlus} />}
-                                onClick={() => handleChangeStatusFriend(1)}
+                                size="large"
+                                type="primary"
+                                icon={<FontAwesomeIcon icon={faUserPlus} />}
+                                loading={loadings['addButton']}
+                                onClick={handleAddFriend}
                             >
                                 Add friend
                             </Button>
                         )}
 
-                        {friendShip.status === 1 &&
-                            (friendShip.userId === user.Id ? (
+                        {profile?.friendShip?.status === FriendShipStatus.PENDING_REQUEST &&
+                            (user.id === profile.friendShip.requesterId ? (
                                 <Button
-                                    primary
-                                    leftIcon={<FontAwesomeIcon icon={faUserXmark} />}
-                                    onClick={() => handleChangeStatusFriend(0)}
+                                    size="large"
+                                    icon={<FontAwesomeIcon icon={faUserXmark} />}
+                                    loading={loadings['cancelButton']}
+                                    onClick={handleCancelFriend}
                                 >
                                     Cancel request
                                 </Button>
                             ) : (
-                                <>
+                                <Flex gap={12}>
                                     <Button
-                                        primary
-                                        leftIcon={<FontAwesomeIcon icon={faUserXmark} />}
-                                        onClick={() => handleChangeStatusFriend(2)}
+                                        size="large"
+                                        type="primary"
+                                        icon={<FontAwesomeIcon icon={faUserPlus} />}
+                                        loading={loadings['acceptButton']}
+                                        onClick={handleAcceptFriend}
+                                        disabled={loadings['cancelButton']}
                                     >
-                                        Confirm request
+                                        Accept Request
                                     </Button>
+
                                     <Button
-                                        leftIcon={<FontAwesomeIcon icon={faUserXmark} />}
-                                        onClick={() => handleChangeStatusFriend(0)}
+                                        size="large"
+                                        icon={<FontAwesomeIcon icon={faUserXmark} />}
+                                        loading={loadings['cancelButton']}
+                                        onClick={handleDeclineFriend}
+                                        disabled={loadings['acceptButton']}
                                     >
-                                        Delete request
+                                        Decline Request
                                     </Button>
-                                </>
+                                </Flex>
                             ))}
 
-                        {friendShip.status === 2 && (
-                            <>
-                                {/* <Button primary leftIcon={<FontAwesomeIcon icon={faUserCheck} />}>
-                                            Friend
-                                        </Button> */}
+                        {profile?.friendShip?.status === FriendShipStatus.FRIENDS && (
+                            <Flex gap={12}>
                                 <Button
-                                    leftIcon={<FontAwesomeIcon icon={faUserCheck} />}
-                                    onClick={() => handleChangeStatusFriend(0)}
+                                    size="large"
+                                    icon={<FontAwesomeIcon icon={faUserXmark} />}
+                                    onClick={() => {
+                                        Modal.confirm({
+                                            title: `Unfriend ${profile.firstName} ${profile.lastName}`,
+                                            content: `Are you sure you want to unfriend ${profile.firstName} ${profile.lastName}?`,
+                                            className: 'custom-dark-modal',
+                                            okText: 'Yes',
+                                            cancelText: 'Cancel',
+                                            onOk: () => handleSendUnfriend(),
+                                        });
+                                    }}
                                 >
                                     Unfriend
                                 </Button>
-                                <Button primary leftIcon={<FontAwesomeIcon icon={faCommentDots} />}>
+
+                                <Button
+                                    size="large"
+                                    type="primary"
+                                    icon={<FontAwesomeIcon icon={faCommentDots} />}
+                                    onClick={handleMessageClick}
+                                >
                                     Message
                                 </Button>
-                            </>
+                            </Flex>
                         )}
                     </div>
                 )}

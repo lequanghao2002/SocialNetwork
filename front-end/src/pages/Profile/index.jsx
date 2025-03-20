@@ -12,6 +12,7 @@ import ProfileInfo from '~/components/Profile/ProfileInfo/ProfileInfo';
 import ProfileFriends from '~/components/Profile/ProfileFriends/ProfileFriends';
 import PostCreate from '~/components/Post/PostCreate/PostCreate';
 import ListPost from '~/components/Post/ListPost/ListPost';
+import { setProfile } from '~/features/user/userSlice';
 
 const cx = classNames.bind(styles);
 
@@ -20,29 +21,19 @@ function Profile() {
     const dispatch = useDispatch();
     const user = useSelector(userSelector);
     const profile = useSelector(profileSelector);
-    const loading = useSelector(loadingProfileSelector);
+    const loadings = useSelector(loadingProfileSelector);
 
     useEffect(() => {
         if (id) {
             dispatch(fetchProfileThunk(id));
-            // if (id !== user.Id) {
-            //     fetchFriendship(user.Id, id);
-            // }
         }
+
+        return () => {
+            dispatch(setProfile(null));
+        };
     }, [id]);
 
-    // const handleChangeStatusFriend = async (status) => {
-    //     const data = { userId: user.Id, friendId: id, status };
-    //     const result = await userServices.changeStatusFriend(data);
-
-    //     if (result) {
-    //         fetchFriendship(user.Id, id);
-    //         // chỗ này chưa xử lý
-    //         //fetchListFriendship(id);
-    //     }
-    // };
-
-    if (loading) return <Spin size="large" fullscreen />;
+    if (loadings['page']) return <Spin size="large" fullscreen />;
 
     return (
         <>
@@ -61,7 +52,7 @@ function Profile() {
 
                         <Col span={13}>
                             <div className={cx('post')}>
-                                <PostCreate />
+                                {user.id === id && <PostCreate />}
 
                                 <ListPost userId={id} />
                             </div>

@@ -110,7 +110,7 @@ function Header() {
                     </Tippy>
 
                     <Menu items={MENU_ITEMS} onChange={handleMenuChange}>
-                        <Image src={user.AvatarUrl} className={cx('user-avatar')} alt={user.displayName}></Image>
+                        <Image src={user.avatarUrl} className={cx('user-avatar')} alt=""></Image>
                     </Menu>
                 </div>
             </div>

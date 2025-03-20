@@ -30,3 +30,60 @@ export const updateProfileDetailThunk = createAsyncThunk(
         }
     },
 );
+
+export const sendFriendRequestThunk = createAsyncThunk('user/sendFriendRequest', async (id, { rejectWithValue }) => {
+    try {
+        const result = await userService.sendFriendRequest(id);
+        return result;
+    } catch (error) {
+        return rejectWithValue(error.response?.data);
+    }
+});
+
+export const cancelFriendRequestThunk = createAsyncThunk(
+    'user/cancelFriendRequest',
+    async (id, { rejectWithValue }) => {
+        try {
+            const result = await userService.cancelFriendRequest(id);
+            return result;
+        } catch (error) {
+            return rejectWithValue(error.response?.data);
+        }
+    },
+);
+
+export const declineFriendRequestThunk = createAsyncThunk(
+    'user/declineFriendRequest',
+    async (id, { rejectWithValue }) => {
+        try {
+            const result = await userService.declineFriendRequest(id);
+            return result;
+        } catch (error) {
+            return rejectWithValue(error.response?.data);
+        }
+    },
+);
+
+export const acceptFriendRequestThunk = createAsyncThunk(
+    'user/acceptFriendRequest',
+    async (id, { rejectWithValue }) => {
+        try {
+            const result = await userService.accepteFriendRequest(id);
+            return result;
+        } catch (error) {
+            return rejectWithValue(error.response?.data);
+        }
+    },
+);
+
+export const sendUnfriendRequestThunk = createAsyncThunk(
+    'user/sendUnfriendRequest',
+    async (id, { rejectWithValue }) => {
+        try {
+            const result = await userService.sendUnfriendRequest(id);
+            return result;
+        } catch (error) {
+            return rejectWithValue(error.response?.data);
+        }
+    },
+);

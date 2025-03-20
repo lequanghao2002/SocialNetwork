@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using SocialNetwork.Hubs;
 using SocialNetwork.Models.DTO.MessageDTO;
-using SocialNetwork.Repositories.MessageRepository;
+using SocialNetwork.Repositories;
 
 namespace SocialNetwork.Services
 {
@@ -14,11 +14,6 @@ namespace SocialNetwork.Services
         {
             _messageRepository = messageRepository;
             _hubContext = hubContext;
-        }
-
-        public async Task OnUserConnected(string connectionId, string userId)
-        {
-            await _hubContext.Groups.AddToGroupAsync(connectionId, userId);
         }
 
         public async Task SendMessage(AddMessageDTO addMessageDTO)

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SocialNetwork.Repositories.MessageRepository;
+using SocialNetwork.Repositories;
 
 namespace SocialNetwork.Controllers
 {

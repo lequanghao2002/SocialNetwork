@@ -63,10 +63,6 @@ namespace SocialNetwork.Repositories
                         FirstName = p.User.FirstName,
                         LastName = p.User.LastName,
                         AvatarUrl = p.User.AvatarUrl,
-                        DateOfBirth = p.User.DateOfBirth,
-                        UserName = p.User.UserName,
-                        Email = p.User.Email,
-                        PhoneNumber = p.User.PhoneNumber,
                     },
                     Tags = p.PostTags.Select(t => new GetTagDTO
                     {
@@ -314,10 +310,6 @@ namespace SocialNetwork.Repositories
                         FirstName = p.User.FirstName,
                         LastName = p.User.LastName,
                         AvatarUrl = p.User.AvatarUrl,
-                        DateOfBirth = p.User.DateOfBirth,
-                        UserName = p.User.UserName,
-                        Email = p.User.Email,
-                        PhoneNumber = p.User.PhoneNumber,
                     },
                     Tags = p.PostTags.Select(t => new GetTagDTO
                     {

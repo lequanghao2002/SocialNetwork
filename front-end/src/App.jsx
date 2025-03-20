@@ -18,12 +18,19 @@ import { fetchUserThunk } from './features/auth/authThunk';
 import { Spin } from 'antd';
 import config from './config';
 import Modals from './components/Modals/Modals';
-import NotificationProvider from './context/NotificationProvider';
+import NotificationProvider, { useNotification } from './context/NotificationProvider';
 import { realtimeHubService } from './sockets/realtimeHubService';
 import MessageProvider from './context/MessageProvider';
 import { filterSelector, pagingSelector } from './features/post/postSelector';
 import { fetchPostsThunk, fetchProfilePostsThunk, fetchSavedPostsThunk } from './features/post/postThunk';
 import { resetPosts, setCurrentPage } from './features/post/postSlice';
+import notificationHubService from './sockets/notificationHubService';
+import { addNotification, deleteNotification } from './features/notification/notificationSlice';
+import { setFriendShip } from './features/user/userSlice';
+import NotificationType from './constants/notificationType';
+import FriendShipStatus from './constants/friendshipStatus';
+import { NotificationEventType } from './constants/notificationEventType';
+import { profileSelector } from './features/user/userSelector';
 
 function RenderRoutes({ routes }) {
     return (
@@ -53,8 +60,7 @@ function AppContent() {
     const loading = useSelector(loadingSelector);
     const location = useLocation();
     const navigate = useNavigate();
-    const { id } = useParams();
-    console.log({ id });
+    const { info } = useNotification();
 
     useEffect(() => {
         const isProfilePage = matchPath(config.routes.profile, location.pathname);
@@ -94,6 +100,64 @@ function AppContent() {
         realtimeHubService.startConnection();
         dispatch(fetchFriendsThunk(user.id));
     }, [user, dispatch]);
+
+    useEffect(() => {
+        notificationHubService.onReceiveNotification((payload) => {
+            const { eventType, data } = payload;
+            const profile = store.getState().user.profile;
+            switch (eventType) {
+                case NotificationEventType.SEND_FRIEND_REQUEST: {
+                    dispatch(addNotification(data));
+                    info('Notification', data.message);
+
+                    console.log(profile, data);
+                    if (profile && profile.id === data.senderId) {
+                        dispatch(
+                            setFriendShip({
+                                requesterId: data.senderId,
+                                addresseeId: data.receiverId,
+                                status: FriendShipStatus.PENDING_REQUEST,
+                            }),
+                        );
+                    }
+                    break;
+                }
+                case NotificationEventType.CANCEL_FRIEND_REQUEST: {
+                    dispatch(deleteNotification(data.id));
+
+                    if (profile && profile.id === data.senderId) {
+                        dispatch(setFriendShip(null));
+                    }
+                    break;
+                }
+                case NotificationEventType.DECLINE_FRIEND_REQUEST: {
+                    if (profile && profile.id === data.receiverId) {
+                        dispatch(setFriendShip(null));
+                    }
+                    break;
+                }
+                case NotificationEventType.ACCEPT_FRIEND_REQUEST: {
+                    dispatch(addNotification(data));
+                    info('Notification', data.message);
+                    if (profile && profile.id === data.senderId) {
+                        dispatch(
+                            setFriendShip({
+                                requesterId: data.receiverId,
+                                addresseeId: data.senderId,
+                                status: FriendShipStatus.FRIENDS,
+                            }),
+                        );
+                    }
+                    break;
+                }
+                default:
+                    console.error('type event invalid');
+                    break;
+            }
+        });
+
+        return () => notificationHubService.offReceiveNotification();
+    }, []);
 
     // Xử lý điều hướng
     useEffect(() => {

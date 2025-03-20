@@ -10,6 +10,8 @@ using SocialNetwork.Models.DTO.UserDTO;
 using SocialNetwork.Models.Entities;
 using Newtonsoft.Json;
 using SocialNetwork.Models.DTO.FavouriteDTO;
+using SocialNetwork.Models.DTO.NotificationDTO;
+using SocialNetwork.Models.DTO.FriendshipDTO;
 
 namespace SocialNetwork.Helpers
 {
@@ -76,6 +78,13 @@ namespace SocialNetwork.Helpers
             CreateMap<UserProfile, GetUserProfileDTO>();
 
             CreateMap<Message, GetMessageDTO>();
+
+            CreateMap<Notification, GetNotificationDTO>();
+            CreateMap<AddNotificationDTO, Notification>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
+                .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+            CreateMap<Friendship, GetFriendShipDTO>();
         }
     }
 }

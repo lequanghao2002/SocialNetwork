@@ -1,27 +1,50 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchProfileThunk, updateProfileDetailThunk, updateProfileInfoThunk } from './userThunk';
+import {
+    acceptFriendRequestThunk,
+    cancelFriendRequestThunk,
+    declineFriendRequestThunk,
+    fetchProfileThunk,
+    sendFriendRequestThunk,
+    sendUnfriendRequestThunk,
+    updateProfileDetailThunk,
+    updateProfileInfoThunk,
+} from './userThunk';
+import FriendShipStatus from '~/constants/friendshipStatus';
 
 const initialState = {
     profile: null,
-    loading: true,
+    loadings: {
+        page: true,
+        addButton: false,
+        acceptButton: false,
+        cancelButton: false,
+    },
 };
 
 const userSlice = createSlice({
     name: 'user',
     initialState,
-    reducers: {},
+    reducers: {
+        setProfile: (state, action) => {
+            state.profile = action.payload;
+        },
+        setFriendShip: (state, action) => {
+            console.log('chạy nè');
+            state.profile.friendShip = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchProfileThunk.pending, (state) => {
-                state.loading = true;
+                state.loadings['page'] = true;
             })
             .addCase(fetchProfileThunk.fulfilled, (state, action) => {
+                console.log(action.payload);
                 state.profile = action.payload;
-                state.loading = false;
+                state.loadings['page'] = false;
             })
             .addCase(fetchProfileThunk.rejected, (state) => {
-                state.profile = null;
-                state.loading = false;
+                state.loadings['page'] = false;
             })
 
             .addCase(updateProfileInfoThunk.fulfilled, (state, action) => {
@@ -37,8 +60,64 @@ const userSlice = createSlice({
 
             .addCase(updateProfileDetailThunk.fulfilled, (state, action) => {
                 state.profile.userProfile = { ...state.profile.userProfile, ...action.payload };
+            })
+
+            .addCase(sendFriendRequestThunk.pending, (state, action) => {
+                state.loadings['addButton'] = true;
+            })
+            .addCase(sendFriendRequestThunk.fulfilled, (state, action) => {
+                state.profile.friendShip = action.payload;
+                state.loadings['addButton'] = false;
+            })
+            .addCase(sendFriendRequestThunk.rejected, (state, action) => {
+                state.loadings['addButton'] = false;
+            })
+
+            .addCase(cancelFriendRequestThunk.pending, (state, action) => {
+                state.loadings['cancelButton'] = true;
+            })
+            .addCase(cancelFriendRequestThunk.fulfilled, (state, action) => {
+                if (action.payload) {
+                    state.profile.friendShip = null;
+                }
+                state.loadings['cancelButton'] = false;
+            })
+            .addCase(cancelFriendRequestThunk.rejected, (state, action) => {
+                state.loadings['cancelButton'] = false;
+            })
+
+            .addCase(declineFriendRequestThunk.pending, (state, action) => {
+                state.loadings['cancelButton'] = true;
+            })
+            .addCase(declineFriendRequestThunk.fulfilled, (state, action) => {
+                if (action.payload) {
+                    state.profile.friendShip = null;
+                }
+                state.loadings['cancelButton'] = false;
+            })
+            .addCase(declineFriendRequestThunk.rejected, (state, action) => {
+                state.loadings['cancelButton'] = false;
+            })
+
+            .addCase(acceptFriendRequestThunk.pending, (state, action) => {
+                state.loadings['acceptButton'] = true;
+            })
+            .addCase(acceptFriendRequestThunk.fulfilled, (state, action) => {
+                if (action.payload) {
+                    state.profile.friendShip.status = FriendShipStatus.FRIENDS;
+                }
+                state.loadings['acceptButton'] = false;
+            })
+            .addCase(acceptFriendRequestThunk.rejected, (state, action) => {
+                state.loadings['acceptButton'] = false;
+            })
+
+            .addCase(sendUnfriendRequestThunk.fulfilled, (state, action) => {
+                state.profile.friendShip = null;
             });
     },
 });
+
+export const { setFriendShip, setProfile } = userSlice.actions;
 
 export default userSlice;

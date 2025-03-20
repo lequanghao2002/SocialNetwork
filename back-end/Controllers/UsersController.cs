@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SocialNetwork.Enums;
+using SocialNetwork.Models.DTO.FriendshipDTO;
+using SocialNetwork.Models.DTO.NotificationDTO;
 using SocialNetwork.Models.DTO.UserDTO;
+using SocialNetwork.Models.Entities;
 using SocialNetwork.Repositories;
 using SocialNetwork.Services;
 
@@ -14,9 +18,13 @@ namespace SocialNetwork.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserService _userService;
-        public UsersController(IUserRepository userRepository, IUserService userService) {
+        private readonly INotificationService _notificationService;
+        private readonly INotificationRepository _notificationRepository;
+        public UsersController(IUserRepository userRepository, IUserService userService, INotificationService notificationService, INotificationRepository notificationRepository) {
             _userRepository = userRepository;
             _userService = userService;
+            _notificationService = notificationService;
+            _notificationRepository = notificationRepository;
         }
 
         [HttpGet("get-by-id")]
@@ -25,7 +33,7 @@ namespace SocialNetwork.Controllers
             try
             {
                 var userId = _userService.GetUserId();
-                var userById = await _userRepository.GetById(userId, id);
+                var userById = await _userRepository.GetWithFriendById(userId, id);
 
                 return Ok(userById);
             }
@@ -92,14 +100,61 @@ namespace SocialNetwork.Controllers
             }
         }
 
-
-
-        [HttpGet("get-status-friend")]
-        public async Task<IActionResult> GetStatusFriend(string userId, string friendId)
+        [HttpPost("send-friend-request")]
+        public async Task<IActionResult> SendFriendRequest(string receiverId)
         {
             try
             {
-                var result = await _userRepository.GetStatusFriend( userId,  friendId);
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var sender = await _userRepository.SendFriendRequest(userId, receiverId);
+
+                if (sender == null)
+                {
+                    return NotFound("Unable to send friend request.");
+                }
+
+                var notification = new AddNotificationDTO
+                {
+                    SenderId = userId,
+                    ReceiverId = receiverId,
+                    Type = NotificationType.FriendRequestSent,
+                };
+                await _notificationService.AddNotification(NotificationEventType.SendFriendRequest, notification);
+
+                return Ok(sender);
+
+               
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("cancel-friend-request")]
+        public async Task<IActionResult> CancelFriendRequest(string receiverId)
+        {
+            try
+            {
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _userRepository.CancelFriendRequest(userId, receiverId);
+
+                if (!result)
+                {
+                    return NotFound("Unable to cancel friend request.");
+                }
+                
+                await _notificationService.DeleteNotification(NotificationEventType.CancelFriendRequest, NotificationType.FriendRequestSent, userId, receiverId);
 
                 return Ok(result);
             }
@@ -109,21 +164,91 @@ namespace SocialNetwork.Controllers
             }
         }
 
-        [HttpPost("change-status-friend")]
-        public async Task<IActionResult> ChangeStatusFriend(ChangeStatusFriendDTO changeStatusFriendDTO)
+        [HttpPost("decline-friend-request")]
+        public async Task<IActionResult> DeclineFriendRequest(string receiverId)
         {
             try
             {
-                var result = await _userRepository.ChangeStatusFriend(changeStatusFriendDTO);
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
 
-                if(result)
+                var result = await _userRepository.CancelFriendRequest(receiverId, userId);
+
+                if (!result)
                 {
-                     return Ok(true);
+                    return NotFound("Unable to decline friend request.");
                 }
-                else
+
+                await _notificationService.DeleteNotification(NotificationEventType.DeclineFriendRequest, NotificationType.FriendRequestSent, userId, receiverId);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("accept-friend-request")]
+        public async Task<IActionResult> AcceptFriendRequest(string receiverId)
+        {
+            try
+            {
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return BadRequest("No find status");
+                    return Unauthorized();
                 }
+
+                var result = await _userRepository.AcceptFriendRequest(receiverId, userId);
+
+                if (!result)
+                {
+                    return NotFound("Unable to decline friend request.");
+                }
+
+                var notification = new AddNotificationDTO
+                {
+                    SenderId = userId,
+                    ReceiverId = receiverId,
+                    Type = NotificationType.FriendRequestAccepted,
+                };
+
+                await _notificationService.AddNotification(NotificationEventType.AcceptFriendRequest, notification);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("send-unfriend-request")]
+        public async Task<IActionResult> SendUnfriendRequest(string receiverId)
+        {
+            try
+            {
+                var userId = _userService.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _userRepository.SendUnfriendRequest(userId, receiverId);
+
+                if (!result)
+                {
+                    return NotFound("Unable to unfriend friend request.");
+                }
+
+                await _notificationRepository.Delete(userId, receiverId, NotificationType.FriendRequestSent);
+                await _notificationRepository.Delete(userId, receiverId, NotificationType.FriendRequestAccepted);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

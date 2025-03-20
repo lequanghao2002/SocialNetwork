@@ -1,5 +1,8 @@
-﻿namespace SocialNetwork.Models.Domain
+﻿using System.Text.Json.Serialization;
+
+namespace SocialNetwork.Models.Domain
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum FriendshipStatus
     {
         NotFriends,      // Không phải bạn bè
@@ -9,7 +12,7 @@
     }
     public class Friendship
     {
-       public string RequesterId { get; set; }
+        public string RequesterId { get; set; }
         public User Requester { get; set; }
         public string AddresseeId { get; set; }
         public User Addressee { get; set; }

@@ -9,7 +9,7 @@ namespace SocialNetwork.Models.DTO.UserDTO
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string AvatarUrl { get; set; } = string.Empty;
-        public FriendshipStatus? Status { get; set; }
+        public GetFriendShipDTO? FriendShip { get; set; }
         public ICollection<GetFriendDTO> Friends { get; set; }
         public GetUserProfileDTO? UserProfile { get; set; }
     }

@@ -20,12 +20,10 @@ namespace SocialNetwork.Repositories
     {
         private readonly SocialNetworkDbContext _dbContext;
         private readonly IMapper _mapper;
-        private readonly IPostRepository _postRepository;
-        public CommentRepository(SocialNetworkDbContext dbContext, IMapper mapper, IPostRepository postRepository)
+        public CommentRepository(SocialNetworkDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
             _mapper = mapper;
-            _postRepository = postRepository;
         }
 
         public async Task<List<GetCommentDTO>> GetByPostId(string postId)

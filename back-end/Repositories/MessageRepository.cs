@@ -1,16 +1,20 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using SocialNetwork.Data;
-using SocialNetwork.Models.Domain;
-using SocialNetwork.Models.DTO.CommentDTO;
 using SocialNetwork.Models.DTO.MessageDTO;
-using SocialNetwork.Models.DTO.TagDTO;
 using SocialNetwork.Models.Entities;
 
-namespace SocialNetwork.Repositories.MessageRepository
+namespace SocialNetwork.Repositories
 {
-    [Authorize]
+    public interface IMessageRepository
+    {
+        public Task<List<GetMessageDTO>> GetByUserId(string userId, string otherUserId);
+        public Task MarkMessagesAsSeen(string userId, string otherUserId);
+        public Task<Message> Add(AddMessageDTO message);
+        public Task<GetMessageDTO> Update(string userId, UpdateMessageDTO message);
+        public Task<GetMessageDTO> Delete(string userId, string id);
+    }
+
     public class MessageRepository : IMessageRepository
     {
         private readonly SocialNetworkDbContext _dbContext;
@@ -63,9 +67,9 @@ namespace SocialNetwork.Repositories.MessageRepository
         public async Task<List<GetMessageDTO>> GetByUserId(string userId, string otherUserId)
         {
             var messages = await _dbContext.Messages
-                .Where(m => 
-                    (m.SenderId == userId && m.ReceiverId == otherUserId) || 
-                    (m.SenderId == otherUserId && m.ReceiverId == userId))
+                .Where(m =>
+                    m.SenderId == userId && m.ReceiverId == otherUserId ||
+                    m.SenderId == otherUserId && m.ReceiverId == userId)
                 .OrderBy(m => m.CreatedDate)
                 .ToListAsync();
 
@@ -74,7 +78,7 @@ namespace SocialNetwork.Repositories.MessageRepository
 
         public async Task MarkMessagesAsSeen(string userId, string otherUserId)
         {
-            await _dbContext.Database.ExecuteSqlRawAsync("UPDATE Messages SET IsSeen = 1 WHERE SenderId = {0} AND ReceiverId = {1} AND IsSeen = 0", otherUserId, userId) ;
+            await _dbContext.Database.ExecuteSqlRawAsync("UPDATE Messages SET IsSeen = 1 WHERE SenderId = {0} AND ReceiverId = {1} AND IsSeen = 0", otherUserId, userId);
         }
     }
 }

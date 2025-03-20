@@ -26,6 +26,7 @@ namespace SocialNetwork.Data
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<Favourite> Favourites { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         #endregion
 
         protected override async void OnModelCreating(ModelBuilder modelBuilder)
@@ -170,6 +171,22 @@ namespace SocialNetwork.Data
                     .HasForeignKey(m => m.ReceiverId)
                     .OnDelete(DeleteBehavior.Restrict);
 
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.ToTable("Notifications");
+                entity.HasKey(n => n.Id);
+
+                entity.HasOne(n => n.Sender)
+                    .WithMany()
+                    .HasForeignKey(n => n.SenderId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(n => n.Receiver)
+                    .WithMany()
+                    .HasForeignKey(n => n.ReceiverId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             ConfigIdentityCore(modelBuilder);
